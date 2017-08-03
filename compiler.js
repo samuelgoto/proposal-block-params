@@ -3,18 +3,15 @@ var tt = acorn.tokTypes;
 const { generate } = require('astring');
 const walk = require("acorn/dist/walk");
 const falafel = require('falafel');
+const {deepEqual} = require('assert');
 
 acorn.plugins.docscript = function(parser) {
 
   parser.extend("parseExpressionStatement", function(nextMethod) {
     return function(node, expr) {
-      // console.log(node);
-      // console.log(expr);
-      // console.log(this.type == tt.braceL);
 
       if (expr.type == 'Identifier') {
 	if (this.type == tt.braceL) {
-	  // console.log("hi");
 	  let func = this.startNode();
 	  func.docscript = true;
 	  func.body = this.parseBlock();
@@ -66,8 +63,6 @@ acorn.plugins.docscript = function(parser) {
 //  plugins: {docscript: true}
 // });
 
-// console.log(JSON.stringify(ast, undefined, " "));
-
 function visitor(node) {
   if (node.type === "CallExpression") {
     if (node.arguments.length > 0 &&
@@ -78,10 +73,10 @@ function visitor(node) {
 	  `DocScript.createElement.call(this, "${callee}", function() ${block.source()})`);
     }
   } else if (node.type == "TemplateLiteral") {
-    console.log("hello world");
-    console.log(node.source());
     // Wraps template literals into a special Document.createElement
     // of type text node.
+    // Filters code of the form:
+    // a { `hello world` }
     if (node.parent &&
 	node.parent.type == "ExpressionStatement" &&
 	node.parent.parent &&
@@ -89,7 +84,6 @@ function visitor(node) {
 	node.parent.parent.parent &&
 	node.parent.parent.parent.type == "FunctionExpression" &&
         node.parent.parent.parent.docscript) {
-      console.log("found it!");
       node.update(`DocScript.createElement.call(this, "text", ${node.source()});`);
     }
   }
@@ -110,36 +104,29 @@ function visitor(node) {
 // var result = falafel("var a = b {};", {
 // var result = falafel("var a = b {};", {
 
-let code = `
-doc = div {
-  span {
-    for (var i = 0; i < 5; i++) {
-      span {
-        \`$\{i\}\`
-      }
-    }
+
+class DocScript {
+  static compile(code) {
+    var result = falafel(code, {
+      parser: acorn, plugins: { docscript: true }
+    }, visitor);
+    return result;
   }
-}
-`;
 
-var result = falafel(code, {
-  parser: acorn, plugins: { docscript: true }
-}, visitor);
-
-console.log(result);
-
-// return;
-
-let docscript = `
-
+  static eval(code) {
+    let docscript = `
 class Element {
   constructor(name) {
     this.name = name;
     // this.args = args;
-    this.children = [];
+    // this.children = [];
   }
 
   addChild(el) {
+    if (!this.children) {
+      // evaluates lazily.
+      this.children = [];
+    }
     this.children.push(el);
   }
 
@@ -169,7 +156,120 @@ class DocScript {
 }
 `;
 
-console.log(`${docscript} ${result}`);
-console.log(JSON.stringify(eval(`${docscript} ${result}`), undefined, ' '));
-// console.log(eval(`${docscript} __docscript__("foo")`));
-// console.log(eval("a = 0"));
+    let result = DocScript.compile(code);
+    // console.log(`${docscript} ${result}`);
+    return eval(`${docscript} ${result}`);
+  }
+}
+
+let code = `
+div {
+  span {
+    for (var i = 0; i < 5; i++) {
+      span {
+        \`$\{i\}\`
+      }
+    }
+  }
+}
+`;
+
+// let result = DocScript.compile(code);
+
+function assert(code, expected, debug) {
+  let result = DocScript.eval(code);
+
+  if (debug) {
+    console.log(`${DocScript.compile(code)}`);
+  }
+
+  deepEqual(result, expected,
+      `expected: ${JSON.stringify(result, undefined, ' ')}`);
+}
+
+// Basic fundamental programs are not broken
+assert("", {});
+assert("1", 1);
+assert("`hello`", `hello`);
+assert("undefined", undefined);
+assert("null", null);
+assert("function a() {}", {});
+assert("function a() { return 1; } a()", 1);
+assert("var a = 1;", {});
+assert("var a = 1; a", 1);
+assert("let a = 1; a", 1);
+
+// DocScripts
+assert(`let doc = 1; doc`, 1);
+assert(`let doc = div {}; doc`, {name: "div"});
+// Nesting
+assert(`
+div {
+  span {
+  }
+}`, {
+  name: "div",
+  children: [{
+    name: "span"
+  }]
+});
+// Text nodes
+assert(`
+div {
+  \`hello world\`
+}`, {
+  name: "div",
+  children: [{
+    name: "text",
+    value: "hello world"
+  }]
+});
+// Scripting for-loops
+assert(`
+div {
+  for (let i = 0; i < 2; i++) {
+    span {
+    }
+  }
+}`, {
+  name: "div",
+  children: [{
+    name: "span"
+  }, {
+    name: "span"
+  }]
+});
+// Scripting calls
+assert(`
+function bar() {
+  return span {
+    \`hello\`
+  }
+}
+div {
+  // TODO(goto): maybe remove the need to .call(this)?
+  bar.call(this);
+}`, {
+  name: "div",
+  children: [{
+    name: "span",
+    children: [{
+      name: "text",
+      value: "hello"
+    }]
+  }]
+});
+// Scripting variables
+assert(`
+let a = span {
+  \`hello world\`
+};
+div {
+  \`\$\{a\}\`;
+}`, {
+  name: "div",
+  children: [{
+    name: "text",
+    value: "hello"
+  }]
+}, true);
