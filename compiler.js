@@ -1,7 +1,10 @@
 var acorn = require("acorn");
 var tt = acorn.tokTypes;
-
+// var babel = require("babel-core");
+// var babylon = require("babylon");
 const { generate } = require('astring');
+const walk = require("acorn/dist/walk");
+const falafel = require('falafel');
 
 acorn.plugins.docscript = function(parser) {
 
@@ -16,17 +19,10 @@ acorn.plugins.docscript = function(parser) {
 	  // console.log("hi");
 	  let func = this.startNode();
 	  func.docscript = true;
-	  this.enterLexicalScope(); // NOTE(goto): I'm not sure what this does
 	  func.body = this.parseBlock();
-	  this.exitLexicalScope(); // NOTE(goto): I'm not sure what this does
-	  // TODO(goto): figure out what to do with:
-	  // - func.params
-	  // - generator
-	  // - expression
-	  // console.log(func);
-	  // console.log("bar");
-	  // node.callee
-	  // console.log(expr);
+	  func.params = [];
+	  func.generator = false;
+	  func.expression = false;
 	  node.callee = expr;
 	  node.arguments = [ this.finishNode(func, "FunctionExpression") ];
 	  this.semicolon();
@@ -45,6 +41,9 @@ acorn.plugins.docscript = function(parser) {
 	let func = this.startNode();
 	func.docscript = true;
 	func.body = this.parseBlock();
+	func.params = [];
+	func.generator = false;
+	func.expression = false;
 	let node = this.startNodeAt(startPos, startLoc)
 	node.callee = base;
 	node.arguments = [ this.finishNode(func, "FunctionExpression") ];
@@ -57,43 +56,124 @@ acorn.plugins.docscript = function(parser) {
   });
 }
 
-let docscripts = [];
-
-docscripts.push(`
-let a = b {};
-`);
-
-docscripts.push(`
-a {}
-`);
-
-docscripts.push(`
-a {
-  b {
-    c("hello");
-  }
-}
-`);
-
 // TODO(goto): figure out how to extent to enable a() {};
 
-let code = `a(function() { b; });`;
+// let ast = acorn.parse(docscripts[0], {
+// let ast = acorn.parse("var a = b(function() {});", {
+// let ast = acorn.parse("var a = foo(function() {});", {
+// let ast = acorn.parse("var a = b {};", {
+// let ast = acorn.parse("b { c {} };", {
+// TODO: let ast = acorn.parse(`b { c { d(); } };`, {
+// let ast = acorn.parse(`d("hi");`, {
+//  plugins: {docscript: true}
+// });
 
-let ast = acorn.parse(docscripts[2], {
-// let ast = acorn.parse("var a = b();", {
-  plugins: {docscript: true}
-});
+// console.log(JSON.stringify(ast, undefined, " "));
 
-console.log(JSON.stringify(ast, undefined, " "));
+function visitor(node) {
+  if (node.type === "CallExpression") {
+    if (node.arguments.length > 0 &&
+	node.arguments[node.arguments.length - 1].docscript) {
+      let block = node.arguments[node.arguments.length -1];
+      let callee = node.callee.name;
+      node.update(`__docscript__("${callee}", function() ${block.source()})`);
+    }
+  }
+}
 
-console.log(`original: ${docscripts[0]}`);
+// let ast = acorn.parse(docscripts[0], {
+// let ast = acorn.parse("var a = b(function() {});", {
+// let ast = acorn.parse("var a = foo(function() {});", {
+// let ast = acorn.parse("var a = b {};", {
+// let ast = acorn.parse("b { c {} };", {
+// TODO: let ast = acorn.parse(`b { c { d(); } };`, {
+// let ast = acorn.parse(`d("hi");`, {
+//  plugins: {docscript: true}
+// });
+// var result = falafel("a {};", {
+// var result = falafel("a { b {} };", {
+// var result = falafel("a { b { c('hi') } };", {
+// var result = falafel(`
+// a {
+//   b {
+//     c('hi')
+//   }
+// };
+// `, {
+// var result = falafel("var a = b {};", {
+var result = falafel("var a = b {};", {
+  parser: acorn, plugins: { docscript: true }
+}, visitor);
 
-let result = generate(ast);
-
-console.log(`result: ${result}`);
+console.log(result);
 
 return;
 
+
+
+//walk.simple(ast, {
+//  Literal(node) {
+//    console.log("foobar");
+//  }
+//});
+
+function transform(ast) {
+  var result = {};
+  for (prop in ast) {
+    if (typeof ast[prop] == "object") {
+    } else if (typeof ast[prop]) {
+    }
+    // result[prop] = transform(ast[prop]);
+  }
+  return result;
+}
+
+console.log(JSON.stringify(transform(ast), undefined, " "));
+
+// console.log(generate(ast));
+
+return;
+
+// console.log(babel);
+
+function plugin({types}) {
+  return {
+    visitor: {
+      CallExpression(path, state) {
+	if (path.node.arguments.length > 0 &&
+	    path.node.arguments[path.node.arguments.length - 1] &&
+	    path.node.arguments[path.node.arguments.length - 1].docscript
+	   ) {
+	  console.log("This is a call expression for a docscript!!");
+
+	  let builtin = types.identifier("__docscript__");
+	  let callee = path.node.callee.name;
+	  let lambda = path.node.arguments[path.node.arguments.length - 1];
+	  lambda.docscript = false;
+	  let code = types.callExpression(builtin, [
+	    types.stringLiteral(callee),
+	    lambda]);
+	  // console.log(path.node.arguments[path.node.arguments.length - 1]);
+	  // console.log(path.node.callee.name);
+
+	  // path.replaceWith(types.numericLiteral(2));
+	  path.replaceWith(code);
+	}
+	// console.log(path.node.arguments);
+	// console.log("hi");
+	// console.log(path);
+      },
+    }
+  }
+}
+
+const {code} = babel.transformFromAst(ast, undefined, {
+  // plugins: [plugin]
+});
+
+console.log(code);
+
+return;
 
 class Element {
   constructor(name, args) {
