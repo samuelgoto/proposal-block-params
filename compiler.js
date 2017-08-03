@@ -1,7 +1,5 @@
 var acorn = require("acorn");
 var tt = acorn.tokTypes;
-// var babel = require("babel-core");
-// var babylon = require("babylon");
 const { generate } = require('astring');
 const walk = require("acorn/dist/walk");
 const falafel = require('falafel');
@@ -76,7 +74,23 @@ function visitor(node) {
 	node.arguments[node.arguments.length - 1].docscript) {
       let block = node.arguments[node.arguments.length -1];
       let callee = node.callee.name;
-      node.update(`__docscript__("${callee}", function() ${block.source()})`);
+      node.update(
+	  `DocScript.createElement.call(this, "${callee}", function() ${block.source()})`);
+    }
+  } else if (node.type == "TemplateLiteral") {
+    console.log("hello world");
+    console.log(node.source());
+    // Wraps template literals into a special Document.createElement
+    // of type text node.
+    if (node.parent &&
+	node.parent.type == "ExpressionStatement" &&
+	node.parent.parent &&
+	node.parent.parent.type == "BlockStatement" &&
+	node.parent.parent.parent &&
+	node.parent.parent.parent.type == "FunctionExpression" &&
+        node.parent.parent.parent.docscript) {
+      console.log("found it!");
+      node.update(`DocScript.createElement.call(this, "text", ${node.source()});`);
     }
   }
 }
@@ -93,119 +107,69 @@ function visitor(node) {
 // var result = falafel("a {};", {
 // var result = falafel("a { b {} };", {
 // var result = falafel("a { b { c('hi') } };", {
-// var result = falafel(`
-// a {
-//   b {
-//     c('hi')
-//   }
-// };
-// `, {
 // var result = falafel("var a = b {};", {
-var result = falafel("var a = b {};", {
+// var result = falafel("var a = b {};", {
+
+let code = `
+doc = div {
+  span {
+    for (var i = 0; i < 5; i++) {
+      span {
+        \`$\{i\}\`
+      }
+    }
+  }
+}
+`;
+
+var result = falafel(code, {
   parser: acorn, plugins: { docscript: true }
 }, visitor);
 
 console.log(result);
 
-return;
+// return;
 
-
-
-//walk.simple(ast, {
-//  Literal(node) {
-//    console.log("foobar");
-//  }
-//});
-
-function transform(ast) {
-  var result = {};
-  for (prop in ast) {
-    if (typeof ast[prop] == "object") {
-    } else if (typeof ast[prop]) {
-    }
-    // result[prop] = transform(ast[prop]);
-  }
-  return result;
-}
-
-console.log(JSON.stringify(transform(ast), undefined, " "));
-
-// console.log(generate(ast));
-
-return;
-
-// console.log(babel);
-
-function plugin({types}) {
-  return {
-    visitor: {
-      CallExpression(path, state) {
-	if (path.node.arguments.length > 0 &&
-	    path.node.arguments[path.node.arguments.length - 1] &&
-	    path.node.arguments[path.node.arguments.length - 1].docscript
-	   ) {
-	  console.log("This is a call expression for a docscript!!");
-
-	  let builtin = types.identifier("__docscript__");
-	  let callee = path.node.callee.name;
-	  let lambda = path.node.arguments[path.node.arguments.length - 1];
-	  lambda.docscript = false;
-	  let code = types.callExpression(builtin, [
-	    types.stringLiteral(callee),
-	    lambda]);
-	  // console.log(path.node.arguments[path.node.arguments.length - 1]);
-	  // console.log(path.node.callee.name);
-
-	  // path.replaceWith(types.numericLiteral(2));
-	  path.replaceWith(code);
-	}
-	// console.log(path.node.arguments);
-	// console.log("hi");
-	// console.log(path);
-      },
-    }
-  }
-}
-
-const {code} = babel.transformFromAst(ast, undefined, {
-  // plugins: [plugin]
-});
-
-console.log(code);
-
-return;
+let docscript = `
 
 class Element {
-  constructor(name, args) {
+  constructor(name) {
     this.name = name;
-    this.args = args;
+    // this.args = args;
     this.children = [];
   }
 
   addChild(el) {
     this.children.push(el);
   }
-}
 
-function __generic__(name, args, body) {
-  console.log(`__generic__ ${name} ${args} ${body}`);
-  let el = new Element(name, args);
-  body.call(el);
-  if (this instanceof Element) {
-    console.log(`I have a parent!!`);
-    this.addChild(el);
-  } else {
-    console.log(`I don't have a parent :(`);
-    return el;
+  setValue(value) {
+    this.value = value;
   }
 }
 
-let foo = __generic__.call(this, "div", {foo: 1}, function() {
-  console.log("am i an element?");
-  console.log(this);
-  __generic__.call(this, "span", {bar: 2}, function() {
-    // hello world
-  });
-});
+class DocScript {
+  static createElement(name, body) {
+    // console.log(this instanceof Element);
+    let el = new Element(name);
 
-console.log(foo);
+    // body can either be a function or a literal.
+    if (body instanceof Function) {
+      body.call(el);
+    } else {
+      // Text elements don't have children.
+      el.setValue(body);
+    }
+    if (this instanceof Element) {
+      // console.log("I have a parent!!");
+      this.addChild(el);
+    }
+    return el;
+  }
+}
+`;
+
+console.log(`${docscript} ${result}`);
+console.log(JSON.stringify(eval(`${docscript} ${result}`), undefined, ' '));
+// console.log(eval(`${docscript} __docscript__("foo")`));
+// console.log(eval("a = 0"));
