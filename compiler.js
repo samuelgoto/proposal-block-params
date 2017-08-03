@@ -72,19 +72,28 @@ function visitor(node) {
       node.update(
 	  `DocScript.createElement.call(this, "${callee}", function() ${block.source()})`);
     }
-  } else if (node.type == "TemplateLiteral") {
-    // Wraps template literals into a special Document.createElement
-    // of type text node.
-    // Filters code of the form:
-    // a { `hello world` }
-    if (node.parent &&
-	node.parent.type == "ExpressionStatement" &&
+  } else if (node.type == "ExpressionStatement") {
+    // Wraps non-docscripts ExpressionStatements into
+    // a DocScript.createElement to enable composition of
+    // function calls, variable references and literals.
+    // enables: div { 1 }
+    // filters: div { span {}  };
+    // This is so far an ExpressionStatement inside a docscript ...
+    let inside = node.parent &&
+	node.parent.type == "BlockStatement" &&
 	node.parent.parent &&
-	node.parent.parent.type == "BlockStatement" &&
-	node.parent.parent.parent &&
-	node.parent.parent.parent.type == "FunctionExpression" &&
-        node.parent.parent.parent.docscript) {
-      node.update(`DocScript.createElement.call(this, "text", ${node.source()});`);
+	node.parent.parent.type == "FunctionExpression" &&
+        node.parent.parent.docscript;
+    // ... but we want to filter out double-wrapping ExpressionStatements
+    // of DocScripts that have already been wrapped.
+    let wrapping = node.expression &&
+	node.expression.type == "CallExpression" &&
+	node.expression.arguments &&
+	node.expression.arguments.length > 0 &&
+	node.expression.arguments[node.expression.arguments.length - 1].docscript;
+    if (inside && !wrapping) {
+      node.update(
+	  `DocScript.appendChild.call(this, ${node.source()})`);
     }
   }
 }
@@ -136,6 +145,13 @@ class Element {
 }
 
 class DocScript {
+
+  static appendChild(el) {
+    if (this instanceof Element) {
+      this.addChild(el);
+    }
+  }
+
   static createElement(name, body) {
     // console.log(this instanceof Element);
     let el = new Element(name);
@@ -143,14 +159,16 @@ class DocScript {
     // body can either be a function or a literal.
     if (body instanceof Function) {
       body.call(el);
-    } else {
+    } else if (typeof body == "string") {
       // Text elements don't have children.
       el.setValue(body);
     }
+
+    // console.log("I have a parent!!");
     if (this instanceof Element) {
-      // console.log("I have a parent!!");
       this.addChild(el);
     }
+
     return el;
   }
 }
@@ -162,20 +180,6 @@ class DocScript {
   }
 }
 
-let code = `
-div {
-  span {
-    for (var i = 0; i < 5; i++) {
-      span {
-        \`$\{i\}\`
-      }
-    }
-  }
-}
-`;
-
-// let result = DocScript.compile(code);
-
 function assert(code, expected, debug) {
   let result = DocScript.eval(code);
 
@@ -186,6 +190,11 @@ function assert(code, expected, debug) {
   deepEqual(result, expected,
       `expected: ${JSON.stringify(result, undefined, ' ')}`);
 }
+
+// console.log(DocScript.compile("div { 1 }"));
+// console.log(DocScript.compile("div { span {}  }"));
+
+// return;
 
 // Basic fundamental programs are not broken
 assert("", {});
@@ -216,13 +225,10 @@ div {
 // Text nodes
 assert(`
 div {
-  \`hello world\`
+  "hello world"
 }`, {
   name: "div",
-  children: [{
-    name: "text",
-    value: "hello world"
-  }]
+  children: ["hello world"]
 });
 // Scripting for-loops
 assert(`
@@ -243,33 +249,29 @@ div {
 assert(`
 function bar() {
   return span {
-    \`hello\`
+    "hello"
   }
 }
 div {
-  // TODO(goto): maybe remove the need to .call(this)?
-  bar.call(this);
+  bar()
 }`, {
   name: "div",
   children: [{
     name: "span",
-    children: [{
-      name: "text",
-      value: "hello"
-    }]
+    children: ["hello"]
   }]
 });
 // Scripting variables
 assert(`
 let a = span {
-  \`hello world\`
+  "hello world"
 };
 div {
-  \`\$\{a\}\`;
+  a
 }`, {
   name: "div",
   children: [{
-    name: "text",
-    value: "hello"
+    name: "span",
+    children: ["hello world"]
   }]
-}, true);
+});
