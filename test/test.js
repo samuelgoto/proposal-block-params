@@ -5,6 +5,7 @@ const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
 describe('DocScript.compile', function() {
+    // TODO(goto): break this down into multiple tests.
     it('all tests', function() {
       // Basic fundamental programs are not broken
       assert("Basic", "", {});
@@ -126,6 +127,9 @@ describe('DocScript.compile', function() {
           ]
         }]
       });
+    });
+
+    it("React", function() {
       assert("Testing react", `
       class React {
         constructor() {
@@ -149,24 +153,53 @@ describe('DocScript.compile', function() {
           ]
         }]
       });
-
     });
+
+    it("arrays of docscripts can be embedded", function() {
+      assert("[]", `
+      div {
+        [ span { }, "hello" ]
+      }`, {
+        name: "div",
+        children: [{
+          name: "span"
+	}, "hello"]
+      }, true);
+    });
+
+    it("[].map() has the right reference to this", function() {
+      assert("[].map()", `
+      div {
+        ["1", "2"].map(x => \`$\{x\}\`)
+      }`, {
+        name: "div",
+	  children: ["1", "2"]
+      });
+    });
+
+    it.skip("['1'] ['1'].map(span {}) works", function() {
+      assert("[].map()", `
+      div {
+	["1"] // for some reason adding this breaks it
+        ["1"].map(x => span { \`$\{x\}\` })
+      }`, {
+        name: "div",
+	children: [{
+	  name: "span",
+          children: ["1"]
+        }]
+      }, true);
+    });
+
+
 });
 
 function assert(title, code, expected, debug) {
-  let result = DocScript.eval(code);
-
   if (debug) {
     console.log(`${DocScript.compile(code)}`);
   }
 
-  deepEqual(result, expected, `
+  let result = DocScript.eval(code);
 
-Failed on: ${title}
-
-expected: ${JSON.stringify(expected, undefined, ' ')}
-
-got: ${JSON.stringify(result, undefined, ' ')}
-
-`);
+  deepEqual(expected, result);
 }

@@ -7,7 +7,8 @@
     "dsc": "./dsc.sh"
   },
   "scripts": {
-    "test": "mocha --reporter spec"
+    "start": "supervisor app",
+    "test": "mocha -w"
   },
   "repository": {
     "type": "git",
@@ -32,7 +33,8 @@
     "acorn": "^5.1.1",
     "astring": "^1.0.3",
     "commander": "^2.11.0",
-    "falafel": "^2.1.0"
+    "falafel": "^2.1.0",
+    "should": "^11.2.1"
   },
   "devDependencies": {
     "chai": "^4.1.0",

@@ -172,10 +172,17 @@ class Element {
 class DocScript {
 
   static createExpression(parent, el) {
-    if (parent instanceof Element &&
-        (el instanceof Element || typeof el == "string")) {
-      parent.addChild(el);
-    }
+      if (!(parent instanceof Element)) {
+	  return;
+      }
+
+      // el can be either an Element, a string or an array of those things.
+      let children = el instanceof Array ? el : [el];
+
+      // Ignores anything that isn't an Element or a String.
+      children.filter(x => x instanceof Element || typeof x == "string").forEach(x => {
+        parent.addChild(x);
+      });
   }
 
   static createElement(name, body, opt_parent) {
