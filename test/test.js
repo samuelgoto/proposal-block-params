@@ -5,28 +5,27 @@ const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
 describe('DocScript.compile', function() {
-    // TODO(goto): break this down into multiple tests.
     it('Basic', function() {
       // Basic fundamental programs are not broken
-      assert("Basic", "", {});
-      assert("Basic", "1", 1);
-      assert("Basic", "`hello`", `hello`);
-      assert("Basic", "undefined", undefined);
-      assert("Basic", "null", null);
-      assert("Basic", "function a() {}", {});
-      assert("Basic", "function a() { return 1; } a()", 1);
-      assert("Basic", "var a = 1;", {});
-      assert("Basic", "var a = 1; a", 1);
-      assert("Basic", "let a = 1; a", 1);
+      assert("", {});
+      assert("1", 1);
+      assert("`hello`", `hello`);
+      assert("undefined", undefined);
+      assert("null", null);
+      assert("function a() {}", {});
+      assert("function a() { return 1; } a()", 1);
+      assert("var a = 1;", {});
+      assert("var a = 1; a", 1);
+      assert("let a = 1; a", 1);
     });
 
     it('Basic DocScripts', function() {
-      assert("DocScript", `let doc = 1; doc`, 1);
-      assert("DocScript", `let doc = div {}; doc`, {name: "div"});
+      assert(`let doc = 1; doc`, 1);
+      assert(`let doc = div {}; doc`, {name: "div"});
     });
 
     it('Nesting', function() {
-      assert("Nesting", `
+      assert(`
       div {
         span {
         }
@@ -39,7 +38,7 @@ describe('DocScript.compile', function() {
     });
 
     it('Text nodes', function() {
-      assert("Text nodes", `
+      assert(`
       div {
         "hello world"
       }`, {
@@ -49,7 +48,7 @@ describe('DocScript.compile', function() {
     });
 
     it('For-loops', function() {
-      assert("Scripting for-loops", `
+      assert(`
       div {
         for (let i = 0; i < 2; i++) {
           span {
@@ -66,7 +65,7 @@ describe('DocScript.compile', function() {
     });
 
     it('Functions 1', function() {
-      assert("Scripting calls 1", `
+      assert(`
       function bar() {
         return span {
           "hello"
@@ -84,7 +83,7 @@ describe('DocScript.compile', function() {
     });
 
     it('Functions 2', function() {
-      assert("Scripting calls 2", `
+      assert(`
       function bar() {
         return span {
           "hello"
@@ -104,7 +103,7 @@ describe('DocScript.compile', function() {
     });
 
     it('Variables', function() {
-      assert("Scripting variables", `
+      assert(`
       let a = span {
         "hello world"
       };
@@ -121,7 +120,7 @@ describe('DocScript.compile', function() {
 
 
     it('Scripting internal variables', function() {
-      assert("", `
+      assert(`
       div {
 	var a = 1;
         var b = 2;
@@ -137,7 +136,7 @@ describe('DocScript.compile', function() {
     });
 
     it("Makes sure that addChild isn't called twice.", function() {
-      assert("", `
+      assert(`
       let a = div {
         function bar() {
           return h1 { "bar" }
@@ -157,7 +156,7 @@ describe('DocScript.compile', function() {
     });
 
     it("React-like component", function() {
-      assert("Testing react", `
+      assert(`
       class React {
         constructor() {
           this.state = "foo";
@@ -183,7 +182,7 @@ describe('DocScript.compile', function() {
     });
 
     it("Arrays of docscripts can be embedded", function() {
-      assert("[]", `
+      assert(`
       div {
         [ span { }, "hello" ]
       }`, {
@@ -195,7 +194,7 @@ describe('DocScript.compile', function() {
     });
 
     it("[].map() has the right reference to this", function() {
-      assert("[].map()", `
+      assert(`
       div {
         ["1", "2"].map(x => \`$\{x\}\`)
       }`, {
@@ -205,7 +204,7 @@ describe('DocScript.compile', function() {
     });
 
     it("Two variables", function() {
-      assert("", `
+      assert(`
       let a = "1";
       div {
 	a
@@ -217,7 +216,7 @@ describe('DocScript.compile', function() {
     });
 
     it("Two method calls", function() {
-      assert("", `
+      assert(`
      function a() { return  "1"; }
       div {
 	a()
@@ -232,7 +231,7 @@ describe('DocScript.compile', function() {
       try {
 	// This throws an Error now because it evaluates to something equivalent to
 	// div { "1"["2"] } == div { undefined }.
-        assert("", `
+        assert(`
         div {
 	  "1"
 	  ["2"]
@@ -248,7 +247,7 @@ describe('DocScript.compile', function() {
     it(".-member expressions", function() {
       try {
         // This evaluates to "1".b which is undefined, so Error is thrown.
-        assert("", `
+        assert(`
         div {
           "1"
 	  .b
@@ -259,7 +258,7 @@ describe('DocScript.compile', function() {
     });
 
     it("div { '1'; }", function() {
-      assert("", `
+      assert(`
       div {
         "1";
       }`, {
@@ -270,7 +269,7 @@ describe('DocScript.compile', function() {
 
     it("['1'] ['1'].map(span {}) works", function() {
       try {
-        assert("[].map()", `
+        assert(`
         div {
 	  ["1"] // for some reason adding this breaks it
           ["1"].map(x => x)
@@ -284,7 +283,7 @@ describe('DocScript.compile', function() {
 
 });
 
-function assert(title, code, expected, debug) {
+function assert(code, expected, debug) {
   if (debug) {
     console.log(`${DocScript.compile(code)}`);
   }
