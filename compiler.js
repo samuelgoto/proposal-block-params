@@ -67,10 +67,31 @@ function visitor(node) {
   if (node.type === "CallExpression") {
     if (node.arguments.length > 0 &&
 	node.arguments[node.arguments.length - 1].docscript) {
+      // Makes a distinction between DocScript code inside
+      // DocScript (e.g. the span in let a = div { span {} }) code and
+      // not (e.g. let a = div {}).
+      // TODO(goto): we should probably break on scoping boundaries
+      // e.g. is this span within a docscript scope?
+      // at the moment, since it is crawling all the way up, i bet
+      // that it would eventually hit the div docscript there.
+      // function() { div { function bar() { return span {} } } }
+      var parent = node.parent;
+      var inside = false;
+      while (parent) {
+	if (parent.docscript) {
+	  inside = true;
+	  break;
+	}
+	parent = parent.parent;
+      }
+
       let block = node.arguments[node.arguments.length -1];
       let callee = node.callee.name;
-      node.update(
-	  `DocScript.createElement.call(this, "${callee}", function() ${block.source()})`);
+      if (!inside) {
+	node.update(`DocScript.createRoot("${callee}", function(parent) ${block.source()})`);
+      } else {
+	node.update(`DocScript.createElement(parent, "${callee}", function(parent) ${block.source()})`);
+      }
     }
   } else if (node.type == "ExpressionStatement") {
     // Wraps non-docscripts ExpressionStatements into
@@ -93,7 +114,7 @@ function visitor(node) {
 	node.expression.arguments[node.expression.arguments.length - 1].docscript;
     if (inside && !wrapping) {
       node.update(
-	  `DocScript.appendChild.call(this, ${node.source()})`);
+	  `DocScript.createExpression(parent, function(parent) { return ${node.source()} } ())`);
     }
   }
 }
@@ -127,8 +148,6 @@ class DocScript {
 class Element {
   constructor(name) {
     this.name = name;
-    // this.args = args;
-    // this.children = [];
   }
 
   addChild(el) {
@@ -138,37 +157,27 @@ class Element {
     }
     this.children.push(el);
   }
-
-  setValue(value) {
-    this.value = value;
-  }
 }
 
 class DocScript {
 
-  static appendChild(el) {
-    if (this instanceof Element) {
-      this.addChild(el);
+  static createExpression(parent, el) {
+    if (parent instanceof Element &&
+        (el instanceof Element || typeof el == "string")) {
+      parent.addChild(el);
     }
   }
 
-  static createElement(name, body) {
-    // console.log(this instanceof Element);
+  static createElement(parent, name, body) {
     let el = new Element(name);
+    body(el);
+    parent.addChild(el);
+    return el;
+  }
 
-    // body can either be a function or a literal.
-    if (body instanceof Function) {
-      body.call(el);
-    } else if (typeof body == "string") {
-      // Text elements don't have children.
-      el.setValue(body);
-    }
-
-    // console.log("I have a parent!!");
-    if (this instanceof Element) {
-      this.addChild(el);
-    }
-
+  static createRoot(name, body) {
+    let el = new Element(name);
+    body(el);
     return el;
   }
 }
@@ -187,11 +196,19 @@ function assert(code, expected, debug) {
     console.log(`${DocScript.compile(code)}`);
   }
 
-  deepEqual(result, expected,
-      `expected: ${JSON.stringify(result, undefined, ' ')}`);
+  deepEqual(result, expected, `
+
+expected: ${JSON.stringify(expected, undefined, ' ')}
+
+got: ${JSON.stringify(result, undefined, ' ')}
+
+`);
 }
 
-// console.log(DocScript.compile("div { 1 }"));
+// console.log(DocScript.eval(`let a = div { span { "foo" } }; a`));
+
+// return;
+
 // console.log(DocScript.compile("div { span {}  }"));
 
 // return;
@@ -245,7 +262,7 @@ div {
     name: "span"
   }]
 });
-// Scripting calls
+// Scripting calls 1
 assert(`
 function bar() {
   return span {
@@ -254,6 +271,24 @@ function bar() {
 }
 div {
   bar()
+}`, {
+  name: "div",
+  children: [{
+    name: "span",
+    children: ["hello"]
+  }]
+});
+// Scripting calls 2
+assert(`
+function bar() {
+  return span {
+    "hello"
+  }
+}
+div {
+  // This is a variation of the previous test where
+  // a ; is added at the end of the expression.
+  bar();
 }`, {
   name: "div",
   children: [{
@@ -273,5 +308,43 @@ div {
   children: [{
     name: "span",
     children: ["hello world"]
+  }]
+});
+// Scripting internal variables
+assert(`
+div {
+  var a = 1;
+  var b = 2
+  b
+  a & b
+  function foo() {
+    return 1;
+  }
+  foo()
+}`, {
+  name: "div"
+});
+
+assert(`
+class React {
+  constructor() {
+    this.state = "foo";
+  }
+  render() {
+    return html {
+      body {
+        "hello world"
+      }
+    }
+  }
+}
+new React().render()
+`, {
+  name: "html",
+  children: [{
+    name: "body",
+    children: [
+      "hello world"
+    ]
   }]
 });
