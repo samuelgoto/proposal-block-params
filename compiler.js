@@ -77,8 +77,16 @@ function visitor(node) {
       // function() { div { function bar() { return span {} } } }
       var parent = node.parent;
       var inside = false;
-      // console.log(node);
+      // console.log(node.parent);
       while (parent) {
+	if (parent.type == "FunctionDeclaration" &&
+	    !parent.docscript) {
+	  // If we are inside a function declaration that is not
+	  // a DocScript, that crosses the boundaries of
+	  // DocScript inside DocScript because the parameters are
+	  // different.
+	  break;
+	}
 	if (parent.docscript) {
 	  inside = true;
 	  break;
@@ -186,7 +194,7 @@ class DocScript {
   }
 }
 
-function assert(code, expected, debug) {
+function assert(title, code, expected, debug) {
   let result = DocScript.eval(code);
 
   if (debug) {
@@ -195,6 +203,8 @@ function assert(code, expected, debug) {
 
   deepEqual(result, expected, `
 
+Failed on: ${title}
+
 expected: ${JSON.stringify(expected, undefined, ' ')}
 
 got: ${JSON.stringify(result, undefined, ' ')}
@@ -202,51 +212,21 @@ got: ${JSON.stringify(result, undefined, ' ')}
 `);
 }
 
-/*
-console.log(DocScript.eval(`
-div {
-  function bar() {
-    return span {};
-  }
-}
-`));
-*/
-
-// return;
-/*
-console.log(DocScript.eval(`
-let a = div {
-  function bar() {
-    return span { "bar" }
-  }
-  span { "foo" }
-};
-a`));
-*/
-
-// return;
-
-// console.log(DocScript.compile("div { span {}  }"));
-
-// return;
-
 // Basic fundamental programs are not broken
-assert("", {});
-assert("1", 1);
-assert("`hello`", `hello`);
-assert("undefined", undefined);
-assert("null", null);
-assert("function a() {}", {});
-assert("function a() { return 1; } a()", 1);
-assert("var a = 1;", {});
-assert("var a = 1; a", 1);
-assert("let a = 1; a", 1);
+assert("Basic", "", {});
+assert("Basic", "1", 1);
+assert("Basic", "`hello`", `hello`);
+assert("Basic", "undefined", undefined);
+assert("Basic", "null", null);
+assert("Basic", "function a() {}", {});
+assert("Basic", "function a() { return 1; } a()", 1);
+assert("Basic", "var a = 1;", {});
+assert("Basic", "var a = 1; a", 1);
+assert("Basic", "let a = 1; a", 1);
 
-// DocScripts
-assert(`let doc = 1; doc`, 1);
-assert(`let doc = div {}; doc`, {name: "div"});
-// Nesting
-assert(`
+assert("DocScript", `let doc = 1; doc`, 1);
+assert("DocScript", `let doc = div {}; doc`, {name: "div"});
+assert("Nesting", `
 div {
   span {
   }
@@ -256,16 +236,14 @@ div {
     name: "span"
   }]
 });
-// Text nodes
-assert(`
+assert("Text nodes", `
 div {
   "hello world"
 }`, {
   name: "div",
   children: ["hello world"]
 });
-// Scripting for-loops
-assert(`
+assert("Scripting for-loops", `
 div {
   for (let i = 0; i < 2; i++) {
     span {
@@ -279,8 +257,7 @@ div {
     name: "span"
   }]
 });
-// Scripting calls 1
-assert(`
+assert("Scripting calls 1", `
 function bar() {
   return span {
     "hello"
@@ -295,8 +272,7 @@ div {
     children: ["hello"]
   }]
 });
-// Scripting calls 2
-assert(`
+assert("Scripting calls 2", `
 function bar() {
   return span {
     "hello"
@@ -313,8 +289,7 @@ div {
     children: ["hello"]
   }]
 });
-// Scripting variables
-assert(`
+assert("Scripting variables", `
 let a = span {
   "hello world"
 };
@@ -327,8 +302,7 @@ div {
     children: ["hello world"]
   }]
 });
-// Scripting internal variables
-assert(`
+assert("Scripting internal variables", `
 div {
   var a = 1;
   var b = 2
@@ -341,8 +315,24 @@ div {
 }`, {
   name: "div"
 });
-
-assert(`
+assert("Makes sure that addChild isn't called twice.", `
+let a = div {
+  function bar() {
+    return h1 { "bar" }
+  }
+  // span { "foo" }
+  bar()
+};
+a`, {
+  name: "div",
+  children: [{
+    name: "h1",
+    children: [
+      "bar"
+    ]
+  }]
+});
+assert("Testing react", `
 class React {
   constructor() {
     this.state = "foo";
