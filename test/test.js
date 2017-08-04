@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 
 describe('DocScript.compile', function() {
     // TODO(goto): break this down into multiple tests.
-    it('all tests', function() {
+    it('Basic', function() {
       // Basic fundamental programs are not broken
       assert("Basic", "", {});
       assert("Basic", "1", 1);
@@ -18,9 +18,14 @@ describe('DocScript.compile', function() {
       assert("Basic", "var a = 1;", {});
       assert("Basic", "var a = 1; a", 1);
       assert("Basic", "let a = 1; a", 1);
+    });
 
+    it('Basic DocScripts', function() {
       assert("DocScript", `let doc = 1; doc`, 1);
       assert("DocScript", `let doc = div {}; doc`, {name: "div"});
+    });
+
+    it('Nesting', function() {
       assert("Nesting", `
       div {
         span {
@@ -31,6 +36,9 @@ describe('DocScript.compile', function() {
           name: "span"
         }]
       });
+    });
+
+    it('Text nodes', function() {
       assert("Text nodes", `
       div {
         "hello world"
@@ -38,6 +46,9 @@ describe('DocScript.compile', function() {
         name: "div",
         children: ["hello world"]
       });
+    });
+
+    it('For-loops', function() {
       assert("Scripting for-loops", `
       div {
         for (let i = 0; i < 2; i++) {
@@ -52,6 +63,9 @@ describe('DocScript.compile', function() {
           name: "span"
         }]
       });
+    });
+
+    it('Functions 1', function() {
       assert("Scripting calls 1", `
       function bar() {
         return span {
@@ -67,6 +81,9 @@ describe('DocScript.compile', function() {
           children: ["hello"]
         }]
       });
+    });
+
+    it('Functions 2', function() {
       assert("Scripting calls 2", `
       function bar() {
         return span {
@@ -84,6 +101,9 @@ describe('DocScript.compile', function() {
           children: ["hello"]
         }]
       });
+    });
+
+    it('Variables', function() {
       assert("Scripting variables", `
       let a = span {
         "hello world"
@@ -97,7 +117,11 @@ describe('DocScript.compile', function() {
           children: ["hello world"]
         }]
       });
-      assert("Scripting internal variables", `
+    });
+
+
+    it('Scripting internal variables', function() {
+      assert("", `
       div {
 	var a = 1;
         var b = 2;
@@ -110,7 +134,10 @@ describe('DocScript.compile', function() {
       }`, {
         name: "div"
       });
-      assert("Makes sure that addChild isn't called twice.", `
+    });
+
+    it("Makes sure that addChild isn't called twice.", function() {
+      assert("", `
       let a = div {
         function bar() {
           return h1 { "bar" }
@@ -129,7 +156,7 @@ describe('DocScript.compile', function() {
       });
     });
 
-    it("React", function() {
+    it("React-like component", function() {
       assert("Testing react", `
       class React {
         constructor() {
@@ -155,7 +182,7 @@ describe('DocScript.compile', function() {
       });
     });
 
-    it("arrays of docscripts can be embedded", function() {
+    it("Arrays of docscripts can be embedded", function() {
       assert("[]", `
       div {
         [ span { }, "hello" ]
@@ -177,7 +204,7 @@ describe('DocScript.compile', function() {
       });
     });
 
-    it("two variables", function() {
+    it("Two variables", function() {
       assert("", `
       let a = "1";
       div {
@@ -189,8 +216,7 @@ describe('DocScript.compile', function() {
       });
     });
 
-
-    it("two method calls", function() {
+    it("Two method calls", function() {
       assert("", `
      function a() { return  "1"; }
       div {
@@ -224,10 +250,9 @@ describe('DocScript.compile', function() {
         // This evaluates to "1".b which is undefined, so Error is thrown.
         assert("", `
         div {
-        
           "1"
 	  .b
-        }`, {}); 
+        }`, {});
       } catch (e) {
 	// Expected exception
       }
