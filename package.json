@@ -1,8 +1,11 @@
 {
   "name": "@docscript/docscript",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A DSL for Javascript designed to build the DOM inspired by Kotlin",
   "main": "docscript.js",
+  "bin": {
+    "dsc": "./dsc.sh"
+  },
   "scripts": {
     "test": "mocha --reporter spec"
   },
