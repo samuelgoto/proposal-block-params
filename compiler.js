@@ -77,6 +77,7 @@ function visitor(node) {
       // function() { div { function bar() { return span {} } } }
       var parent = node.parent;
       var inside = false;
+      // console.log(node);
       while (parent) {
 	if (parent.docscript) {
 	  inside = true;
@@ -88,9 +89,9 @@ function visitor(node) {
       let block = node.arguments[node.arguments.length -1];
       let callee = node.callee.name;
       if (!inside) {
-	node.update(`DocScript.createRoot("${callee}", function(parent) ${block.source()})`);
+	node.update(`DocScript.createElement("${callee}", function(parent) ${block.source()})`);
       } else {
-	node.update(`DocScript.createElement(parent, "${callee}", function(parent) ${block.source()})`);
+	node.update(`DocScript.createElement("${callee}", function(parent) ${block.source()}, parent)`);
       }
     }
   } else if (node.type == "ExpressionStatement") {
@@ -168,16 +169,12 @@ class DocScript {
     }
   }
 
-  static createElement(parent, name, body) {
+  static createElement(name, body, opt_parent) {
     let el = new Element(name);
     body(el);
-    parent.addChild(el);
-    return el;
-  }
-
-  static createRoot(name, body) {
-    let el = new Element(name);
-    body(el);
+    if (opt_parent) {
+      opt_parent.addChild(el);
+    }
     return el;
   }
 }
@@ -205,7 +202,27 @@ got: ${JSON.stringify(result, undefined, ' ')}
 `);
 }
 
-// console.log(DocScript.eval(`let a = div { span { "foo" } }; a`));
+/*
+console.log(DocScript.eval(`
+div {
+  function bar() {
+    return span {};
+  }
+}
+`));
+*/
+
+// return;
+/*
+console.log(DocScript.eval(`
+let a = div {
+  function bar() {
+    return span { "bar" }
+  }
+  span { "foo" }
+};
+a`));
+*/
 
 // return;
 
