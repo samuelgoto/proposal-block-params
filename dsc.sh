@@ -20,5 +20,10 @@ program
       }
       console.log(DocScript.compile(data));
     });
-  })
-  .parse(process.argv);
+  });
+
+program.parse(process.argv);
+
+if (process.argv.length == 2) {
+  // TODO(goto): read from stdin to enable pipes.
+}
