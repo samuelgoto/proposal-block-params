@@ -228,56 +228,44 @@ describe('DocScript.compile', function() {
     });
 
     it("[]-member expressions", function() {
-      try {
-	// This throws an Error now because it evaluates to something equivalent to
-	// div { "1"["2"] } == div { undefined }.
-        assertThat(`
+      assertThat(`
         div {
-	  "1"
-	  ["2"]
-        }`).equalsTo({});
-
-        throw Error("Should hav failed: deliberate tells people that this isn't cool.");
-
-      } catch (e) {
-       	// expected exception
-      }
+          "1"
+          ["2"]
+        }`
+      ).throwsError(
+        `This throws an Error now because it evaluates to something
+        equivalent to div { "1"["2"] } == div { undefined }.`);
      });
 
     it(".-member expressions", function() {
-      try {
-        // This evaluates to "1".b which is undefined, so Error is thrown.
-        assertThat(`
+      assertThat(`
         div {
           "1"
 	  .b
-        }`).equalsTo({});
-      } catch (e) {
-	// Expected exception
-      }
+        }`
+      ).throwsError(`
+        This evaluates to "1".b which is undefined, so Error is thrown`);
     });
 
     it("div { '1'; }", function() {
       assertThat(`
-      div {
-        "1";
-      }`).equalsTo({
+        div {
+          "1";
+        }`
+      ).equalsTo({
         name: "div",
 	children: ["1"]
       });
     });
 
     it("['1'] ['1'].map(span {}) works", function() {
-      try {
-        assertThat(`
+      assertThat(`
         div {
-	  ["1"] // for some reason adding this breaks it
+          ["1"] // for some reason adding this breaks it
           ["1"].map(x => x)
-        }`).equalsTo({});
-        throw Error("Should've failed")
-      } catch (e) {
-	  // Expected exception
-      }
+        }
+      `).throwsError("Should've failed");
     });
 });
 
@@ -294,6 +282,19 @@ class That {
     let result = DocScript.eval(this.code);
 
     Assert.deepEqual(expected, result);
+  }
+
+  throwsError(message, opt_debug) {
+    if (opt_debug) {
+      console.log(`${DocScript.compile(this.code)}`);
+    }
+
+    try {
+      let result = DocScript.eval(this.code);
+      throw Error(message);
+    } catch (e) {
+      // Expected exception.
+    }
   }
 }
 
