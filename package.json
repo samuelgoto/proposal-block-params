@@ -1,0 +1,28 @@
+{
+  "name": "docscript",
+  "version": "0.0.0",
+  "description": "A DSL for Javascript designed to build the DOM inspired by Kotlin",
+  "main": "compiler.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samuelgoto/docscript.git"
+  },
+  "keywords": [
+    "javascript",
+    "dsl",
+    "dom",
+    "kotlin",
+    "jsx",
+    "jfx",
+    "scripts"
+  ],
+  "author": "goto@google.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/samuelgoto/docscript/issues"
+  },
+  "homepage": "https://github.com/samuelgoto/docscript#readme"
+}
