@@ -351,6 +351,36 @@ describe('DocScript.compile', function() {
     });
   });
 
+  it("Composes classes", function() {
+    assertThat(`
+      class Foo {
+        render() {
+          return div {
+            // if a docscript expression starts with a capital letter
+            // it refers to a custom class type rather than a literal.
+            Bar {};
+          }
+        }
+      }
+      class Bar {
+        render() {
+          return div {
+            "bar";
+          }
+        }
+      }
+      new Foo().render();
+    `
+    ).equalsTo({
+      name: "div",
+      children: [{
+	name: "div",
+        children: ["bar"]
+      }]
+    });
+  });
+
+
   it("React-like component testing most features", function() {
     assertThat(`
       class React {
@@ -404,7 +434,7 @@ describe('DocScript.compile', function() {
     });
   });
 
-  it.only("React ShoppingList example", function() {
+  it("React ShoppingList example", function() {
     assertThat(`
       class ShoppingList {
         constructor() {
@@ -445,7 +475,6 @@ describe('DocScript.compile', function() {
       }]
     });
   });
-
 });
 
 class That {

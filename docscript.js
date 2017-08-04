@@ -97,10 +97,17 @@ function visitor(node) {
 
       let block = node.arguments[node.arguments.length -1];
       let callee = node.callee.name;
+
+      let first = callee.charAt(0);
+      if (!(first == first.toUpperCase() && first != first.toLowerCase())) {
+	// this is not a custom-class reference, but a literal.
+	callee = `"${callee}"`;
+      }
+
       if (!inside) {
-	node.update(`DocScript.createElement.call(this, "${callee}", function(parent) ${block.source()})`);
+	node.update(`DocScript.createElement.call(this, ${callee}, function(parent) ${block.source()})`);
       } else {
-	node.update(`DocScript.createElement.call(this, "${callee}", function(parent) ${block.source()}, parent)`);
+	node.update(`DocScript.createElement.call(this, ${callee}, function(parent) ${block.source()}, parent)`);
       }
     }
   } else if (node.type == "ExpressionStatement") {
@@ -180,8 +187,17 @@ class DocScript {
       });
   }
 
-  static createElement(name, body, opt_parent) {
-    let el = new Element(name);
+  static createElement(type, body, opt_parent) {
+    let el;
+
+    if (typeof type == "string") {
+      el = new Element(type);
+    } else {
+      // console.log(type);
+      // console.log(new type().render());
+      el = new type().render();
+    }
+
     body.call(this, el);
     if (opt_parent) {
       opt_parent.addChild(el);
