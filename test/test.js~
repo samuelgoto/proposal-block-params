@@ -1,5 +1,17 @@
+'use strict';
+
 const {deepEqual} = require('assert');
-const {DocScript} = require('./docscript');
+const {DocScript} = require('./../docscript');
+var expect = require('chai').expect;
+
+describe('DocScript.compile', function() {
+    it('should convert single digits', function() {
+        expect(1).to.equal(1);
+    });
+});
+
+return;
+
 
 function assert(title, code, expected, debug) {
   let result = DocScript.eval(code);

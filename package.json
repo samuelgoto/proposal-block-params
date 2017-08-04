@@ -4,7 +4,7 @@
   "description": "A DSL for Javascript designed to build the DOM inspired by Kotlin",
   "main": "docscript.js",
   "scripts": {
-    "test": "test"
+    "test": "mocha --reporter spec"
   },
   "repository": {
     "type": "git",
@@ -29,5 +29,9 @@
     "acorn": "^5.1.1",
     "astring": "^1.0.3",
     "falafel": "^2.1.0"
+  },
+  "devDependencies": {
+    "chai": "^4.1.0",
+    "mocha": "^3.5.0"
   }
 }
