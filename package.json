@@ -2,7 +2,7 @@
   "name": "docscript",
   "version": "0.0.0",
   "description": "A DSL for Javascript designed to build the DOM inspired by Kotlin",
-  "main": "compiler.js",
+  "main": "docscript.js",
   "scripts": {
     "test": "test"
   },
