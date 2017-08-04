@@ -380,6 +380,27 @@ describe('DocScript.compile', function() {
     });
   });
 
+  it("This-reference of custom elements", function() {
+    assertThat(`
+      class Foo {
+        render() {
+          // if a docscript expression starts with a capital letter
+          // it refers to a custom class type rather than a literal.
+          return Bar {};
+        }
+      }
+      class Bar {
+        constructor() {
+          this.foo = "bar";
+        }
+        render() {
+          return this.foo;
+        }
+      }
+      new Foo().render();
+    `
+    ).equalsTo("bar");
+  });
 
   it("React-like component testing most features", function() {
     assertThat(`
