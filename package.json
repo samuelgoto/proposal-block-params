@@ -27,6 +27,7 @@
   "homepage": "https://github.com/samuelgoto/docscript#readme",
   "dependencies": {
     "acorn": "^5.1.1",
-    "astring": "^1.0.3"
+    "astring": "^1.0.3",
+    "falafel": "^2.1.0"
   }
 }
