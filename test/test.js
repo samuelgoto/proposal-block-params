@@ -1,6 +1,6 @@
 'use strict';
 
-const {deepEqual} = require('assert');
+const Assert = require('assert');
 const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
@@ -99,10 +99,10 @@ describe('DocScript.compile', function() {
       });
       assert("Scripting internal variables", `
       div {
-        var a = 1;
-        var b = 2
-        b
-        a & b
+	var a = 1;
+        var b = 2;
+	b
+	a & b
         function foo() {
           return 1;
         }
@@ -164,7 +164,7 @@ describe('DocScript.compile', function() {
         children: [{
           name: "span"
 	}, "hello"]
-      }, true);
+      });
     });
 
     it("[].map() has the right reference to this", function() {
@@ -177,18 +177,83 @@ describe('DocScript.compile', function() {
       });
     });
 
-    it.skip("['1'] ['1'].map(span {}) works", function() {
-      assert("[].map()", `
+    it("two variables", function() {
+      assert("", `
+      let a = "1";
       div {
-	["1"] // for some reason adding this breaks it
-        ["1"].map(x => span { \`$\{x\}\` })
+	a
+        a
       }`, {
         name: "div",
-	children: [{
-	  name: "span",
-          children: ["1"]
-        }]
-      }, true);
+	children: ["1", "1"]
+      });
+    });
+
+
+    it("two method calls", function() {
+      assert("", `
+     function a() { return  "1"; }
+      div {
+	a()
+        a()
+      }`, {
+        name: "div",
+	children: ["1", "1"]
+      });
+    });
+
+    it("[]-member expressions", function() {
+      try {
+	// This throws an Error now because it evaluates to something equivalent to
+	// div { "1"["2"] } == div { undefined }.
+        assert("", `
+        div {
+	  "1"
+	  ["2"]
+        }`, {});
+
+        throw Error("Should hav failed: deliberate tells people that this isn't cool.");
+
+      } catch (e) {
+       	// expected exception
+      }
+     });
+
+    it(".-member expressions", function() {
+      try {
+        // This evaluates to "1".b which is undefined, so Error is thrown.
+        assert("", `
+        div {
+        
+          "1"
+	  .b
+        }`, {}); 
+      } catch (e) {
+	// Expected exception
+      }
+    });
+
+    it("div { '1'; }", function() {
+      assert("", `
+      div {
+        "1";
+      }`, {
+        name: "div",
+	children: ["1"]
+      });
+    });
+
+    it("['1'] ['1'].map(span {}) works", function() {
+      try {
+        assert("[].map()", `
+        div {
+	  ["1"] // for some reason adding this breaks it
+          ["1"].map(x => x)
+        }`, {});
+        throw Error("Should've failed")
+      } catch (e) {
+	  // Expected exception
+      }
     });
 
 
@@ -201,5 +266,5 @@ function assert(title, code, expected, debug) {
 
   let result = DocScript.eval(code);
 
-  deepEqual(expected, result);
+  Assert.deepEqual(expected, result);
 }

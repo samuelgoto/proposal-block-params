@@ -110,6 +110,7 @@ function visitor(node) {
     // enables: div { 1 }
     // filters: div { span {}  };
     // This is so far an ExpressionStatement inside a docscript ...
+    // console.log(node);
     let inside = node.parent &&
 	node.parent.type == "BlockStatement" &&
 	node.parent.parent &&
@@ -129,22 +130,6 @@ function visitor(node) {
   }
 }
 
-// let ast = acorn.parse(docscripts[0], {
-// let ast = acorn.parse("var a = b(function() {});", {
-// let ast = acorn.parse("var a = foo(function() {});", {
-// let ast = acorn.parse("var a = b {};", {
-// let ast = acorn.parse("b { c {} };", {
-// TODO: let ast = acorn.parse(`b { c { d(); } };`, {
-// let ast = acorn.parse(`d("hi");`, {
-//  plugins: {docscript: true}
-// });
-// var result = falafel("a {};", {
-// var result = falafel("a { b {} };", {
-// var result = falafel("a { b { c('hi') } };", {
-// var result = falafel("var a = b {};", {
-// var result = falafel("var a = b {};", {
-
-
 class DocScript {
   static compile(code) {
     var result = falafel(code, {
@@ -155,6 +140,7 @@ class DocScript {
 
   static eval(code) {
     let docscript = `
+
 class Element {
   constructor(name) {
     this.name = name;
@@ -179,9 +165,18 @@ class DocScript {
       // el can be either an Element, a string or an array of those things.
       let children = el instanceof Array ? el : [el];
 
-      // Ignores anything that isn't an Element or a String.
-      children.filter(x => x instanceof Element || typeof x == "string").forEach(x => {
-        parent.addChild(x);
+      children.forEach(x => {
+	// console.log(x);
+        if (x == null || x == undefined) {
+	  // Throws errors for null and undefined to enable developers to catch
+          // MemberExpressions early.
+	  throw new Error("Tried to add an invalid element into the tree");          
+        }
+
+	if (x instanceof Element || typeof x == "string") {
+	  // Ignores anything that isn't an Element or a String. 
+          parent.addChild(x);
+        }
       });
   }
 
