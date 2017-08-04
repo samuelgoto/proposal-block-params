@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/samuelgoto/docscript/issues"
   },
-  "homepage": "https://github.com/samuelgoto/docscript#readme"
+  "homepage": "https://github.com/samuelgoto/docscript#readme",
+  "dependencies": {
+    "acorn": "^5.1.1"
+  }
 }
