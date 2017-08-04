@@ -1,5 +1,5 @@
 {
-  "name": "docscript",
+  "name": "@docscript/docscript",
   "version": "0.0.0",
   "description": "A DSL for Javascript designed to build the DOM inspired by Kotlin",
   "main": "docscript.js",
@@ -19,7 +19,7 @@
     "jfx",
     "scripts"
   ],
-  "author": "goto@google.com",
+  "author": "samuelgoto@gmail.com",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/samuelgoto/docscript/issues"
