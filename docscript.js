@@ -98,9 +98,9 @@ function visitor(node) {
       let block = node.arguments[node.arguments.length -1];
       let callee = node.callee.name;
       if (!inside) {
-	node.update(`DocScript.createElement("${callee}", function(parent) ${block.source()})`);
+	node.update(`DocScript.createElement.call(this, "${callee}", function(parent) ${block.source()})`);
       } else {
-	node.update(`DocScript.createElement("${callee}", function(parent) ${block.source()}, parent)`);
+	node.update(`DocScript.createElement.call(this, "${callee}", function(parent) ${block.source()}, parent)`);
       }
     }
   } else if (node.type == "ExpressionStatement") {
@@ -125,7 +125,7 @@ function visitor(node) {
 	node.expression.arguments[node.expression.arguments.length - 1].docscript;
     if (inside && !wrapping) {
       node.update(
-	  `DocScript.createExpression(parent, function(parent) { return ${node.source()} } ())`);
+	  `DocScript.createExpression.call(this, parent, (function(parent) { return ${node.source()} }).call(this))`);
     }
   }
 }
@@ -170,11 +170,11 @@ class DocScript {
         if (x == null || x == undefined) {
 	  // Throws errors for null and undefined to enable developers to catch
           // MemberExpressions early.
-	  throw new Error("Tried to add an invalid element into the tree");          
+	  throw new Error("Tried to add an invalid element into the tree");
         }
 
 	if (x instanceof Element || typeof x == "string") {
-	  // Ignores anything that isn't an Element or a String. 
+	  // Ignores anything that isn't an Element or a String.
           parent.addChild(x);
         }
       });
@@ -182,7 +182,7 @@ class DocScript {
 
   static createElement(name, body, opt_parent) {
     let el = new Element(name);
-    body(el);
+    body.call(this, el);
     if (opt_parent) {
       opt_parent.addChild(el);
     }

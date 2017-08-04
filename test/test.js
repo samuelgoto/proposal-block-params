@@ -162,33 +162,6 @@ describe('DocScript.compile', function() {
     });
   });
 
-  it("React-like component", function() {
-    assertThat(`
-      class React {
-        constructor() {
-          this.state = "foo";
-        }
-        render() {
-          return html {
-            body {
-              "hello world"
-            }
-          }
-        }
-      }
-      new React().render()
-      `
-    ).equalsTo({
-      name: "html",
-      children: [{
-        name: "body",
-        children: [
-          "hello world"
-        ]
-      }]
-    });
-  });
-
   it("Arrays of docscripts can be embedded", function() {
     assertThat(`
       div {
@@ -279,6 +252,200 @@ describe('DocScript.compile', function() {
       }
     `).throwsError("Should've failed");
   });
+
+  it("div {} expressions become statements", function() {
+    assertThat(`
+      div {
+        span {}
+        ["1"]
+      }`
+    ).equalsTo({
+      name: "div",
+      children: [{
+	name: "span"
+      }, "1"]
+    });
+  });
+
+  it("div {} expressions can follow [].map()", function() {
+    assertThat(`
+      div {
+        span {}
+        ["1"].map(x => "foo" + x);
+      }`
+    ).equalsTo({
+      name: "div",
+      children: [{
+	name: "span"
+      }, "foo1"]
+    });
+  });
+
+  it("this.prop reference on Function.call()", function() {
+    assertThat(`
+      function foo() {
+        return div {
+          this.foo;
+        };
+      }
+      foo.call({foo: "bar"});
+    `
+    ).equalsTo({
+      name: "div",
+      children: ["bar"]
+    });
+  });
+
+  it("this.method() reference on Function.call()", function() {
+    assertThat(`
+      function foo() {
+        return div {
+          this.foo();
+        };
+      }
+      foo.call({foo: function() { return "bar"} });
+    `
+    ).equalsTo({
+      name: "div",
+      children: ["bar"]
+    });
+  });
+
+  it("this reference on Classes", function() {
+    assertThat(`
+      class Foo {
+        constructor() {
+          this.foo = "bar";
+        }
+        bar() {
+          return div {
+            this.foo;
+          };
+        }
+      }
+      new Foo().bar();
+    `
+    ).equalsTo({
+      name: "div",
+      children: ["bar"]
+    });
+  });
+
+  it("this.method() reference on Classes", function() {
+    assertThat(`
+      class Foo {
+        foo() {
+          return "bar";
+        }
+        bar() {
+          return div {
+            this.foo();
+          };
+        }
+      }
+      new Foo().bar();
+    `
+    ).equalsTo({
+      name: "div",
+      children: ["bar"]
+    });
+  });
+
+  it("React-like component testing most features", function() {
+    assertThat(`
+      class React {
+        constructor() {
+          this.state = {foo: "this-state-foo"};
+        }
+        subtree() {
+          return "a-sub-tree";
+        }
+        render() {
+          let a = "a-variable";
+          return html {
+            body {
+              "a-string-literal";
+              this.state.foo;
+              this.subtree();
+              a;
+              let b = "internal-variable";
+              b;
+              span {
+                "variable-references-works-on-inner-scopes";
+                a;
+              }
+              ["list-comprehensions"].map(x => x + "-also");
+            }
+          }
+        }
+      }
+      new React().render()
+      `
+    ).equalsTo({
+      name: "html",
+      children: [{
+        name: "body",
+        children: [
+          "a-string-literal",
+	  "this-state-foo",
+	  "a-sub-tree",
+	  "a-variable",
+	  "internal-variable",
+	  {
+	    name: "span",
+	    children: [
+	      "variable-references-works-on-inner-scopes",
+	      "a-variable"
+	    ]
+	  },
+	  "list-comprehensions-also"
+        ]
+      }]
+    });
+  });
+
+  it.only("React ShoppingList example", function() {
+    assertThat(`
+      class ShoppingList {
+        constructor() {
+          this.props = {name: "Sam Goto"};
+        }
+        render() {
+          return div {
+            h1 {
+              \`Shopping List for \$\{this.props.name\}\`;
+            }
+            ul {
+              li { "Instagram" }
+              li { "WhatsApp" }
+              li { "Oculus" }
+            }
+          };
+        }
+      }
+      new ShoppingList().render();
+    `
+    ).equalsTo({
+      name: "div",
+      children: [{
+	name: "h1",
+	children: ["Shopping List for Sam Goto"]
+      }, {
+	name: "ul",
+	children: [{
+	  name: "li",
+	  children: ["Instagram"]
+	}, {
+	  name: "li",
+	  children: ["WhatsApp"]
+	}, {
+	  name: "li",
+	  children: ["Oculus"]
+	}]
+      }]
+    });
+  });
+
 });
 
 class That {
@@ -293,7 +460,7 @@ class That {
 
     let result = DocScript.eval(this.code);
 
-    Assert.deepEqual(expected, result);
+    Assert.deepEqual(result, expected);
   }
 
   throwsError(message, opt_debug) {
@@ -301,11 +468,17 @@ class That {
       console.log(`${DocScript.compile(this.code)}`);
     }
 
+    let error = true;
     try {
       let result = DocScript.eval(this.code);
-      throw Error(message);
+      error = false;
+      // console.log("hi");
     } catch (e) {
       // Expected exception.
+    }
+
+    if (!error) {
+      throw new Error(message);
     }
   }
 }
