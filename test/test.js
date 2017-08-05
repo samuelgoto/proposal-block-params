@@ -4,7 +4,7 @@ const Assert = require('assert');
 const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
-describe('DocScript.compile', function() {
+describe('Evaluate', function() {
   it('Basic', function() {
     // Basic fundamental programs are not broken
     assertThat("").equalsTo({});
@@ -19,9 +19,13 @@ describe('DocScript.compile', function() {
     assertThat("let a = 1; a").equalsTo(1);
   });
 
-  it('Basic DocScripts', function() {
+  it('Simplest', function() {
     assertThat(`let doc = 1; doc`).equalsTo(1);
     assertThat(`let doc = div {}; doc`).equalsTo({name: "div"});
+  });
+
+  it.skip('Attributes', function() {
+    assertThat(`div(1) {}`).equalsTo({name: "div"}, true);
   });
 
   it('Nesting', function() {
@@ -242,7 +246,7 @@ describe('DocScript.compile', function() {
       name: "div",
       children: ["1"]
     });
-    });
+  });
 
   it("['1'] ['1'].map(span {}) works", function() {
     assertThat(`

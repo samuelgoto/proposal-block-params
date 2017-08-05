@@ -7,11 +7,23 @@ const walk = require("acorn/dist/walk");
 const falafel = require('falafel');
 
 acorn.plugins.docscript = function(parser) {
+  parser.extend("parseStatement", function(nextMethod) {
+    return function(declaration, topLevel, exports) {
+      // console.log("hello");
+      // console.log(exports);
+      // console.log(this.type);
+      return nextMethod.call(this, declaration, topLevel, exports);
+    }
+  });
 
   parser.extend("parseExpressionStatement", function(nextMethod) {
     return function(node, expr) {
 
+      // console.log(this.type);
+      // console.log("hi");
+
       if (expr.type == 'Identifier') {
+	// console.log(node);
 	if (this.type == tt.braceL) {
 	  let func = this.startNode();
 	  func.docscript = true;
@@ -19,10 +31,35 @@ acorn.plugins.docscript = function(parser) {
 	  func.params = [];
 	  func.generator = false;
 	  func.expression = false;
+	  let arg = this.startNode();
+	  arg.start = this.start - 1;
+	  arg.properties = [];
 	  node.callee = expr;
-	  node.arguments = [ this.finishNode(func, "FunctionExpression") ];
+	  node.arguments = [
+	    this.finishNode(arg, "ObjectExpression"),
+	    this.finishNode(func, "FunctionExpression")
+	  ];
 	  this.semicolon();
 	  return this.finishNode(node, "CallExpression");
+	}
+      } else if (expr.type == "CallExpression") {
+	// console.log(expr);
+	if (this.type == tt.braceL) {
+	  let func = this.startNode();
+	  func.docscript = true;
+	  func.body = this.parseBlock();
+	  func.params = [];
+	  func.generator = false;
+	  func.expression = false;
+	  // console.log(expr.arguments);
+	  if (expr.arguments.length > 1 ||
+	      expr.arguments[0].type != "ObjectExpression") {
+	    this.raise(this.start, "First argument isn't an object!!");
+	    // this.raise(this.start, "'with' in strict mode")
+	  }
+	  expr.arguments.push(this.finishNode(func, "FunctionExpression"));
+	  this.semicolon();
+	  return this.finishNode(expr, "CallExpression");
 	}
       }
 
@@ -40,9 +77,14 @@ acorn.plugins.docscript = function(parser) {
 	func.params = [];
 	func.generator = false;
 	func.expression = false;
+	let arg = this.startNode();
+	arg.properties = [];
 	let node = this.startNodeAt(startPos, startLoc)
 	node.callee = base;
-	node.arguments = [ this.finishNode(func, "FunctionExpression") ];
+	node.arguments = [
+	  this.finishNode(arg, "ObjectExpression"),
+	  this.finishNode(func, "FunctionExpression")
+	];
 	return this.finishNode(node, "CallExpression")
       }
 
@@ -61,8 +103,11 @@ acorn.plugins.docscript = function(parser) {
 // let ast = acorn.parse("b { c {} };", {
 // TODO: let ast = acorn.parse(`b { c { d(); } };`, {
 // let ast = acorn.parse(`d("hi");`, {
-//  plugins: {docscript: true}
+// let ast = acorn.parse(`d("hi") {};`, {
+//   plugins: {docscript: true}
 // });
+// console.log(JSON.stringify(ast, undefined, " "));
+// return;
 
 function visitor(node) {
   if (node.type === "CallExpression") {
@@ -95,8 +140,15 @@ function visitor(node) {
 	parent = parent.parent;
       }
 
+      // TODO(goto): there is a bug in the generation of the ObjectExpression
+      // that makes props be the empty string that needs further investigation.
+      let props = node.arguments[0].source() || "{}";
+      // console.log(node.arguments[0]);
+      // console.log(`hello ${props}`);
       let block = node.arguments[node.arguments.length -1];
       let callee = node.callee.name;
+
+      // console.log(node);
 
       let first = callee.charAt(0);
       if (!(first == first.toUpperCase() && first != first.toLowerCase())) {
@@ -105,9 +157,9 @@ function visitor(node) {
       }
 
       if (!inside) {
-	node.update(`DocScript.createElement.call(this, ${callee}, function(parent) ${block.source()})`);
+	node.update(`DocScript.createElement.call(this, ${callee}, ${props}, function(parent) ${block.source()})`);
       } else {
-	node.update(`DocScript.createElement.call(this, ${callee}, function(parent) ${block.source()}, parent)`);
+	node.update(`DocScript.createElement.call(this, ${callee}, ${props}, function(parent) ${block.source()}, parent)`);
       }
     }
   } else if (node.type == "ExpressionStatement") {
@@ -187,7 +239,7 @@ class DocScript {
       });
   }
 
-  static createElement(type, body, opt_parent) {
+  static createElement(type, props, body, opt_parent) {
     let el;
 
     if (typeof type == "string") {
