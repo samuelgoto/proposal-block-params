@@ -415,6 +415,19 @@ describe("Runtime", function() {
     ).equalsTo("bar");
   });
 
+  it('Attributes: functions', function() {
+    let result = assertThat(`
+      div({
+        onclick: function() {
+          return "hello world";
+        }
+      }) {
+      }
+    `).evals();
+    let callback = result.attributes.onclick();
+    Assert.equal("hello world", callback);
+  });
+
   it("React-like component testing most features", function() {
     assertThat(`
       class React {
@@ -516,13 +529,17 @@ class That {
     this.code = code;
   }
 
-  equalsTo(expected, opt_debug) {
+  evals(opt_debug) {
     if (opt_debug) {
       console.log(`${DocScript.compile(this.code)}`);
     }
 
     let result = DocScript.eval(this.code);
+    return result;
+  }
 
+  equalsTo(expected, opt_debug) {
+    let result = this.evals(opt_debug);
     Assert.deepEqual(result, expected);
   }
 
