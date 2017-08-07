@@ -18,13 +18,14 @@ describe("Transpiler", function() {
 
   it("Visiting empty attributes", function() {
     let result = DocScript.compile(`d({}) {};`);
+    // console.log(result);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", {}, function(parent) {})`);
+        `DocScript.createElement.call(this, "d", {}, function(parent) {});`);
   });
 
   it("Visiting attributes", function() {
     let result = DocScript.compile(`d({a: 1}) {};`);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", {a: 1}, function(parent) {})`);
+        `DocScript.createElement.call(this, "d", {a: 1}, function(parent) {});`);
   });
 });

@@ -428,6 +428,21 @@ describe("Runtime", function() {
     Assert.equal("hello world", callback);
   });
 
+  it.skip('Attributes: functions, classes and this', function() {
+    let result = assertThat(`
+      class Foo {
+        bar() {
+          return div({}) {
+          };
+        }
+      }
+      new Foo().bar()
+    `).evals();
+    console.log(result);
+    // let callback = result.attributes.onclick();
+    // Assert.equal("hello world", callback);
+  });
+
   it("React-like component testing most features", function() {
     assertThat(`
       class React {

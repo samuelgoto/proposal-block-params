@@ -1,10 +1,10 @@
 'use strict';
 
-var acorn = require("acorn");
-var tt = acorn.tokTypes;
-const { generate } = require('astring');
+const acorn = require("acorn");
+const astring = require('astring');
 const walk = require("acorn/dist/walk");
 const falafel = require('falafel');
+var tt = acorn.tokTypes;
 
 acorn.plugins.docscript = function(parser) {
   parser.extend("parseExpressionStatement", function(nextMethod) {
@@ -61,6 +61,7 @@ acorn.plugins.docscript = function(parser) {
   // enables var a = b {} to be parsed
   parser.extend("parseSubscripts", function(nextMethod) {
     return function(base, startPos, startLoc, noCalls) {
+      // handles a {};
       if (!noCalls && this.type == tt.braceL) {
 	let func = this.startNode();
 	func.docscript = true;
@@ -79,8 +80,37 @@ acorn.plugins.docscript = function(parser) {
 	return this.finishNode(node, "CallExpression")
       }
 
-      return nextMethod.call(
+      let expr = nextMethod.call(
 	  this, base, startPos, startLoc, noCalls);
+
+      // If we are in a CallExpression which is followed by a {
+      // then eat that and move that into the arguments of the call.
+      if (expr.type == "CallExpression" && this.type == tt.braceL) {
+	// Makes sure that the first argument of the call is an
+	// ObjectExpression.
+	if (expr.arguments.length != 1) {
+	  this.raise(this.start, "More than 1 argument");
+	} else if (expr.arguments[0].type != "ObjectExpression") {
+	  this.raise(this.start, "First argument isn't an object!!");
+	}
+
+	let func = this.startNode();
+	func.docscript = true;
+	func.body = this.parseBlock();
+	func.params = [];
+	func.generator = false;
+	func.expression = false;
+	// func.parent = undefined;
+	// Adds the function body as an argument
+	expr.arguments.push(this.finishNode(func, "FunctionExpression"));
+	// And fixes the start and end indexes to include the function
+	// block.
+	expr.end = func.end;
+	// console.log(expr);
+        // debugger;
+      }
+
+      return expr;
     }
   });
 }
@@ -94,14 +124,18 @@ acorn.plugins.docscript = function(parser) {
 // let ast = acorn.parse("b { c {} };", {
 // TODO: let ast = acorn.parse(`b { c { d(); } };`, {
 // let ast = acorn.parse(`d("hi");`, {
-// let ast = acorn.parse(`d("hi") {};`, {
-//   plugins: {docscript: true}
+// let ast = acorn.parse(`d {};`, {
+//    plugins: {docscript: true}
 // });
 // console.log(JSON.stringify(ast, undefined, " "));
+
+// console.log(generate(ast));
+
 // return;
 
 function visitor(node) {
   if (node.type === "CallExpression") {
+    // console.log(node.source());
     if (node.arguments.length > 0 &&
 	node.arguments[node.arguments.length - 1].docscript) {
       // Makes a distinction between DocScript code inside
@@ -147,6 +181,8 @@ function visitor(node) {
 	callee = `"${callee}"`;
       }
 
+      // console.log(`foo ${node.source()}`);
+
       if (!inside) {
 	node.update(`DocScript.createElement.call(this, ${callee}, ${props}, function(parent) ${block.source()})`);
       } else {
@@ -154,6 +190,7 @@ function visitor(node) {
       }
     }
   } else if (node.type == "ExpressionStatement") {
+    // console.log(`hello ${node.source()}`);
     // Wraps non-docscripts ExpressionStatements into
     // a DocScript.createElement to enable composition of
     // function calls, variable references and literals.
@@ -182,6 +219,18 @@ function visitor(node) {
 
 class DocScript {
   static compile(code) {
+    // NOTE(goto): major hack ahead, parses using acorn, generates
+    // text source code again, then uses falafel to parse (again!)
+    // from the source code generated from the ast.
+    // There is a bug in falafel where it takes the code as input rather
+    // than taking it from the resulting ast constructed by the parser
+    // to generate the result.
+    // This has certainly performance implications (as you are parsing twice)
+    // but may have semantic implications too. This ought to be fixed.
+    // let ast = acorn.parse(code, {
+    //  plugins: {docscript: true}
+    // });
+    // let generated = astring.generate(ast);
     var result = falafel(code, {
       parser: acorn, plugins: { docscript: true }
     }, visitor);
@@ -260,6 +309,24 @@ class DocScript {
     return eval(`${docscript} ${result}`);
   }
 }
+
+//console.log(JSON.stringify(acorn.parse(`d() { 1 };`, {
+//    plugins: {docscript: true}
+//}), undefined, " "));
+
+// return;
+
+// let code = `d({}) {};`;
+
+// let ast = acorn.parse(code, {
+//  plugins: {docscript: true}
+// });
+
+// var result = falafel(code, {
+//  parser: acorn, plugins: { docscript: true }
+// }, visitor);
+
+// console.log(result);
 
 module.exports = {
     DocScript: DocScript
