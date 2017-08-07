@@ -526,7 +526,6 @@ class That {
     try {
       let result = DocScript.eval(this.code);
       error = false;
-      // console.log("hi");
     } catch (e) {
       // Expected exception.
     }
