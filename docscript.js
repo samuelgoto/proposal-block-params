@@ -7,15 +7,6 @@ const walk = require("acorn/dist/walk");
 const falafel = require('falafel');
 
 acorn.plugins.docscript = function(parser) {
-  parser.extend("parseStatement", function(nextMethod) {
-    return function(declaration, topLevel, exports) {
-      // console.log("hello");
-      // console.log(exports);
-      // console.log(this.type);
-      return nextMethod.call(this, declaration, topLevel, exports);
-    }
-  });
-
   parser.extend("parseExpressionStatement", function(nextMethod) {
     return function(node, expr) {
 
@@ -142,7 +133,7 @@ function visitor(node) {
 
       // TODO(goto): there is a bug in the generation of the ObjectExpression
       // that makes props be the empty string that needs further investigation.
-      let props = node.arguments[0].source() || "{}";
+      let props = node.arguments[0].source() || "undefined";
       // console.log(node.arguments[0]);
       // console.log(`hello ${props}`);
       let block = node.arguments[node.arguments.length -1];
@@ -201,8 +192,11 @@ class DocScript {
     let docscript = `
 
 class Element {
-  constructor(name) {
+  constructor(name, opt_attributes) {
     this.name = name;
+    if (opt_attributes) {
+      this.attributes = opt_attributes || {};
+    }
   }
 
   addChild(el) {
@@ -243,10 +237,12 @@ class DocScript {
     let el;
 
     if (typeof type == "string") {
-      el = new Element(type);
+      el = new Element(type, props);
     } else {
       // console.log(type);
       // console.log(new type().render());
+      // TODO(goto): this makes things specific to a render()
+      // method. Generalize this.
       el = new type().render();
     }
 

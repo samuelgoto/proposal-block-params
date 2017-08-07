@@ -4,7 +4,7 @@ const Assert = require('assert');
 const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
-describe('Evaluate', function() {
+describe("Runtime", function() {
   it('Basic', function() {
     // Basic fundamental programs are not broken
     assertThat("").equalsTo({});
@@ -24,8 +24,17 @@ describe('Evaluate', function() {
     assertThat(`let doc = div {}; doc`).equalsTo({name: "div"});
   });
 
-  it.skip('Attributes', function() {
-    assertThat(`div(1) {}`).equalsTo({name: "div"}, true);
+  it('Attributes: syntax error', function() {
+    assertThat(`div(1) {}`).throwsError("Syntax error: should take object");
+  });
+
+  it('Attributes', function() {
+    assertThat(`div({a: 1}) {}`).equalsTo({
+      name: "div",
+      attributes: {
+	"a": 1
+      }
+    });
   });
 
   it('Nesting', function() {

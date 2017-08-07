@@ -13,7 +13,7 @@ describe("Transpiler", function() {
   it("Visiting basic", function() {
     let result = DocScript.compile(`d {};`);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", {}, function(parent) {});`);
+        `DocScript.createElement.call(this, "d", undefined, function(parent) {});`);
   });
 
   it("Visiting empty attributes", function() {
