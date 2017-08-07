@@ -43,11 +43,11 @@ acorn.plugins.docscript = function(parser) {
 	  func.generator = false;
 	  func.expression = false;
 	  // console.log(expr.arguments);
-	  if (expr.arguments.length > 1 ||
-	      expr.arguments[0].type != "ObjectExpression") {
-	    this.raise(this.start, "First argument isn't an object!!");
-	    // this.raise(this.start, "'with' in strict mode")
-	  }
+	  //if (expr.arguments.length > 1 ||
+	  //    expr.arguments[0].type != "ObjectExpression") {
+	  //  this.raise(this.start, "First argument isn't an object!!");
+	  // this.raise(this.start, "'with' in strict mode")
+	  //}
 	  expr.arguments.push(this.finishNode(func, "FunctionExpression"));
 	  this.semicolon();
 	  return this.finishNode(expr, "CallExpression");
@@ -69,12 +69,12 @@ acorn.plugins.docscript = function(parser) {
 	func.params = [];
 	func.generator = false;
 	func.expression = false;
-	let arg = this.startNode();
-	arg.properties = [];
+	// let arg = this.startNode();
+	// arg.properties = [];
 	let node = this.startNodeAt(startPos, startLoc)
 	node.callee = base;
 	node.arguments = [
-	  this.finishNode(arg, "ObjectExpression"),
+	  // this.finishNode(arg, "ObjectExpression"),
 	  this.finishNode(func, "FunctionExpression")
 	];
 	return this.finishNode(node, "CallExpression")
@@ -88,11 +88,11 @@ acorn.plugins.docscript = function(parser) {
       if (expr.type == "CallExpression" && this.type == tt.braceL) {
 	// Makes sure that the first argument of the call is an
 	// ObjectExpression.
-	if (expr.arguments.length != 1) {
-	  this.raise(this.start, "More than 1 argument");
-	} else if (expr.arguments[0].type != "ObjectExpression") {
-	  this.raise(this.start, "First argument isn't an object!!");
-	}
+	// if (expr.arguments.length != 1) {
+	//  this.raise(this.start, "More than 1 argument");
+	// } else if (expr.arguments[0].type != "ObjectExpression") {
+	//  this.raise(this.start, "First argument isn't an object!!");
+	// }
 
 	let func = this.startNode();
 	func.docscript = true;
@@ -165,12 +165,20 @@ function visitor(node) {
 	parent = parent.parent;
       }
 
+      let block = node.arguments.pop();
+      // console.log(node.arguments);
       // TODO(goto): there is a bug in the generation of the ObjectExpression
       // that makes props be the empty string that needs further investigation.
-      let props = node.arguments[0].source() || "undefined";
+      let props = "[";
+      // console.log(node.arguments[0].source());
+      // console.log(`hello world ${node.arguments[0].source()}`);
+      for (let arg in node.arguments) {
+	props += `${node.arguments[arg].source()}, `;
+      }
+      props += "]";
+      // let props = node.arguments[0].source() || "undefined";
       // console.log(node.arguments[0]);
       // console.log(`hello ${props}`);
-      let block = node.arguments[node.arguments.length -1];
       let callee = node.callee.name;
 
       // console.log(node);
@@ -215,6 +223,7 @@ function visitor(node) {
 	  `DocScript.createExpression.call(this, parent, (function(parent) { return ${node.source()} }).call(this))`);
     }
   } else if (node.type == "FunctionExpression") {
+    return;
     // If this is a function inside an object declaration as an argument
     // of a docscript, fix its binding to its.
     if (node.parent.type == "Property" &&
@@ -300,8 +309,36 @@ class DocScript {
   static createElement(type, props, body, opt_parent) {
     let el;
 
+    let attributes = props.length > 0 ? {} : undefined;
+
+    // console.log("hi");
+    // console.log(props);
+
+    props.forEach(arg => {
+      if (typeof arg == "object") {
+        for (let prop in arg) {
+          // console.log("hello");
+          // console.log(prop);
+          if (!(arg[prop] instanceof Function)) {
+            attributes[prop] = arg[prop];
+          } else {
+            attributes[prop] = (arg[prop]).bind(this);
+          }
+        }
+      }
+    });
+
+    // console.log("Foo bar");
+    // console.log(attributes);
+
+    // for (let prop in props) {
+    //  if (props[prop] instanceof Function) {
+    //    props[prop] = (props[prop]).bind(this);
+    //  }
+    // }
+
     if (typeof type == "string") {
-      el = new Element(type, props);
+      el = new Element(type, attributes);
     } else {
       // console.log(type);
       // console.log(new type().render());

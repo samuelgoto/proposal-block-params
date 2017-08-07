@@ -13,23 +13,34 @@ describe("Transpiler", function() {
   it("Visiting basic", function() {
     let result = DocScript.compile(`d {};`);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", undefined, function(parent) {});`);
+        `DocScript.createElement.call(this, "d", [], function(parent) {});`);
   });
 
   it("Visiting empty attributes", function() {
     let result = DocScript.compile(`d({}) {};`);
     // console.log(result);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", {}, function(parent) {});`);
+        `DocScript.createElement.call(this, "d", [{}, ], function(parent) {});`);
   });
 
-  it("Visiting attributes", function() {
+  it("Visiting single attribute", function() {
+    let result = DocScript.compile(`d(1) {};`);
+    // console.log(result);
+    Assert.equal(result,
+        `DocScript.createElement.call(this, "d", [1, ], function(parent) {});`);
+  });
+
+  it("Visiting object attribute", function() {
     let result = DocScript.compile(`d({a: 1}) {};`);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", {a: 1}, function(parent) {});`);
+        `DocScript.createElement.call(this, "d", [{a: 1}, ], function(parent) {});`);
   });
 
-  it("Visiting function attributes binds this", function() {
+  it.skip("Visiting function attributes binds this", function() {
+    // NOTE(goto): this was an early design where we fix this at the
+    // code generation level. This kind of works, but misses when
+    // expressions are used as opposed to code. For example:
+    // let a = {b: function() {} }; d(a) {};
     let result = DocScript.compile(`d({a: function() { return this; } }) {};`);
     Assert.equal(result,
         `DocScript.createElement.call(this, "d", {a: (function() { return this; }).bind(this) }, function(parent) {});`);

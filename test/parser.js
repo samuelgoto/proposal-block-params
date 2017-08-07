@@ -40,10 +40,12 @@ describe("Parser", function() {
     `).parses();
   });
 
-  it("Parsing attributes inside methods", function() {
+  it("Parsing attribute that gets ignored", function() {
+    // This is allowed, but because this isn't a named object this
+    // gets ignored.
     assertThat(`
      d(1) {}
-   `).throwsError("Should've enforced syntax error");
+   `).parses();
   });
 });
 

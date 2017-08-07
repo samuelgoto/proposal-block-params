@@ -24,8 +24,15 @@ describe("Runtime", function() {
     assertThat(`let doc = div {}; doc`).equalsTo({name: "div"});
   });
 
-  it('Attributes: syntax error', function() {
-    assertThat(`div(1) {}`).throwsError("Syntax error: should take object");
+  it('Attributes: non-object attribute gets ignored', function() {
+    // The literal 1 gets ignored as a parameter because it is not a
+    // named key/value object.
+    // TODO(goto): possibly allow things like "enabled" that are just
+    // key-like objects to exist.
+    assertThat(`div(1) {}`).equalsTo({
+      name: "div",
+      attributes: []
+    });
   });
 
   it('Attributes', function() {
@@ -431,7 +438,7 @@ describe("Runtime", function() {
   it('Attributes: functions, classes', function() {
     let result = assertThat(`
       class Foo {
-        bar() {
+        render() {
           return div({
             onclick: function() {
               return "hello world";
@@ -440,31 +447,60 @@ describe("Runtime", function() {
           };
         }
       }
-      new Foo().bar()
+      new Foo()
     `).evals();
-    let callback = result.attributes.onclick();
+    let callback = result.render().attributes.onclick();
     Assert.equal("hello world", callback);
   });
 
-  it('Attributes: attributes and this', function() {
+  it('Attributes: classes, attributes and this', function() {
     let result = assertThat(`
       class Foo {
         constructor() {
           this.message = "hello world";
         }
-        bar() {
+        setState() {
+          this.state = "changed!";
+        }
+        render() {
           return div({
             onclick: function() {
+              this.setState();
               return this.message;
             }
             }) {
           };
         }
       }
-      new Foo().bar()
+      new Foo()
     `).evals();
-    let callback = result.attributes.onclick();
+    let callback = result.render().attributes.onclick();
     Assert.equal("hello world", callback);
+    Assert.equal("changed!", result.state);
+  });
+
+  it('Attributes: classes, attributes and this from references', function() {
+    let result = assertThat(`
+      class Foo {
+        constructor() {
+          this.message = "hello world";
+        }
+        render() {
+          let props = {
+            onclick: function() {
+              this.state = "changed!";
+              return this.message;
+            }
+          };
+          return div(props) {
+          };
+        }
+      }
+      new Foo()
+    `).evals();
+    let callback = result.render().attributes.onclick();
+    Assert.equal("hello world", callback);
+    Assert.equal("changed!", result.state);
   });
 
   it("React-like component testing most features", function() {
