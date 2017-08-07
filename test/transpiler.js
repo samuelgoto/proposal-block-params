@@ -28,4 +28,10 @@ describe("Transpiler", function() {
     Assert.equal(result,
         `DocScript.createElement.call(this, "d", {a: 1}, function(parent) {});`);
   });
+
+  it("Visiting function attributes binds this", function() {
+    let result = DocScript.compile(`d({a: function() { return this; } }) {};`);
+    Assert.equal(result,
+        `DocScript.createElement.call(this, "d", {a: (function() { return this; }).bind(this) }, function(parent) {});`);
+  });
 });

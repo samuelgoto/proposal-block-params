@@ -214,6 +214,21 @@ function visitor(node) {
       node.update(
 	  `DocScript.createExpression.call(this, parent, (function(parent) { return ${node.source()} }).call(this))`);
     }
+  } else if (node.type == "FunctionExpression") {
+    // If this is a function inside an object declaration as an argument
+    // of a docscript, fix its binding to its.
+    if (node.parent.type == "Property" &&
+        node.parent.parent.type == "ObjectExpression" &&
+        node.parent.parent.parent.type == "CallExpression") {
+      // console.log(`${node.source()}`);
+      let call = node.parent.parent.parent;
+      if (call.arguments &&
+	  call.arguments.length > 0 &&
+	  call.arguments[call.arguments.length -1].docscript) {
+	// console.log("hi");
+	node.update(`(${node.source()}).bind(this)`);
+      }
+    }
   }
 }
 
