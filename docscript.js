@@ -12,10 +12,15 @@ acorn.plugins.docscript = function(parser) {
 
       // console.log(this.type);
       // console.log("hi");
+      // console.log(expr);
+      // console.log(JSON.stringify(this.type, undefined, ' '));
+      // console.log(JSON.stringify(tt.parenR, undefined, ' '));
+      // console.log(this.type == tt.name);
 
       if (expr.type == 'Identifier') {
-	// console.log(node);
+	// console.log(this.type);
 	if (this.type == tt.braceL) {
+	  // console.log("hi");
 	  let func = this.startNode();
 	  func.docscript = true;
 	  func.body = this.parseBlock();
@@ -58,25 +63,67 @@ acorn.plugins.docscript = function(parser) {
     }
   });
 
-  // enables var a = b {} to be parsed
-  parser.extend("parseSubscripts", function(nextMethod) {
-    return function(base, startPos, startLoc, noCalls) {
-      // handles a {};
-      if (!noCalls && this.type == tt.braceL) {
+
+  parser.extend("parseNew", function(nextMethod) {
+    return function() {
+      let expr = nextMethod.call(this);
+      // console.log("parsing new!!");
+      if (this.type == tt.braceL) {
+	// console.log("next is a brace!");
 	let func = this.startNode();
 	func.docscript = true;
+	func.start = this.pos - 1;
 	func.body = this.parseBlock();
 	func.params = [];
 	func.generator = false;
 	func.expression = false;
+	func.end = this.pos;
+	expr.end = func.end;
+	expr.arguments.push(this.finishNode(func, "FunctionExpression"));
+      }
+      return expr;
+    }
+  });
+
+  // enables var a = b {} to be parsed
+  parser.extend("parseSubscripts", function(nextMethod) {
+    return function(base, startPos, startLoc, noCalls) {
+      if (!noCalls && this.type == tt.braceL) {
+	// console.log("parsing subscripts");
+	// console.log(this.pos);
+	// console.log(this.type);
+	// console.log(base);
+
+	let func = this.startNode();
+	func.docscript = true;
+	// Starts from the previous character
+	func.start = this.pos - 1;
+	func.body = this.parseBlock();
+	func.params = [];
+	func.generator = false;
+	func.expression = false;
+	func.end = this.pos;
 	// let arg = this.startNode();
 	// arg.properties = [];
 	let node = this.startNodeAt(startPos, startLoc)
+	// console.log(base);
 	node.callee = base;
-	node.arguments = [
-	  // this.finishNode(arg, "ObjectExpression"),
+
+	// Adds the argument to the correct function call.
+	// if (base.type == "NewExpression") {
+	//  base.end = func.end;
+	  // console.log(this.pos);
+	//  base.arguments.push(this.finishNode(func, "FunctionExpression"));
+	  // console.log(base);
+	// } else {
+	// console.log(base.arguments);
+	node.arguments = base.arguments || [];
+	node.arguments.push(
 	  this.finishNode(func, "FunctionExpression")
-	];
+	);
+	// }
+
+	// console.log(base.type);
 	return this.finishNode(node, "CallExpression")
       }
 
@@ -106,7 +153,7 @@ acorn.plugins.docscript = function(parser) {
 	// And fixes the start and end indexes to include the function
 	// block.
 	expr.end = func.end;
-	// console.log(expr);
+        // console.log(expr);
         // debugger;
       }
 
@@ -124,20 +171,51 @@ acorn.plugins.docscript = function(parser) {
 // let ast = acorn.parse("b { c {} };", {
 // TODO: let ast = acorn.parse(`b { c { d(); } };`, {
 // let ast = acorn.parse(`d("hi");`, {
-// let ast = acorn.parse(`d {};`, {
-//    plugins: {docscript: true}
-// });
-// console.log(JSON.stringify(ast, undefined, " "));
+// let ast = acorn.parse(`(Html) d {}`, {
+
+//let ast = acorn.parse(`let a = new HtmlElement() { }`, {
+//  plugins: {docscript: true}
+//});
+//console.log(JSON.stringify(ast, undefined, " "));
+
+//return;
 
 // console.log(generate(ast));
 
 // return;
 
 function visitor(node) {
-  if (node.type === "CallExpression") {
+  if (node.type == "NewExpression") {
+    // console.log("new!!!");
+    // console.log(node);
     // console.log(node.source());
+    // return node.update(`new `);
     if (node.arguments.length > 0 &&
 	node.arguments[node.arguments.length - 1].docscript) {
+      // console.log("foobar");
+      // node.update(`new ${node.callee.source()}()`);
+      // console.log(node.callee.arguments);
+      // console.log(JSON.stringify(node, undefined, ' '));
+      let body = node.arguments[node.arguments.length - 1];
+      // let args = node.arguments
+      // console.log(node.arguments);
+      // console.log(body.body);
+      // console.log(body);
+      // TODO(goto): we are ignoring other constructor parameters. fix that.
+      return node.update(
+	  `new ${node.callee.source()}(function(parent) ${body.source()})`);
+    }
+    // return;
+  }
+
+  if (node.type === "CallExpression") {
+    // console.log(node.source());
+
+    if (node.arguments.length > 0 &&
+	node.arguments[node.arguments.length - 1].docscript) {
+
+      // if () {
+      // }
       // Makes a distinction between DocScript code inside
       // DocScript (e.g. the span in let a = div { span {} }) code and
       // not (e.g. let a = div {}).
@@ -149,6 +227,9 @@ function visitor(node) {
       var parent = node.parent;
       var inside = false;
       // console.log(node.parent);
+      // TODO(goto): walking up looks like a hack. What if the context
+      // is passed by reference and you don't have that information at
+      // compile time?
       while (parent) {
 	if (parent.type == "FunctionDeclaration" &&
 	    !parent.docscript) {
@@ -165,15 +246,16 @@ function visitor(node) {
 	parent = parent.parent;
       }
 
-      let block = node.arguments.pop();
+      let block = node.arguments[node.arguments.length - 1];
       // console.log(node.arguments);
       // TODO(goto): there is a bug in the generation of the ObjectExpression
       // that makes props be the empty string that needs further investigation.
       let props = "[";
       // console.log(node.arguments[0].source());
       // console.log(`hello world ${node.arguments[0].source()}`);
-      for (let arg in node.arguments) {
-	props += `${node.arguments[arg].source()}, `;
+      // console.log(node.arguments);
+      for (let i = 0; i < (node.arguments.length - 1); i++) {
+	props += `${node.arguments[i].source()}, `;
       }
       props += "]";
       // let props = node.arguments[0].source() || "undefined";
@@ -190,7 +272,6 @@ function visitor(node) {
       }
 
       // console.log(`foo ${node.source()}`);
-
       if (!inside) {
 	node.update(`DocScript.createElement.call(this, ${callee}, ${props}, function(parent) ${block.source()})`);
       } else {
@@ -199,6 +280,7 @@ function visitor(node) {
     }
   } else if (node.type == "ExpressionStatement") {
     // console.log(`hello ${node.source()}`);
+    // console.log(node.expression.arguments);
     // Wraps non-docscripts ExpressionStatements into
     // a DocScript.createElement to enable composition of
     // function calls, variable references and literals.
@@ -211,6 +293,9 @@ function visitor(node) {
 	node.parent.parent &&
 	node.parent.parent.type == "FunctionExpression" &&
         node.parent.parent.docscript;
+    // console.log("hello world");
+    // console.log(node.parent);
+    // console.log(`Am I inside? ${inside}`);
     // ... but we want to filter out double-wrapping ExpressionStatements
     // of DocScripts that have already been wrapped.
     let wrapping = node.expression &&
@@ -218,25 +303,18 @@ function visitor(node) {
 	node.expression.arguments &&
 	node.expression.arguments.length > 0 &&
 	node.expression.arguments[node.expression.arguments.length - 1].docscript;
+
+    // let isDocScript = ;
+    // console.log(node.expression);
+
+    // TODO(goto): figure out why we need to check whether we are inside a new statement or not.
     if (inside && !wrapping) {
+      // console.log("hi");
+      // console.log(node);
+      // console.log(node.source());
+      // console.log(node.parent.parent.parent);
       node.update(
 	  `DocScript.createExpression.call(this, parent, (function(parent) { return ${node.source()} }).call(this))`);
-    }
-  } else if (node.type == "FunctionExpression") {
-    return;
-    // If this is a function inside an object declaration as an argument
-    // of a docscript, fix its binding to its.
-    if (node.parent.type == "Property" &&
-        node.parent.parent.type == "ObjectExpression" &&
-        node.parent.parent.parent.type == "CallExpression") {
-      // console.log(`${node.source()}`);
-      let call = node.parent.parent.parent;
-      if (call.arguments &&
-	  call.arguments.length > 0 &&
-	  call.arguments[call.arguments.length -1].docscript) {
-	// console.log("hi");
-	node.update(`(${node.source()}).bind(this)`);
-      }
     }
   }
 }
@@ -272,7 +350,7 @@ class Element {
     }
   }
 
-  addChild(el) {
+  appendChild(el) {
     if (!this.children) {
       // evaluates lazily.
       this.children = [];
@@ -301,7 +379,7 @@ class DocScript {
 
 	if (x instanceof Element || typeof x == "string") {
 	  // Ignores anything that isn't an Element or a String.
-          parent.addChild(x);
+          parent.appendChild(x);
         }
       });
   }
@@ -349,7 +427,7 @@ class DocScript {
 
     body.call(this, el);
     if (opt_parent) {
-      opt_parent.addChild(el);
+      opt_parent.appendChild(el);
     }
     return el;
   }
@@ -362,21 +440,17 @@ class DocScript {
   }
 }
 
-//console.log(JSON.stringify(acorn.parse(`d() { 1 };`, {
-//    plugins: {docscript: true}
+//console.log(JSON.stringify(acorn.parse(`new d { e { f {} } }`, {
+//  plugins: {docscript: true}
 //}), undefined, " "));
 
-// return;
+//return;
 
 // let code = `d({}) {};`;
 
-// let ast = acorn.parse(code, {
-//  plugins: {docscript: true}
-// });
-
-// var result = falafel(code, {
+//console.log(falafel(`d(1) {  };`, {
 //  parser: acorn, plugins: { docscript: true }
-// }, visitor);
+//}, visitor));
 
 // console.log(result);
 

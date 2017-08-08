@@ -9,7 +9,7 @@
   "scripts": {
     "start": "supervisor app",
     "test": "mocha -w",
-    "debug": "google-chrome http://127.0.0.1:8080/debug?port=5858 2> /dev/null & mocha --debug --debug-brk"
+    "debug": "google-chrome http://127.0.0.1:8080/debug?port=5858 & mocha --debug --debug-brk"
   },
   "repository": {
     "type": "git",

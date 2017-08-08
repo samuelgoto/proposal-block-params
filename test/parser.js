@@ -10,8 +10,26 @@ const walk = require("acorn/dist/walk");
 const falafel = require('falafel');
 
 describe("Parser", function() {
-  it("Parsing basic", function() {
+  // Asserts that these things, without the plugin, would lead to SyntaxErrors
+  it("There docscript in JS", function() {
+    assertThat(`foo {}`).syntaxError();
+  });
+
+  it("There docscript in JS with attributes", function() {
+    assertThat(`foo() {}`).syntaxError();
+  });
+
+  it("There is no cast in JS", function() {
+    assertThat(`(Foo) foo()`).syntaxError();
+  });
+
+  // And with the plugin enabled ...
+  it("Parsing basic statement", function() {
     assertThat(`d {};`).parses();
+  });
+
+  it("Parsing basic expression", function() {
+    assertThat(`let a = d {};`).parses();
   });
 
   it("Parsing empty attributes", function() {
@@ -47,11 +65,33 @@ describe("Parser", function() {
      d(1) {}
    `).parses();
   });
+
+  it("Extending new in statements", function() {
+    assertThat(`new HtmlElement() { div };`).parses();
+  });
+
+  it("Extending new in expressions", function() {
+    assertThat(`let a = new HtmlElement() { div };`).parses();
+  });
 });
 
 class That {
   constructor(code) {
     this.code = code;
+  }
+
+  syntaxError() {
+    let error = true;
+    try {
+      let result = acorn.parse(this.code);
+      error = false;
+    } catch (e) {
+      // Expected exception.
+    }
+
+    if (!error) {
+      throw new Error("Syntax Error expected");
+    }
   }
 
   parses(opt_debug) {
