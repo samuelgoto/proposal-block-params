@@ -1,3 +1,0 @@
-let head = span { "hello world" };
-
-console.log(head);

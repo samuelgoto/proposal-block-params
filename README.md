@@ -29,12 +29,12 @@ let body = div {
   }
 
   // Same goes for for loops
-  for (let page in ["about", "contact"]) {
-    a(href: `${page}.html`) { page }
+  for (let page of ["about", "contact"]) {
+    a({href: `${page}.html`}) { page }
   }
   
   // Attributes are passed as ({key: value}) and can contain JS too.
-  div(onclick: function() { alert("Hi!"); }) {
+  div({onclick: function() { alert("Hi!"); }}) {
     click me!
   } 
 }
@@ -79,8 +79,13 @@ class MyComponent extends mixin(Component, React) {
 # Usage
 
 ```console
-> dsc examples/simplest.ds > /tmp/simplest.ds.js; node /tmp/simplest.ds.js
-Element { name: 'span', children: [ 'hello world' ] }
+> dsc examples/simplest.ds.js > /tmp/simplest.js; node /tmp/simplest.js
+{
+ "name": "span",
+ "children": [
+  "Hello World!"
+ ]
+}
 ```
 
 # Tests
