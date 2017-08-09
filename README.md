@@ -34,20 +34,13 @@ let body = div {
   // Attributes are passed as ({key: value}) and can contain JS too.
   div(onclick: function() { alert("Hi!"); }) {
     click me!
-  }
-  
-  // Promises!
-  fetch("data.pb").then(data => {
-    data.forEach(user => {
-      `${user.name}`
-    });
-  });
+  } 
 }
 ```
 Finally, a ```dom()``` API is provided so that you can turn the ```Element``` instance into a HTMLElement instance to be embedded in the DOM.
 
 ```javascript
-funcion extra() {
+function extra() {
   return span { "extra info" }
 }
 
