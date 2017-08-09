@@ -1,9 +1,9 @@
 DocScript
 =========
 
-An exploration of a [DSL](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22) for Javascript designed to manipulate the DOM.
+This is an early exploration of an extension to the JS language to enable a [DSL](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22) designed to manipulate the DOM.
 
-The syntax is largely inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html), [JFX](https://en.wikipedia.org/wiki/JavaFX_Script), [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview) and [JSON-ish](http://blog.sgo.to/2015/09/json-ish.html) and application is largely inspired by [JSX](https://facebook.github.io/react/docs/introducing-jsx.html) (i.e. templating language to build HTML components).
+The syntax is largely inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML) and the application is largely inspired by [JSX](https://facebook.github.io/react/docs/introducing-jsx.html) (i.e. templating language to build HTML components).
 
 This is currently prototyped as a transpiler.
 
@@ -32,6 +32,10 @@ let body = div {
   // Same goes for for loops
   for (let page in ["about", "contact"]) {
     a(href=`${page}.html`) { page }
+  }
+  
+  div({onclick: function() { alert("Hi!"); }}) {
+    click me!
   }
   
   // Promises!
@@ -72,3 +76,19 @@ document.body.appendChild(html.dom());
   `npm test`
 
 
+# Related work
+
+* JSX
+* Kotlin typed builders
+* Elm
+* Hyperscript
+* json-ish
+* Om
+* Flutter
+* Anko layouts
+* E4X
+* [Curl](https://en.wikipedia.org/wiki/Curl_(programming_language))
+* [JFX Script](https://en.wikipedia.org/wiki/JavaFX_Script)
+* [JXON](https://developer.mozilla.org/en-US/docs/Archive/JXON)
+* [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview)
+* [JSON-ish](http://blog.sgo.to/2015/09/json-ish.html)
