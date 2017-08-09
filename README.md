@@ -12,18 +12,15 @@ This is currently prototyped as a transpiler.
 DocScript extends the JS syntax to enable declaring tree-like structures and intermingling imperative code back and fourth. Its most simple invocation returns an Element:
 
 ```javascript
-let head = span { 
-  // This is JS scope, so comments are valid!
-  
-  // String expressions added as text nodes!
-  "Sam's home page"
-};
+let head = span { "Hello World!" };
 ```
 
 Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid JS code, so you can execute real statements. For example:
 
 ```javascript
 let body = div {
+  // This is JS scope, so comments are valid!
+
   // Like, for real JS. E.g. if statements are executed.
   if (document.cookie) {
     "Welcome back!"
