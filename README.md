@@ -13,7 +13,7 @@ DocScript extends the JS syntax to enable declaring tree-like structures and int
 
 ```javascript
 let head = span { 
-  // This is JS, so comments are valid!
+  // This is JS scope, so comments are valid!
   
   // String expressions added as text nodes!
   "Sam's home page"
@@ -50,16 +50,34 @@ let body = div {
 Finally, a ```dom()``` API is provided so that you can turn the ```Element``` instance into a HTMLElement instance to be embedded in the DOM.
 
 ```javascript
+funcion extra() {
+  return span { "extra info" }
+}
+
 let html = div {
   // Expressions that result into a DocScript are
   // appended as children!
   head
+  extra()
   body
 }
 
 // The .dom() API transforms the Element instance into
 // an HTMLElement instance.
 document.body.appendChild(html.dom());
+```
+
+It plays well with components-like frameworks:
+
+```javascript
+class MyComponent extends mixin(Component, React) {
+  constructor() {
+    this.name = "Sam Goto";
+  }
+  render() {
+    return span { `Welcome back, ${this.foo}!` }
+  }
+}
 ```
 
 # Installation
