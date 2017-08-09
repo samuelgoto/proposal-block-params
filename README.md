@@ -7,7 +7,7 @@ The syntax is inspired by [Kotlin builders](https://kotlinlang.org/docs/referenc
 
 Like Kotlin, it is designed to enable going back and fourth between the declarative code and the imperative code.
 
-This is currently prototyped as a transpiler.
+This is currently prototyped as a transpiler. You can find a lot of examples [here](tests/runtime.js).
 
 # Example
 
