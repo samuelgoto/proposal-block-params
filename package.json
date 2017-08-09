@@ -1,6 +1,6 @@
 {
   "name": "@docscript/docscript",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A DSL for Javascript designed to build the DOM inspired by Kotlin",
   "main": "docscript.js",
   "bin": {
