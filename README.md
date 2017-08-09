@@ -134,6 +134,9 @@ Hi!
 
   `npm test`
 
+# Status
+
+  You really don't want to use this right now. Very early prototype.
 
 # Related work
 
