@@ -3,7 +3,9 @@ DocScript
 
 This is an early exploration of an extension to the JS language to enable a [DSL](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22) designed to manipulate the DOM.
 
-The syntax is inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML). It is meant to be used as a DSL like [JSX](https://facebook.github.io/react/docs/introducing-jsx.html) (i.e. templating language to build HTML components).
+The syntax is inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML).
+
+It is designed to optimize for the trend to move [CSS to JS](https://speakerdeck.com/vjeux/react-css-in-js) and [HTML to JS](https://facebook.github.io/react/docs/introducing-jsx.html).
 
 Like Kotlin, it is designed to enable going back and fourth between the declarative code and the imperative code.
 
@@ -37,6 +39,16 @@ let body = div {
   div({onclick: function() { alert("Hi!"); }}) {
     click me!
   } 
+  
+  // CSS in JS!
+  let COMMON_WIDTH = 1000;
+  span({
+    style : {  
+      width: COMMON_WIDTH, // imperative css!
+    }
+  }) {
+    hello world!
+  }
 }
 ```
 Finally, a ```dom()``` API is provided so that you can turn the ```Element``` instance into a HTMLElement instance to be embedded in the DOM.
