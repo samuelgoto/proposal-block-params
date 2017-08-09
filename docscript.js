@@ -261,9 +261,8 @@ class DocScript {
     return result;
   }
 
-  static eval(code) {
-    let docscript = `
-
+  static api() {
+    return `
 class Element {
   constructor(name, opt_attributes) {
     this.name = name;
@@ -292,7 +291,6 @@ class DocScript {
       let children = el instanceof Array ? el : [el];
 
       children.forEach(x => {
-	// console.log(x);
         if (x == null || x == undefined) {
 	  // Throws errors for null and undefined to enable developers to catch
           // MemberExpressions early.
@@ -311,14 +309,9 @@ class DocScript {
 
     let attributes = props.length > 0 ? {} : undefined;
 
-    // console.log("hi");
-    // console.log(props);
-
     props.forEach(arg => {
       if (typeof arg == "object") {
         for (let prop in arg) {
-          // console.log("hello");
-          // console.log(prop);
           if (!(arg[prop] instanceof Function)) {
             attributes[prop] = arg[prop];
           } else {
@@ -328,20 +321,9 @@ class DocScript {
       }
     });
 
-    // console.log("Foo bar");
-    // console.log(attributes);
-
-    // for (let prop in props) {
-    //  if (props[prop] instanceof Function) {
-    //    props[prop] = (props[prop]).bind(this);
-    //  }
-    // }
-
     if (typeof type == "string") {
       el = new Element(type, attributes);
     } else {
-      // console.log(type);
-      // console.log(new type().render());
       // TODO(goto): this makes things specific to a render()
       // method. Generalize this.
       el = new type().render();
@@ -355,10 +337,12 @@ class DocScript {
   }
 }
 `;
+  }
 
+  static eval(code) {
     let result = DocScript.compile(code);
     // console.log(`${docscript} ${result}`);
-    return eval(`${docscript} ${result}`);
+    return eval(`${api()} ${result}`);
   }
 }
 

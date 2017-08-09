@@ -18,6 +18,7 @@ program
       if (err) {
         return console.log(err);
       }
+      console.log(DocScript.api());
       console.log(DocScript.compile(data));
     });
   });
