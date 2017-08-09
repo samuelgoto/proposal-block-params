@@ -3,7 +3,7 @@ DocScript
 
 This is an early exploration of an extension to the JS language to enable a [DSL](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22) designed to manipulate the DOM.
 
-The syntax is largely inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML) and the application is largely inspired by [JSX](https://facebook.github.io/react/docs/introducing-jsx.html) (i.e. templating language to build HTML components).
+The syntax and semantics are largely inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML). It is meant to be used as a DSL like [JSX](https://facebook.github.io/react/docs/introducing-jsx.html) (i.e. templating language to build HTML components).
 
 This is currently prototyped as a transpiler.
 
@@ -20,7 +20,7 @@ let head = span {
 };
 ```
 
-Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid Javavscript code, so you can execute real statements. For example:
+Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid JS code, so you can execute real statements. For example:
 
 ```javascript
 let body = div {
@@ -31,10 +31,11 @@ let body = div {
 
   // Same goes for for loops
   for (let page in ["about", "contact"]) {
-    a(href=`${page}.html`) { page }
+    a(href: `${page}.html`) { page }
   }
   
-  div({onclick: function() { alert("Hi!"); }}) {
+  // Attributes are passed as ({key: value}) and can contain JS too.
+  div(onclick: function() { alert("Hi!"); }) {
     click me!
   }
   
@@ -48,7 +49,7 @@ let body = div {
 ```
 Finally, a ```dom()``` API is provided so that you can turn the ```Element``` instance into a HTMLElement instance to be embedded in the DOM.
 
-```
+```javascript
 let html = div {
   // Expressions that result into a DocScript are
   // appended as children!
