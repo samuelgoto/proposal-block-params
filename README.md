@@ -79,13 +79,55 @@ class MyComponent extends mixin(Component, React) {
 # Usage
 
 ```console
-> dsc examples/simplest.ds.js > /tmp/simplest.js; node /tmp/simplest.js
+> dsc examples/helloworld.ds.js > /tmp/helloworld.js; node /tmp/helloworld.js
 {
- "name": "span",
+ "name": "div",
  "children": [
-  "Hello World!"
+  {
+   "name": "span",
+   "children": [
+    "Hello World!"
+   ]
+  },
+  {
+   "name": "span",
+   "children": [
+    "extra info"
+   ]
+  },
+  {
+   "name": "div",
+   "children": [
+    {
+     "name": "a",
+     "attributes": {
+      "href": "about.html"
+     },
+     "children": [
+      "about"
+     ]
+    },
+    {
+     "name": "a",
+     "attributes": {
+      "href": "contact.html"
+     },
+     "children": [
+      "contact"
+     ]
+    },
+    {
+     "name": "div",
+     "attributes": {},
+     "children": [
+      "click me!"
+     ]
+    }
+   ]
+  }
  ]
 }
+Hi!
 ```
 
 # Tests
