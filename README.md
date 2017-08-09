@@ -7,6 +7,10 @@ The syntax is largely inspired by [Kotlin builders](https://kotlinlang.org/docs/
 
 This is currently prototyped as a transpiler.
 
+# Example
+
+DocScript extends the JS syntax to enable declaring tree-like structures and intermingling imperative code back and fourth. Its most simple invocation returns an Element:
+
 ```javascript
 let head = span { 
   // This is JS, so comments are valid!
@@ -14,7 +18,11 @@ let head = span {
   // String expressions added as text nodes!
   "Sam's home page"
 };
+```
 
+Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid Javavscript code, so you can execute real statements. For example:
+
+```javascript
 let body = div {
   // Like, for real JS. E.g. if statements are executed.
   if (document.cookie) {
@@ -33,7 +41,10 @@ let body = div {
     });
   });
 }
+```
+Finally, a ```dom()``` API is provided so that you can turn the ```Element``` instance into a HTMLElement instance to be embedded in the DOM.
 
+```
 let html = div {
   // Expressions that result into a DocScript are
   // appended as children!
@@ -46,17 +57,17 @@ let html = div {
 document.body.appendChild(html.dom());
 ```
 
-## Installation
+# Installation
 
   `npm install @docscript/docscript`
   
-## Usage
+# Usage
 
 ```console
   dsc file.js
 ```
 
-## Tests
+# Tests
 
   `npm test`
 
