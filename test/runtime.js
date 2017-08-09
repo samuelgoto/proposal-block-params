@@ -69,6 +69,20 @@ describe("Runtime", function() {
     });
   });
 
+  // TODO(goto): fix this.
+  it.skip('If statements', function() {
+    assertThat(`
+      div {
+        if (true) {
+          "hello world"
+        }
+      }`
+    ).equalsTo({
+      name: "div",
+      children: ["hello world"]
+    });
+  });
+
   it('For-loops', function() {
     assertThat(`
       div {

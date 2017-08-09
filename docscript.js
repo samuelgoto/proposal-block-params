@@ -342,7 +342,7 @@ class DocScript {
   static eval(code) {
     let result = DocScript.compile(code);
     // console.log(`${docscript} ${result}`);
-    return eval(`${api()} ${result}`);
+    return eval(`${DocScript.api()} ${result}`);
   }
 }
 
