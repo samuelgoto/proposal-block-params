@@ -47,8 +47,8 @@ function extra() {
 let html = div {
   // Expressions that result into a DocScript are
   // appended as children!
-  head
-  extra()
+  head // variables get composed
+  extra() // functions get called
   body
 }
 
