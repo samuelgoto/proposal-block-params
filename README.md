@@ -74,7 +74,7 @@ class MyComponent extends mixin(Component, React) {
 
 # Installation
 
-  `npm install @docscript/docscript`
+  `npm install -g @docscript/docscript`
   
 # Usage
 

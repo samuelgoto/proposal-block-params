@@ -1,10 +1,7 @@
-// Pretends to be in a browser context.
-let document = { cookies: "fake cookie" };
-
 let head = span { "Hello World!" };
 
 let body = div {
-  if (document.cookies) {
+  if (true) {
     // TODO(goto): figure out why this isn't working.
     "Welcome back!"
   }
