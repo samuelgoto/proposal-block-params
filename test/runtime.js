@@ -20,10 +20,6 @@ describe("Runtime", function() {
   });
 
   it('Simplest', function() {
-    assertThat(`div {};`).equalsTo({name: "div"});
-  });
-
-  it('Assignment', function() {
     assertThat(`let doc = 1; doc`).equalsTo(1);
     assertThat(`let doc = div {}; doc`).equalsTo({name: "div"});
   });
@@ -505,21 +501,6 @@ describe("Runtime", function() {
     let callback = result.render().attributes.onclick();
     Assert.equal("hello world", callback);
     Assert.equal("changed!", result.state);
-  });
-
-  it.skip('new-ing', function() {
-    let result = assertThat(`
-      class F {
-        constructor(fn) {
-          this.fn = fn();
-        }
-      };
-      new F() { div {} }
-    `).evals();
-    // let data = result.fn();
-    console.log(result);
-    console.log(data);
-    // Assert.equal({}, );
   });
 
   it("React-like component testing most features", function() {

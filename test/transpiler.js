@@ -36,12 +36,6 @@ describe("Transpiler", function() {
         `DocScript.createElement.call(this, "d", [{a: 1}, ], function(parent) {});`);
   });
 
-  it("Visiting new", function() {
-    let result = DocScript.compile(`new F() { d {} }`);
-    Assert.equal(result,
-        `new F(function(parent) { DocScript.createElement.call(this, "d", [], function(parent) {}, parent) })`);
-  });
-
   it.skip("Visiting function attributes binds this", function() {
     // NOTE(goto): this was an early design where we fix this at the
     // code generation level. This kind of works, but misses when
