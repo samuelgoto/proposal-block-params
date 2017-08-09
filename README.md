@@ -79,7 +79,7 @@ class MyComponent extends mixin(Component, React) {
 # Usage
 
 ```console
-> dsc examples/simplest.ds > /tmp/simplest.js; node /tmp/simplest.js
+> dsc examples/simplest.ds > /tmp/simplest.ds.js; node /tmp/simplest.ds.js
 Element { name: 'span', children: [ 'hello world' ] }
 ```
 
