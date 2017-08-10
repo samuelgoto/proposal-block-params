@@ -1,13 +1,13 @@
 DocScript
 =========
 
-This is an early exploration of an extension to the JS language to enable a [DSL](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22) designed to manipulate the DOM.
+This is a **very early** exploration of an extension to the JS language to enable a [DSL](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22) designed to manipulate the DOM, highly inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML).
 
-The syntax is inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML).
+It is designed to intermingle well with [CSS to JS](https://speakerdeck.com/vjeux/react-css-in-js) and [HTML to JS](https://facebook.github.io/react/docs/introducing-jsx.html).
 
-It is designed to optimize for the trend to move [CSS to JS](https://speakerdeck.com/vjeux/react-css-in-js) and [HTML to JS](https://facebook.github.io/react/docs/introducing-jsx.html).
+Like Kotlin, it is designed to enable going back and fourth between the declarative code and the full set of imperative code (statements in addition to expressions).
 
-Like Kotlin, it is designed to enable going back and fourth between the declarative code and the imperative code.
+You can find a good analysis of alternatives [here](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22).
 
 This is currently prototyped as a transpiler. You can find a lot of examples [here](test/runtime.js).
 
