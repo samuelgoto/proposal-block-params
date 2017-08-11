@@ -3,17 +3,17 @@ const fs = require('fs');
 const Assert = require('assert');
 
 describe("Integration Tests", function(done) {
-  fs.readdirSync("./test/examples")
+  fs.readdirSync("./examples")
       .filter(file => {
 	// Only keep the .js files
 	// console.log(file);
-	return file.substr(-3) === ".ds";
+	return file.substr(-3) === ".js";
       })
       .forEach(file => {
 	// console.log(file);
 	it(`${file}`, function() {
-	  let code = fs.readFileSync(`./test/examples/${file}`);
-	  let expected = fs.readFileSync(`./test/examples/${file}.json`);
+	  let code = fs.readFileSync(`./examples/${file}`);
+	  let expected = fs.readFileSync(`./examples/${file}.out`);
 	  // let foo = [];
 	  // let  = ;
 	  // let result = DocScript.compile(code);
