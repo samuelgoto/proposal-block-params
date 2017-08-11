@@ -1,0 +1,37 @@
+{
+ "name": "div",
+ "attributes": {
+  "className": "shopping-list"
+ },
+ "children": [
+  {
+   "name": "h1",
+   "children": [
+    "Shopping List for Sam Goto"
+   ]
+  },
+  {
+   "name": "ul",
+   "children": [
+    {
+     "name": "li",
+     "children": [
+      "Instagram"
+     ]
+    },
+    {
+     "name": "li",
+     "children": [
+      "What's App"
+     ]
+    },
+    {
+     "name": "li",
+     "children": [
+      "Oculus"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -26,7 +26,9 @@ describe("Integration Tests", function(done) {
 	  // console.log(result);
 	  // console.log(stdout.join("\n"));
 	  // console.log(expected.toString());
-	  Assert.equal(`${expected.toString()}`, `${stdout.join("\n")}\n`);
+	  let succeeded = Assert.equal(
+	      `${expected.toString()}`, `${stdout.join("\n")}\n`,
+	      `Got: \n${stdout.join("\n")}\n`);
 	  // let result = eval(code.toString());
 	  // DocScript.eval(DocScript.api(), code.toString());
 	});
