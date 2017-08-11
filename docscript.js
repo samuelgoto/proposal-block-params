@@ -339,10 +339,20 @@ class DocScript {
 `;
   }
 
-  static eval(code) {
+  static eval(code, opt_stdout) {
     let result = DocScript.compile(code);
+    let stdout = `
+    var console = {
+      log: function(str) {
+	if (opt_stdout) {
+          opt_stdout.push(str);
+	}
+      }
+    };
+    `;
+
     // console.log(`${docscript} ${result}`);
-    return eval(`${DocScript.api()} ${result}`);
+    return eval(`${DocScript.api()}; ${stdout}; ${result}`);
   }
 }
 

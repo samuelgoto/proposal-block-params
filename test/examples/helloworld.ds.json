@@ -1,0 +1,48 @@
+{
+ "name": "div",
+ "children": [
+  {
+   "name": "span",
+   "children": [
+    "Hello World!"
+   ]
+  },
+  {
+   "name": "span",
+   "children": [
+    "extra info"
+   ]
+  },
+  {
+   "name": "div",
+   "children": [
+    {
+     "name": "a",
+     "attributes": {
+      "href": "about.html"
+     },
+     "children": [
+      "about"
+     ]
+    },
+    {
+     "name": "a",
+     "attributes": {
+      "href": "contact.html"
+     },
+     "children": [
+      "contact"
+     ]
+    },
+    {
+     "name": "div",
+     "attributes": {},
+     "children": [
+      "click me!"
+     ]
+    }
+   ]
+  }
+ ]
+}
+Hi!
