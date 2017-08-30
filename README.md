@@ -16,14 +16,14 @@ This is currently prototyped as a transpiler. You can find a lot of examples [he
 Much like in [Kotlin Builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) the general trick in the language is to enable {} expressions to follow functions and embed that as the last argument of the function. For example, the example below: 
 
 ```javascript
-let head = span { "Hello World!" };
+let head = span { text("Hello World!") };
 ```
 
 is isomorphic to the code below:
 
 
 ```javascript
-let head = span(() => { "Hello World!" });
+let head = span(() => { text("Hello World!") });
 ```
 
 Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid JS code, so you can execute real JS imperative statements. For example:
