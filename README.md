@@ -1,7 +1,7 @@
 Builders
 =========
 
-This is a **very early** exploration of an extension to the JS language to enable a [DSL](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22) designed to manipulate the DOM, highly inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML).
+This is a **very early** exploration of an extension to the JS language to enable [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)-like syntax to enable [DSLs](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22).
 
 It is designed to intermingle well with [CSS in JS](https://speakerdeck.com/vjeux/react-css-in-js) and [HTML in JS](https://facebook.github.io/react/docs/introducing-jsx.html).
 
@@ -13,19 +13,20 @@ This is currently prototyped as a transpiler. You can find a lot of examples [he
 
 # Example
 
-The idea is to extend the JS syntax to enable declaring tree-like structures and intermingling imperative code back and fourth. Its most simple invocation returns an Element:
+Much like in [Kotlin Builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) the general trick in the language is to enable {} expressions to follow functions and embed that as the last argument of the function. For example, the example below: 
 
 ```javascript
 let head = span { "Hello World!" };
 ```
 
-The general trick in the language is to enable {} expressions to follow functions and embed that as the last argument of the function. For example, the example above is isomorphic to the code below:
+is isomorphic to the code below:
+
 
 ```javascript
 let head = span(() => { "Hello World!" });
 ```
 
-Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid JS code, so you can execute real statements. For example:
+Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid JS code, so you can execute real JS imperative statements. For example:
 
 ```javascript
 let body = div {
@@ -33,7 +34,7 @@ let body = div {
 
   // Like, for real JS. E.g. if statements are executed.
   if (document.cookie) {
-    "Welcome back!"
+    text("Welcome back!")
   }
 
   // Same goes for for loops
@@ -43,7 +44,7 @@ let body = div {
   
   // Attributes are passed as ({key: value}) and can contain JS too.
   div({onclick: function() { alert("Hi!"); }}) {
-    click me!
+    text("click me!")
   } 
   
   // CSS in JS!
@@ -53,7 +54,7 @@ let body = div {
       width: COMMON_WIDTH, // imperative css!
     }
   }) {
-    hello world!
+    text("hello world!")
   }
 }
 ```
@@ -66,7 +67,7 @@ class MyComponent extends mixin(Component, React) {
     this.name = "Sam Goto";
   }
   render() {
-    return span { `Welcome back, ${this.foo}!` }
+    return span { text(`Welcome back, ${this.foo}!`) }
   }
 }
 ```
