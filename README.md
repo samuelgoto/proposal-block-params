@@ -23,7 +23,7 @@ is isomorphic to the code below:
 
 
 ```javascript
-let head = span(() => { text("Hello World!") });
+let head = span(function() { text("Hello World!") });
 ```
 
 Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid JS code, so you can execute real JS imperative statements. For example:
