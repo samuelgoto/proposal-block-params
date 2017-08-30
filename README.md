@@ -1,9 +1,9 @@
-DocScript
+Builders
 =========
 
 This is a **very early** exploration of an extension to the JS language to enable a [DSL](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22) designed to manipulate the DOM, highly inspired by [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) (i.e. they look ilke {}-trees rather than XML).
 
-It is designed to intermingle well with [CSS to JS](https://speakerdeck.com/vjeux/react-css-in-js) and [HTML to JS](https://facebook.github.io/react/docs/introducing-jsx.html).
+It is designed to intermingle well with [CSS in JS](https://speakerdeck.com/vjeux/react-css-in-js) and [HTML in JS](https://facebook.github.io/react/docs/introducing-jsx.html).
 
 Like Kotlin, it is designed to enable going back and fourth between the declarative code and the full set of imperative code (statements in addition to expressions).
 
@@ -13,10 +13,16 @@ This is currently prototyped as a transpiler. You can find a lot of examples [he
 
 # Example
 
-DocScript extends the JS syntax to enable declaring tree-like structures and intermingling imperative code back and fourth. Its most simple invocation returns an Element:
+The idea is to extend the JS syntax to enable declaring tree-like structures and intermingling imperative code back and fourth. Its most simple invocation returns an Element:
 
 ```javascript
 let head = span { "Hello World!" };
+```
+
+The general trick in the language is to enable {} expressions to follow functions and embed that as the last argument of the function. For example, the example above is isomorphic to the code below:
+
+```javascript
+let head = span(() => { "Hello World!" });
 ```
 
 Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid JS code, so you can execute real statements. For example:
@@ -51,25 +57,6 @@ let body = div {
   }
 }
 ```
-Finally, a ```dom()``` API is provided so that you can turn the ```Element``` instance into a HTMLElement instance to be embedded in the DOM.
-
-```javascript
-function extra() {
-  return span { "extra info" }
-}
-
-let html = div {
-  // Expressions that result into a DocScript are
-  // appended as children!
-  head // variables get composed
-  extra() // functions get called
-  body
-}
-
-// The .dom() API transforms the Element instance into
-// an HTMLElement instance.
-document.body.appendChild(html.dom());
-```
 
 It plays well with components-like frameworks:
 
@@ -88,59 +75,6 @@ class MyComponent extends mixin(Component, React) {
 
   `npm install -g @docscript/docscript`
   
-# Usage
-
-```console
-> dsc examples/helloworld.ds.js > /tmp/helloworld.js; node /tmp/helloworld.js
-{
- "name": "div",
- "children": [
-  {
-   "name": "span",
-   "children": [
-    "Hello World!"
-   ]
-  },
-  {
-   "name": "span",
-   "children": [
-    "extra info"
-   ]
-  },
-  {
-   "name": "div",
-   "children": [
-    {
-     "name": "a",
-     "attributes": {
-      "href": "about.html"
-     },
-     "children": [
-      "about"
-     ]
-    },
-    {
-     "name": "a",
-     "attributes": {
-      "href": "contact.html"
-     },
-     "children": [
-      "contact"
-     ]
-    },
-    {
-     "name": "div",
-     "attributes": {},
-     "children": [
-      "click me!"
-     ]
-    }
-   ]
-  }
- ]
-}
-Hi!
-```
 
 # Tests
 
