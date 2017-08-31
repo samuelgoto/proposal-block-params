@@ -1,7 +1,99 @@
-Builders
+High Order Functions
 =========
 
-This is a **very early** exploration of an extension to the JS language to enable [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)-like syntax to enable [DSLs](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22).
+This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical sugar extension to JS heavily inspired by [Kotlin lambdas](https://kotlinlang.org/docs/reference/lambdas.html) that enables an interest set of code patterns.
+
+The syntactical sugar is to enable function `{}` blocks of the last parameter to be declared outside of the closing `)` of function calls. For example:
+
+```javascript
+function a(b) {
+  b();
+}
+
+// when {}-blocks follow function calls ...
+a {
+  // random code
+}
+
+// ... they get appended to the function call as the last parameter.
+a(() => {
+  // random code
+});
+```
+
+While a simple syntactical change, this enables interesting use cases.
+
+# Use cases
+
+## Builders
+
+https://engineering.facile.it/blog/eng/kotlin-dsl/
+
+```javascript
+
+
+```
+
+## with
+
+```javascript
+let person = new Person();
+let kids = [{name: "leo", age: 4}, {name: "anna", age: 1}];
+
+with (person) {
+  setName("Sam Goto");
+  setFavoriteSuperHero("Iron Man");
+  for (kid in kids) {
+    let child = new Child();
+    with (child) {
+      setName(kid.name);
+      setAge(kid.age);
+    }
+    addChild(kid);
+  }
+}
+
+function with(obj, body) {
+  body.call(obj);
+}
+```
+
+## lock
+
+```javascript
+lock (resource) {
+  resource.kill();
+}
+
+function lock(resource, body) {
+  Atomic.wait();
+  body();
+  Atomic.release(); // TODO(goto): get this right
+}
+```
+
+# do
+
+```javascript
+let a = do {  
+  if (expr)
+    return 1;
+  else
+    return 2;
+};
+
+function do(body) {
+  return body();
+}
+```
+
+# graphql
+
+https://www.kotlinresources.com/library/kraph/
+
+# HTML
+
+Much like in [Kotlin Builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) the general trick in the language is to enable {} expressions to follow functions and embed that as the last argument of the function. For example, the example below: 
 
 It is designed to intermingle well with [CSS in JS](https://speakerdeck.com/vjeux/react-css-in-js) and [HTML in JS](https://facebook.github.io/react/docs/introducing-jsx.html).
 
@@ -9,11 +101,7 @@ Like Kotlin, it is designed to enable going back and fourth between the declarat
 
 You can find a good analysis of alternatives [here](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22).
 
-This is currently prototyped as a transpiler. You can find a lot of examples [here](test/runtime.js).
 
-# Example
-
-Much like in [Kotlin Builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) the general trick in the language is to enable {} expressions to follow functions and embed that as the last argument of the function. For example, the example below: 
 
 ```javascript
 let head = span { text("Hello World!") };
@@ -59,20 +147,10 @@ let body = div {
 }
 ```
 
-It plays well with components-like frameworks:
-
-```javascript
-class MyComponent extends mixin(Component, React) {
-  constructor() {
-    this.name = "Sam Goto";
-  }
-  render() {
-    return span { text(`Welcome back, ${this.foo}!`) }
-  }
-}
-```
 
 # Installation
+
+  This is currently prototyped as a transpiler. You can find a lot of examples [here](test/runtime.js).
 
   `npm install -g @docscript/docscript`
   
