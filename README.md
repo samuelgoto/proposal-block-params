@@ -9,7 +9,7 @@ While a simple syntactical change, it enables an interesting set of code pattern
 
 # Use cases
 
-A random list of possibilities collected from kotlin/groovy, somewhat sorted by most to least compelling.
+A random list of possibilities collected from kotlin/groovy (links to equivalent idea in kotlin/groovy at the headers), somewhat sorted by most to least compelling.
 
 ## [lock](https://kotlinlang.org/docs/reference/lambdas.html)
 
@@ -87,7 +87,7 @@ job('PROJ-unit-tests') {
 }
 ```
 
-## [Android](https://github.com/Kotlin/anko)
+## [android](https://github.com/Kotlin/anko)
 
 ```javascript
 VerticalLayout {
@@ -127,7 +127,7 @@ let re = regex {
   start()
   literally("a")
   optionally("b")
-  either {
+  one().of() {
     exactly(5).characters()
     some(3).words()
   }
