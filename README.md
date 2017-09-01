@@ -1,7 +1,7 @@
 Domain Specific Languages
 =========
 
-This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/lambdas.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html) that enables domain specific languages to be polyfilled.
+This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/lambdas.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be polyfilled.
 
 In its basic form, it is an affordance that lets you omit parantheses around the arguments of function calls for lambdas. For example, ```a {}``` is isomorphic to ```a(function() {})``` or ```a(1) {b()}``` is equivalent to ```a(1, function() {b()})```.
 
