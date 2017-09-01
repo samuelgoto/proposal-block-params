@@ -3,60 +3,138 @@ Domain Specific Languages
 
 This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/lambdas.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html) that enables domain specific languages to be polyfilled.
 
-In its basic form, it is an affordance that lets you omit parantheses around the arguments of function calls for lambdas. For example, this ```a {}``` is isormphic to this ```a(function() {});```.
+In its basic form, it is an affordance that lets you omit parantheses around the arguments of function calls for lambdas. For example, ```a {}``` is isomorphic to ```a(function() {})``` or ```a(1) {b()}``` is equivalent to ```a(1, function() {b()})```.
 
-While a simple syntactical change, this enables interesting use cases.
+While a simple syntactical change, it enables an interesting set of code patterns.
 
 # Use cases
 
-## lock
+A random list of possibilities collected from kotlin/groovy, somewhat sorted by most to least compelling.
+
+## [lock](https://kotlinlang.org/docs/reference/lambdas.html)
 
 ```javascript
 lock (resource) {
   resource.kill();
 }
-
-function lock(resource, body) {
-  Atomic.wait();
-  body();
-  Atomic.release(); // TODO(goto): get this right
-}
 ```
 
-## Builders
-
-https://engineering.facile.it/blog/eng/kotlin-dsl/
+## [configuration ](https://github.com/jenkinsci/job-dsl-plugin)
 
 ```javascript
-
-
-```
-
-## With
-
-```javascript
-let person = new Person();
-let kids = [{name: "leo", age: 4}, {name: "anna", age: 1}];
-
-with (person) {
-  setName("Sam Goto");
-  setFavoriteSuperHero("Iron Man");
-  for (kid in kids) {
-    let child = new Child();
-    with (child) {
-      setName(kid.name);
-      setAge(kid.age);
-    }
-    addChild(kid);
+job('PROJ-unit-tests') {
+  scm {
+      git(gitUrl)
+  }
+  triggers {
+      scm('*/15 * * * *')
+  }
+  steps {
+      maven('-e clean test')
   }
 }
+```
 
-function with(obj, body) {
-  body.call(obj);
+## [node](http://melix.github.io/javaone-groovy-dsls/#/ratpack)
+
+```javascript
+const express = require("express");
+const app = express();
+
+server (app) {
+  get("/") {
+     response().send("hello world" + request().get("param1"));
+  }
+
+  listen(3000) {
+    console.log("hello world");
+  }
 }
 ```
 
-# Do
+## [HTML](https://kotlinlang.org/docs/reference/type-safe-builders.html)
+
+```javascript
+let body = html {
+  head {
+    title("Welcome!")
+  }
+  body {
+    div {
+      span("Hello World")
+    }
+    a({href: "contact.html"}) { span("contact me") }
+  }
+}
+```
+
+## [Android](https://github.com/Kotlin/anko)
+
+```javascript
+VerticalLayout {
+  ImageView ({width: matchParent}) {
+      padding = dip(20)
+      margin = dip(15)
+    }
+    Button("Tap to Like") {
+      onclick { toast("Thanks for the love!") }
+    }
+  }
+}
+```
+
+## [assert](https://artemzin.com/blog/ui-testing-separating-assertions-from-actions-with-kotlin-dsl/)
+
+```javascript
+assert (expr) {
+  console.log("blahh something went wrong!");
+}
+```
+
+## [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
+
+```javascript
+run(100) {
+  alert("hello world");
+}
+```
+
+## [regexes](https://github.com/h0tk3y/regex-dsl)
+
+```javascript
+// NOTE(goto): inspired by https://github.com/MaxArt2501/re-build too.
+let re = regex {
+  start()
+  literally("a")
+  optionally("b")
+  or {
+    exactly(5).characters()
+    some(3).words()
+  }
+  end()
+}
+```
+
+## [testing](http://hadihariri.com/2013/01/21/extension-function-literals-in-kotlin-or-how-to-enforce-restrictions-on-your-dsl/)
+
+```javascript
+given("a calculator", {
+
+  val calculator = Calculator()
+
+  on("calling sum with two numbers", {
+
+    val sum = calculator.sum(2, 3)
+
+    it("should return the sum of the two numbers", {
+
+      shouldEqual(5, sum)
+    }
+  }
+}
+```
+
+## do
 
 ```javascript
 let a = do {  
@@ -65,76 +143,25 @@ let a = do {
   else
     return 2;
 };
-
-function do(body) {
-  return body();
-}
 ```
 
-# graphql
+## graphql
 
 https://www.kotlinresources.com/library/kraph/
 
-# HTML
 
-Much like in [Kotlin Builders](https://kotlinlang.org/docs/reference/type-safe-builders.html) the general trick in the language is to enable {} expressions to follow functions and embed that as the last argument of the function. For example, the example below: 
-
-It is designed to intermingle well with [CSS in JS](https://speakerdeck.com/vjeux/react-css-in-js) and [HTML in JS](https://facebook.github.io/react/docs/introducing-jsx.html).
-
-Like Kotlin, it is designed to enable going back and fourth between the declarative code and the full set of imperative code (statements in addition to expressions).
-
-You can find a good analysis of alternatives [here](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22).
-
-
+## [unless](https://www.slideshare.net/glaforge/practical-groovy-dsl)
 
 ```javascript
-let head = span { text("Hello World!") };
-```
-
-is isomorphic to the code below:
-
-
-```javascript
-let head = span(function() { text("Hello World!") });
-```
-
-Along the lines of [Kotlin builders](https://kotlinlang.org/docs/reference/type-safe-builders.html)'s, what goes inside the ```{}``` is valid JS code, so you can execute real JS imperative statements. For example:
-
-```javascript
-let body = div {
-  // This is JS scope, so comments are valid!
-
-  // Like, for real JS. E.g. if statements are executed.
-  if (document.cookie) {
-    text("Welcome back!")
-  }
-
-  // Same goes for for loops
-  for (let page of ["about", "contact"]) {
-    a({href: `${page}.html`}) { page }
-  }
-  
-  // Attributes are passed as ({key: value}) and can contain JS too.
-  div({onclick: function() { alert("Hi!"); }}) {
-    text("click me!")
-  } 
-  
-  // CSS in JS!
-  let COMMON_WIDTH = 1000;
-  span({
-    style : {  
-      width: COMMON_WIDTH, // imperative css!
-    }
-  }) {
-    text("hello world!")
-  }
+unless (expr) {
+  // statements
 }
 ```
 
 
-# Installation
+# Polyfill
 
-  This is currently prototyped as a transpiler. You can find a lot of examples [here](test/runtime.js).
+  This is currently polyfilled as a transpiler. You can find a lot of examples [here](test/runtime.js).
 
   `npm install -g @docscript/docscript`
   
