@@ -19,22 +19,6 @@ lock (resource) {
 }
 ```
 
-## [configuration ](https://github.com/jenkinsci/job-dsl-plugin)
-
-```javascript
-job('PROJ-unit-tests') {
-  scm {
-      git(gitUrl)
-  }
-  triggers {
-      scm('*/15 * * * *')
-  }
-  steps {
-      maven('-e clean test')
-  }
-}
-```
-
 ## [node](http://melix.github.io/javaone-groovy-dsls/#/ratpack)
 
 ```javascript
@@ -68,6 +52,41 @@ let body = html {
 }
 ```
 
+## [graphql](https://www.kotlinresources.com/library/kraph/)
+
+```javascript
+// hero uses proxies/getters to know when properties
+// are requested.
+let heroes = hero {
+  name
+  height
+  mass
+  friends {
+    name
+    home {
+      name
+      climate
+    }
+  }
+}
+```
+
+## [configuration ](https://github.com/jenkinsci/job-dsl-plugin)
+
+```javascript
+job('PROJ-unit-tests') {
+  scm {
+      git(gitUrl)
+  }
+  triggers {
+      scm('*/15 * * * *')
+  }
+  steps {
+      maven('-e clean test')
+  }
+}
+```
+
 ## [Android](https://github.com/Kotlin/anko)
 
 ```javascript
@@ -94,7 +113,8 @@ assert (expr) {
 ## [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
 
 ```javascript
-run(100) {
+run (100) {
+  // internally calls setTimeout
   alert("hello world");
 }
 ```
@@ -107,7 +127,7 @@ let re = regex {
   start()
   literally("a")
   optionally("b")
-  or {
+  either {
     exactly(5).characters()
     some(3).words()
   }
@@ -144,11 +164,6 @@ let a = do {
     return 2;
 };
 ```
-
-## graphql
-
-https://www.kotlinresources.com/library/kraph/
-
 
 ## [unless](https://www.slideshare.net/glaforge/practical-groovy-dsl)
 
