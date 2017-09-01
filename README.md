@@ -1,29 +1,27 @@
-High Order Functions
+Domain Specific Languages
 =========
 
-This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical sugar extension to JS heavily inspired by [Kotlin lambdas](https://kotlinlang.org/docs/reference/lambdas.html) that enables an interest set of code patterns.
+This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/lambdas.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html) that enables domain specific languages to be polyfilled.
 
-The syntactical sugar is to enable function `{}` blocks of the last parameter to be declared outside of the closing `)` of function calls. For example:
-
-```javascript
-function a(b) {
-  b();
-}
-
-// when {}-blocks follow function calls ...
-a {
-  // random code
-}
-
-// ... they get appended to the function call as the last parameter.
-a(() => {
-  // random code
-});
-```
+In its basic form, it is an affordance that lets you omit parantheses around the arguments of function calls for lambdas. For example, this ```a {}``` is isormphic to this ```a(function() {});```.
 
 While a simple syntactical change, this enables interesting use cases.
 
 # Use cases
+
+## lock
+
+```javascript
+lock (resource) {
+  resource.kill();
+}
+
+function lock(resource, body) {
+  Atomic.wait();
+  body();
+  Atomic.release(); // TODO(goto): get this right
+}
+```
 
 ## Builders
 
@@ -34,7 +32,7 @@ https://engineering.facile.it/blog/eng/kotlin-dsl/
 
 ```
 
-## with
+## With
 
 ```javascript
 let person = new Person();
@@ -58,21 +56,7 @@ function with(obj, body) {
 }
 ```
 
-## lock
-
-```javascript
-lock (resource) {
-  resource.kill();
-}
-
-function lock(resource, body) {
-  Atomic.wait();
-  body();
-  Atomic.release(); // TODO(goto): get this right
-}
-```
-
-# do
+# Do
 
 ```javascript
 let a = do {  
