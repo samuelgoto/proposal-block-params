@@ -1,5 +1,3 @@
-'use strict';
-
 const acorn = require("acorn");
 const astring = require('astring');
 const walk = require("acorn/dist/walk");
@@ -46,7 +44,6 @@ acorn.plugins.docscript = function(parser) {
 	  //if (expr.arguments.length > 1 ||
 	  //    expr.arguments[0].type != "ObjectExpression") {
 	  //  this.raise(this.start, "First argument isn't an object!!");
-	  // this.raise(this.start, "'with' in strict mode")
 	  //}
 	  expr.arguments.push(this.finishNode(func, "FunctionExpression"));
 	  this.semicolon();
@@ -135,108 +132,21 @@ acorn.plugins.docscript = function(parser) {
 
 function visitor(node) {
   if (node.type === "CallExpression") {
-    // console.log(node.source());
     if (node.arguments.length > 0 &&
 	node.arguments[node.arguments.length - 1].docscript) {
-      // Makes a distinction between DocScript code inside
-      // DocScript (e.g. the span in let a = div { span {} }) code and
-      // not (e.g. let a = div {}).
-      // TODO(goto): we should probably break on scoping boundaries
-      // e.g. is this span within a docscript scope?
-      // at the moment, since it is crawling all the way up, i bet
-      // that it would eventually hit the div docscript there.
-      // function() { div { function bar() { return span {} } } }
-      var parent = node.parent;
-      var inside = false;
-      // console.log(node.parent);
-      while (parent) {
-	if (parent.type == "FunctionDeclaration" &&
-	    !parent.docscript) {
-	  // If we are inside a function declaration that is not
-	  // a DocScript, that crosses the boundaries of
-	  // DocScript inside DocScript because the parameters are
-	  // different.
-	  break;
+      let params = ``;
+      for (let i = 0; i < node.arguments.length; i++) {
+	// console.log(i);
+	let param = node.arguments[i];
+	if (!param.docscript) {
+	  params += `${param.source()}, `;
+	  continue;
 	}
-	if (parent.docscript) {
-	  inside = true;
-	  break;
-	}
-	parent = parent.parent;
+
+	params += `function(scope) { with (scope) ${param.source()} }`;
       }
 
-      let block = node.arguments.pop();
-      // console.log(node.arguments);
-      // TODO(goto): there is a bug in the generation of the ObjectExpression
-      // that makes props be the empty string that needs further investigation.
-      let props = "[";
-      // console.log(node.arguments[0].source());
-      // console.log(`hello world ${node.arguments[0].source()}`);
-      for (let arg in node.arguments) {
-	props += `${node.arguments[arg].source()}, `;
-      }
-      props += "]";
-      // let props = node.arguments[0].source() || "undefined";
-      // console.log(node.arguments[0]);
-      // console.log(`hello ${props}`);
-      let callee = node.callee.name;
-
-      // console.log(node);
-
-      let first = callee.charAt(0);
-      if (!(first == first.toUpperCase() && first != first.toLowerCase())) {
-	// this is not a custom-class reference, but a literal.
-	callee = `"${callee}"`;
-      }
-
-      // console.log(`foo ${node.source()}`);
-
-      if (!inside) {
-	node.update(`DocScript.createElement.call(this, ${callee}, ${props}, function(parent) ${block.source()})`);
-      } else {
-	node.update(`DocScript.createElement.call(this, ${callee}, ${props}, function(parent) ${block.source()}, parent)`);
-      }
-    }
-  } else if (node.type == "ExpressionStatement") {
-    // console.log(`hello ${node.source()}`);
-    // Wraps non-docscripts ExpressionStatements into
-    // a DocScript.createElement to enable composition of
-    // function calls, variable references and literals.
-    // enables: div { 1 }
-    // filters: div { span {}  };
-    // This is so far an ExpressionStatement inside a docscript ...
-    // console.log(node);
-    let inside = node.parent &&
-	node.parent.type == "BlockStatement" &&
-	node.parent.parent &&
-	node.parent.parent.type == "FunctionExpression" &&
-        node.parent.parent.docscript;
-    // ... but we want to filter out double-wrapping ExpressionStatements
-    // of DocScripts that have already been wrapped.
-    let wrapping = node.expression &&
-	node.expression.type == "CallExpression" &&
-	node.expression.arguments &&
-	node.expression.arguments.length > 0 &&
-	node.expression.arguments[node.expression.arguments.length - 1].docscript;
-    if (inside && !wrapping) {
-      node.update(
-	  `DocScript.createExpression.call(this, parent, (function(parent) { return ${node.source()} }).call(this))`);
-    }
-  } else if (node.type == "FunctionExpression") {
-    return;
-    // If this is a function inside an object declaration as an argument
-    // of a docscript, fix its binding to its.
-    if (node.parent.type == "Property" &&
-        node.parent.parent.type == "ObjectExpression" &&
-        node.parent.parent.parent.type == "CallExpression") {
-      // console.log(`${node.source()}`);
-      let call = node.parent.parent.parent;
-      if (call.arguments &&
-	  call.arguments.length > 0 &&
-	  call.arguments[call.arguments.length -1].docscript) {
-	// console.log("hi");
-	node.update(`(${node.source()}).bind(this)`);
-      }
+      node.update(`${node.callee.source()}(${params})`);
     }
   }
 }

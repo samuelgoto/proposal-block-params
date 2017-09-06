@@ -1,5 +1,3 @@
-'use strict';
-
 const Assert = require('assert');
 const docscript = require('./../docscript');
 var expect = require('chai').expect;

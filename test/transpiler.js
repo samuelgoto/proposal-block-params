@@ -1,5 +1,3 @@
-'use strict';
-
 const Assert = require('assert');
 const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
@@ -13,27 +11,44 @@ describe("Transpiler", function() {
   it("Visiting basic", function() {
     let result = DocScript.compile(`d {};`);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", [], function(parent) {});`);
+        `d(function(scope) { with (scope) {} });`);
   });
 
   it("Visiting empty attributes", function() {
     let result = DocScript.compile(`d({}) {};`);
     // console.log(result);
-    Assert.equal(result,
-        `DocScript.createElement.call(this, "d", [{}, ], function(parent) {});`);
+    Assert.equal(result, `d({}, function(scope) { with (scope) {} });`);
   });
 
   it("Visiting single attribute", function() {
     let result = DocScript.compile(`d(1) {};`);
     // console.log(result);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", [1, ], function(parent) {});`);
+        `d(1, function(scope) { with (scope) {} });`);
   });
 
   it("Visiting object attribute", function() {
     let result = DocScript.compile(`d({a: 1}) {};`);
     Assert.equal(result,
-        `DocScript.createElement.call(this, "d", [{a: 1}, ], function(parent) {});`);
+        `d({a: 1}, function(scope) { with (scope) {} });`);
+  });
+
+  it("Keeps statements in expressions", function() {
+    let result = DocScript.compile(`d { a = 1 };`);
+    Assert.equal(result,
+        `d(function(scope) { with (scope) { a = 1 } });`);
+  });
+
+  it("Keeps statements in calls", function() {
+    let result = DocScript.compile(`d(1) { a = 1 };`);
+    Assert.equal(result,
+        `d(1, function(scope) { with (scope) { a = 1 } });`);
+  });
+
+  it.skip("Keeps statements in calls", function() {
+    let result = DocScript.compile(`d { a };`);
+    Assert.equal(result,
+        `d(function(scope) { with (scope) { scope.statement(a) } });`);
   });
 
   it.skip("Visiting function attributes binds this", function() {
