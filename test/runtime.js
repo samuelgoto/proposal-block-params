@@ -21,16 +21,20 @@ describe("Runtime", function() {
     assertThat(`function div() { return 1; } div {}`).equalsTo(1, true);
   });
 
-  it.skip('Expression Statements', function() {
-    assertThat(`
-      function div(block) {
-        let result = {};
-        block.call({
-        });
-        return result;
-      }
+  let sdk = `
+    function div(block) {
+      let result = {children: []};
+      block({
+        __Literal__: function(expr) { result.children.push(expr); }
+      });
+      return result;
+    }
+  `;
+
+  it('Expression Statements', function() {
+    assertThat(sdk + `
       div { 1 }`
-    ).equalsTo(1, true);
+    ).equalsTo({children: [ 1 ]});
   });
 
   it('Attributes: non-object attribute gets ignored', function() {

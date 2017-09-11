@@ -45,10 +45,16 @@ describe("Transpiler", function() {
         `d(1, function(scope) { with (scope) { a = 1 } });`);
   });
 
-  it.skip("Keeps statements in calls", function() {
+  it("Wraps literals in __Literal__", function() {
+    let result = DocScript.compile(`d { 1 };`);
+    Assert.equal(result,
+        `d(function(scope) { with (scope) { scope.__Literal__(1); } });`);
+  });
+
+  it("Wraps variables in __Identifier__", function() {
     let result = DocScript.compile(`d { a };`);
     Assert.equal(result,
-        `d(function(scope) { with (scope) { scope.statement(a) } });`);
+        `d(function(scope) { with (scope) { scope.__Identifier__(a); } });`);
   });
 
   it.skip("Visiting function attributes binds this", function() {

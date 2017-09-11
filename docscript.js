@@ -148,6 +148,35 @@ function visitor(node) {
 
       node.update(`${node.callee.source()}(${params})`);
     }
+  } else if (node.type == "ExpressionStatement") {
+    var parent = node.parent;
+    var inside = false;
+    // console.log(node.parent);
+    while (parent) {
+      if (parent.type == "FunctionDeclaration" &&
+	  !parent.docscript) {
+	// If we are inside a function declaration that is not
+	// a DocScript, that crosses the boundaries of
+	// DocScript inside DocScript because the parameters are
+	// different.
+	break;
+      }
+      if (parent.docscript) {
+	inside = true;
+	break;
+      }
+      parent = parent.parent;
+    }
+    if (inside) {
+      // console.log("hi");
+      // console.log(node);
+      // console.log(node.expression.type == "");
+      // console.log(node.source());
+      let type = node.expression.type;
+      if (type == "Identifier" || type == "Literal") {
+        node.update(`scope.__${type}__(${node.source()});`);
+      }
+    }
   }
 }
 
