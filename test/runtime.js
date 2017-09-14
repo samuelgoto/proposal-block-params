@@ -379,16 +379,15 @@ describe("Runtime", function() {
     ).equalsTo("bar");
   });
 
-  it.skip('Attributes: functions', function() {
+  it('Attributes: functions', function() {
     let result = assertThat(`
-      div({
-        onclick: function() {
+      div {
+        setAttribute("onclick", function() {
           return "hello world";
-        }
-      }) {
+        })
       }
     `).evals();
-    let callback = result.attributes.onclick();
+    let callback = result.onclick();
     Assert.equal("hello world", callback);
   });
 
@@ -595,6 +594,9 @@ function assertThat(code) {
   }
 
   return {
+    evals: function(opt_debug) {
+      return evals(opt_debug);
+    },
     equalsTo: function(expected, opt_debug) {
       let result = evals(opt_debug);
       Assert.deepEqual(clean(result), expected);
