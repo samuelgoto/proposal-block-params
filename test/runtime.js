@@ -23,15 +23,46 @@ describe("Runtime", function() {
 
   let sdk = `
     function div(block) {
-      let result = {children: []};
-      block({
-        __Literal__: function(expr) { result.children.push(expr); }
-      });
+      let result = new DIV();
+      block.call(result, result);
       return result;
+    }
+    function DIV() {
+      this["@type"] = "div";
+      this.width = undefined;
+      this.height = undefined;
+      this.setAttribute = function(name, value) {
+        this[name] = value;
+      };
+      this.node = function() {
+        return this;
+      };
+      this.append = function(child) {
+        this.children = this.children || [];
+        this.children.push(child);
+      };
+      this.span = function(arg1, arg2) {
+        let result = new SPAN();
+        let block = function() {};
+        if (typeof arg1 == "function") {
+          block = arg1;
+        } else if (typeof arg2 == "function") {
+          block = arg2;
+        }
+        block.call(result, result);
+        if (typeof arg1 == "string") {
+          result.children = [arg1];
+        }
+        this.append(result);
+        return result;
+      }
+    }
+    function SPAN() {
+      this["@type"] = "span";
     }
   `;
 
-  it('Expression Statements', function() {
+  it.skip('Expression Statements', function() {
     assertThat(sdk + `
       div { 1 }`
     ).equalsTo({children: [ 1 ]});
@@ -46,153 +77,113 @@ describe("Runtime", function() {
   });
 
   it('Attributes', function() {
-    assertThat(`function div(param) { return param } div({a: 1}) {}`).equalsTo({
-      a: 1
+    assertThat(sdk + `div { width = 100 }`).equalsTo({
+      "@type": "div",
+      width: 100
     });
   });
 
-  it('Property access', function() {
-    assertThat(`
-      function div(block) {
-        let result = {
-          a: 1,
-          b: function() { result.c = 3 }
-        };
-        block(result);
-        return result;
-      }
+  it('Methods', function() {
+    assertThat(sdk + `
       div {
-        a = 2
-        b()
+        setAttribute("width", 200)
       }`
-    ).contains({a : 2, c: 3});
+    ).equalsTo({"@type": "div", width : 200});
   });
 
   it('Nesting', function() {
-    assertThat(`
-      function div(block) {
-        let result = {};
-        block({
-          span: function() {
-            result.hello = "hi";
-          }
-        });
-        return result;
-      }
+    assertThat(sdk + `
       div {
         span {
         }
       }`
     ).equalsTo({
-      hello: "hi"
+      "@type": "div",
+      children: [{
+	"@type": "span"
+      }]
     });
   });
 
   it('Text nodes', function() {
-    assertThat(`
-      function div(block) {
-        let result = '';
-        block({
-          span: function(text) { result = text; }
-        });
-        return result;
-      }
+    assertThat(sdk + `
       div {
         span("hello world")
       }`
-    ).equalsTo("hello world");
+    ).equalsTo({
+      "@type": "div",
+      children: [{
+	"@type": "span",
+	children: [ "hello world" ]
+      }]
+    });
   });
 
   it('If statements', function() {
-    assertThat(`
-      function div(block) {
-        let result = "";
-        block({
-          span: function(text) { result = text; }
-        });
-        return result;
-      }
+    assertThat(sdk + `
       div {
         if (true) {
           span("hello world")
         }
       }`
-    ).equalsTo("hello world");
+    ).equalsTo({
+      "@type": "div",
+      children: [{
+	"@type": "span",
+	children: [ "hello world" ]
+      }]
+    });
   });
 
   it('For-loops', function() {
-    assertThat(`
-      function div(block) {
-        let result = "";
-        block({
-          span: function(text) { result += text; }
-        });
-        return result;
-      }
+    assertThat(sdk + `
       div {
         for (let i = 0; i < 2; i++) {
-          span("<" + i + "> ")
+          span("" + i + "")
         }
       }`
-    ).equalsTo("<0> <1> ");
+    ).equalsTo({
+      "@type": "div",
+      "children": [{
+	"@type": "span",
+	"children": ["0"]
+      }, {
+	"@type": "span",
+	"children": ["1"]
+      }]
+    });
   });
 
   it('Functions 1', function() {
-    assertThat(`
-      function div(block) {
-        let result = {};
-        block({
-          node: function() {
-            return result;
-          }
-        });
-        return result;
-      }
-
+    assertThat(sdk + `
       function bar(parent) {
-        parent.hello = "world";
+        parent.append("hello world");
       }
 
       div {
         bar(node())
       }`
     ).equalsTo({
-      hello: "world"
+      "@type": "div",
+      "children": ["hello world"]
     });
   });
 
   it('Variables', function() {
-    assertThat(`
-      function div(block) {
-        let result = { children: [] };
-        block({
-          append: function(child) { result.children.push(child); }
-        });
-        return result;
-      }
-      function span(text) {
-        return text;
-      }
-      let a = span("hello world");
+    assertThat(sdk + `
+      // TODO(goto): figure out why using "let foo" here breaks.
+      var foo = "hello world";
       div {
-        append(a)
+        append(foo)
       }`
     ).equalsTo({
+      "@type": "div",
       children: ["hello world"]
     });
   });
 
   it('Scripting internal variables', function() {
-    assertThat(`
-      function div(block) {
-        let result = { children: [] };
-        block({
-          append: function(value) {
-            result.children.push(value);
-          }
-        });
-        return result;
-      }
+    assertThat(sdk + `
       div {
 	var a = 1;
         var b = 2;
@@ -204,64 +195,31 @@ describe("Runtime", function() {
         append(foo())
       }`
     ).equalsTo({
+      "@type": "div",
       children: [2, 0, 1]
     });
   });
 
-  it.skip("Arrays can be embedded", function() {
-    assertThat(`
-      function div(block) {
-        let result = {};
-        block({
-          append: function(children) {
-          }
-        });
-        return result;
-      }
+  it("Arrays can be embedded", function() {
+    assertThat(sdk + `
       div {
-        append([ span { }, "hello" ])
+        ["hello", "world"].forEach(x => append(x));
       }`
     ).equalsTo({
-      name: "div",
-      children: [{
-        name: "span"
-      }, "hello"]
+      "@type": "div",
+      children: ["hello", "world"]
     });
   });
 
-  it.skip("[].map() has the right reference to this", function() {
-    assertThat(`
+  it("Two variables", function() {
+    assertThat(sdk + `
+      var a = "1";
       div {
-        ["1", "2"].map(x => \`$\{x\}\`)
+	append(a)
+        append(a)
       }`
     ).equalsTo({
-      name: "div",
-      children: ["1", "2"]
-    });
-  });
-
-  it.skip("Two variables", function() {
-    assertThat(`
-      let a = "1";
-      div {
-	a
-        a
-      }`
-    ).equalsTo({
-      name: "div",
-      children: ["1", "1"]
-    });
-  });
-
-  it.skip("Two method calls", function() {
-    assertThat(`
-      function a() { return  "1"; }
-      div {
-	a()
-        a()
-      }`
-    ).equalsTo({
-      name: "div",
+      "@type": "div",
       children: ["1", "1"]
     });
   });
@@ -322,45 +280,46 @@ describe("Runtime", function() {
   });
 
   it.skip("div {} expressions can follow [].map()", function() {
-    assertThat(`
+    assertThat(sdk + `
       div {
+        // TODO(goto): span {}; works, debug why omitting it doesn't.
         span {}
-        ["1"].map(x => "foo" + x);
+        ["1"].map(x => append("foo" + x));
       }`
     ).equalsTo({
-      name: "div",
+      "@type": "div",
       children: [{
-	name: "span"
+	"@type": "span"
       }, "foo1"]
     });
   });
 
-  it.skip("this.prop reference on Function.call()", function() {
-    assertThat(`
-      function foo() {
+  it("scope reference works on parameters", function() {
+    assertThat(sdk + `
+      function foo(props) {
         return div {
-          this.foo;
+          append(props.foo);
         };
       }
-      foo.call({foo: "bar"});
+      foo({foo: "bar"});
     `
     ).equalsTo({
-      name: "div",
+      "@type": "div",
       children: ["bar"]
     });
   });
 
-  it.skip("this.method() reference on Function.call()", function() {
-    assertThat(`
-      function foo() {
+  it("method() reference works", function() {
+    assertThat(sdk + `
+      function foo(context) {
         return div {
-          this.foo();
+          append(context.foo())
         };
       }
-      foo.call({foo: function() { return "bar"} });
+      foo({foo: function() { return "bar"} });
     `
     ).equalsTo({
-      name: "div",
+      "@type": "div",
       children: ["bar"]
     });
   });
@@ -649,10 +608,27 @@ function assertThat(code) {
     }
     return eval(compiled);
   }
+
+  function clean(obj) {
+    // console.log(obj);
+    // return obj;
+    for (prop in obj) {
+      if (typeof obj[prop] == "function" ||
+	 obj[prop] == undefined) {
+	delete obj[prop];
+	continue;
+      } else if (typeof obj[prop] == "object") {
+        clean(obj[prop]);
+	continue;
+      }
+    }
+    return obj;
+  }
+
   return {
     equalsTo: function(expected, opt_debug) {
       let result = evals(opt_debug);
-      Assert.deepEqual(result, expected);
+      Assert.deepEqual(clean(result), expected);
     },
     contains: function(expected, opt_debug) {
       let result = evals(opt_debug);
