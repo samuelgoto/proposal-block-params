@@ -1,48 +1,35 @@
 {
- "name": "div",
+ "@type": "div",
  "children": [
   {
-   "name": "span",
+   "@type": "div",
    "children": [
     "Hello World!"
    ]
   },
   {
-   "name": "span",
+   "@type": "div",
    "children": [
     "extra info"
    ]
   },
   {
-   "name": "div",
+   "@type": "div",
    "children": [
+    "Welcome back!",
     {
-     "name": "a",
-     "attributes": {
-      "href": "about.html"
-     },
+     "@type": "span",
      "children": [
       "about"
      ]
     },
     {
-     "name": "a",
-     "attributes": {
-      "href": "contact.html"
-     },
+     "@type": "span",
      "children": [
       "contact"
-     ]
-    },
-    {
-     "name": "div",
-     "attributes": {},
-     "children": [
-      "click me!"
      ]
     }
    ]
   }
  ]
 }
-Hi!

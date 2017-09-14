@@ -18,48 +18,10 @@ describe("Runtime", function() {
   });
 
   it('Simplest', function() {
-    assertThat(`function div() { return 1; } div {}`).equalsTo(1, true);
+    assertThat(`function foo() { return 1; } foo {}`).equalsTo(1, true);
   });
 
   let sdk = `
-    function div(block) {
-      let result = new DIV();
-      block.call(result, result);
-      return result;
-    }
-    function DIV() {
-      this["@type"] = "div";
-      this.width = undefined;
-      this.height = undefined;
-      this.setAttribute = function(name, value) {
-        this[name] = value;
-      };
-      this.root = function() {
-        return this;
-      };
-      this.node = function(child) {
-        this.children = this.children || [];
-        this.children.push(child);
-      };
-      this.span = function(arg1, arg2) {
-        let result = new SPAN();
-        let block = function() {};
-        if (typeof arg1 == "function") {
-          block = arg1;
-        } else if (typeof arg2 == "function") {
-          block = arg2;
-        }
-        block.call(result, result);
-        if (typeof arg1 == "string") {
-          result.children = [arg1];
-        }
-        this.node(result);
-        return result;
-      }
-    }
-    function SPAN() {
-      this["@type"] = "span";
-    }
   `;
 
   it.skip('Expression Statements', function() {
@@ -73,18 +35,20 @@ describe("Runtime", function() {
     // named key/value object.
     // TODO(goto): possibly allow things like "enabled" that are just
     // key-like objects to exist.
-    assertThat(`function div(param) { return param; } div(1) {}`).equalsTo(1);
+    assertThat(`function foo(param) { return param; } foo(1) {}`).equalsTo(1);
   });
 
   it('Attributes', function() {
-    assertThat(sdk + `div { width = 100 }`).equalsTo({
+    assertThat(`
+      div { width = 100 }
+    `).equalsTo({
       "@type": "div",
       width: 100
-    });
+    }, true);
   });
 
   it('Methods', function() {
-    assertThat(sdk + `
+    assertThat(`
       div {
         setAttribute("width", 200)
       }`
@@ -92,7 +56,7 @@ describe("Runtime", function() {
   });
 
   it('Nesting', function() {
-    assertThat(sdk + `
+    assertThat(`
       div {
         span {
         }
@@ -106,7 +70,7 @@ describe("Runtime", function() {
   });
 
   it('Text nodes', function() {
-    assertThat(sdk + `
+    assertThat(`
       div {
         span("hello world")
       }`
@@ -120,7 +84,7 @@ describe("Runtime", function() {
   });
 
   it('If statements', function() {
-    assertThat(sdk + `
+    assertThat(`
       div {
         if (true) {
           span("hello world")
@@ -136,7 +100,7 @@ describe("Runtime", function() {
   });
 
   it('For-loops', function() {
-    assertThat(sdk + `
+    assertThat(`
       div {
         for (let i = 0; i < 2; i++) {
           span("" + i + "")
@@ -155,7 +119,7 @@ describe("Runtime", function() {
   });
 
   it('Functions 1', function() {
-    assertThat(sdk + `
+    assertThat(`
       function bar(parent) {
         parent.node("hello world");
       }
@@ -170,7 +134,7 @@ describe("Runtime", function() {
   });
 
   it('Variables', function() {
-    assertThat(sdk + `
+    assertThat(`
       // TODO(goto): figure out why using "let foo" here breaks.
       var foo = "hello world";
       div {
@@ -183,7 +147,7 @@ describe("Runtime", function() {
   });
 
   it('Scripting internal variables', function() {
-    assertThat(sdk + `
+    assertThat(`
       div {
 	var a = 1;
         var b = 2;
@@ -201,7 +165,7 @@ describe("Runtime", function() {
   });
 
   it("Arrays can be embedded", function() {
-    assertThat(sdk + `
+    assertThat(`
       div {
         ["hello", "world"].forEach(x => node(x));
       }`
@@ -212,7 +176,7 @@ describe("Runtime", function() {
   });
 
   it("Two variables", function() {
-    assertThat(sdk + `
+    assertThat(`
       var a = "1";
       div {
 	node(a)
@@ -602,7 +566,12 @@ class That {
 function assertThat(code) {
   // return new That(code);
   function evals(opt_debug) {
-    let compiled = DocScript.compile(code).toString();
+    let script = `
+      const {div} = require("../examples/framework/framework.js");
+
+      ${code}
+    `;
+    let compiled = DocScript.compile(script).toString();
     if (opt_debug) {
       console.log(compiled);
     }

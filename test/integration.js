@@ -2,7 +2,7 @@ var {DocScript} = require('./../docscript.js');
 const fs = require('fs');
 const Assert = require('assert');
 
-describe.skip("Integration Tests", function(done) {
+describe("Integration Tests", function(done) {
   fs.readdirSync("./examples")
       .filter(file => {
 	// Only keep the .js files
@@ -20,9 +20,23 @@ describe.skip("Integration Tests", function(done) {
 	  // console.log(`${docscript} ${result}`);
 	  // let b = eval(`${DocScript.api()} ${result}`);
 	  let stdout = [];
-	  let result = DocScript.eval(`
-	      ${code.toString()}
-          `, stdout);
+	  // console.log(`${code.toString()}`);
+	  let foo = DocScript.compile(code.toString());
+	  let debug = `
+            var console = {
+              log: function(str) {
+                stdout.push(str);
+              }
+            };
+         `;
+
+	  let script = `${debug} ${foo}`;
+	  console.log(script);
+	  eval(script);
+	  // console.log(file);
+	  // let result = DocScript.eval(`
+	  //    ${code.toString()}
+          // `, stdout);
 	  // console.log(result);
 	  // console.log(stdout.join("\n"));
 	  // console.log(expected.toString());
