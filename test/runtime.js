@@ -226,7 +226,8 @@ describe("Runtime", function() {
         ["1"] // for some reason adding this breaks it
         ["1"].map(x => x)
       }
-    `).throwsError("Should've failed");
+    `).equalsTo({
+    });
   });
 
   it.skip("div {} expressions become statements", function() {
