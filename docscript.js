@@ -143,7 +143,7 @@ function visitor(node) {
 	  continue;
 	}
 
-	params += `function(scope) { with (scope) ${param.source()} }`;
+	params += `function() { with (this) ${param.source()} }`;
       }
 
       node.update(`${node.callee.source()}(${params})`);

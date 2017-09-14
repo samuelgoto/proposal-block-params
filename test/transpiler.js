@@ -11,50 +11,50 @@ describe("Transpiler", function() {
   it("Visiting basic", function() {
     let result = DocScript.compile(`d {};`);
     Assert.equal(result,
-        `d(function(scope) { with (scope) {} });`);
+        `d(function() { with (this) {} });`);
   });
 
   it("Visiting empty attributes", function() {
     let result = DocScript.compile(`d({}) {};`);
     // console.log(result);
-    Assert.equal(result, `d({}, function(scope) { with (scope) {} });`);
+    Assert.equal(result, `d({}, function() { with (this) {} });`);
   });
 
   it("Visiting single attribute", function() {
     let result = DocScript.compile(`d(1) {};`);
     // console.log(result);
     Assert.equal(result,
-        `d(1, function(scope) { with (scope) {} });`);
+        `d(1, function() { with (this) {} });`);
   });
 
   it("Visiting object attribute", function() {
     let result = DocScript.compile(`d({a: 1}) {};`);
     Assert.equal(result,
-        `d({a: 1}, function(scope) { with (scope) {} });`);
+        `d({a: 1}, function() { with (this) {} });`);
   });
 
   it("Keeps statements in expressions", function() {
     let result = DocScript.compile(`d { a = 1 };`);
     Assert.equal(result,
-        `d(function(scope) { with (scope) { a = 1 } });`);
+        `d(function() { with (this) { a = 1 } });`);
   });
 
   it("Keeps statements in calls", function() {
     let result = DocScript.compile(`d(1) { a = 1 };`);
     Assert.equal(result,
-        `d(1, function(scope) { with (scope) { a = 1 } });`);
+        `d(1, function() { with (this) { a = 1 } });`);
   });
 
   it("Wraps literals in __Literal__", function() {
     let result = DocScript.compile(`d { 1 };`);
     Assert.equal(result,
-        `d(function(scope) { with (scope) { scope.__Literal__(1); } });`);
+        `d(function() { with (this) { scope.__Literal__(1); } });`);
   });
 
   it("Wraps variables in __Identifier__", function() {
     let result = DocScript.compile(`d { a };`);
     Assert.equal(result,
-        `d(function(scope) { with (scope) { scope.__Identifier__(a); } });`);
+        `d(function() { with (this) { scope.__Identifier__(a); } });`);
   });
 
   it.skip("Visiting function attributes binds this", function() {
