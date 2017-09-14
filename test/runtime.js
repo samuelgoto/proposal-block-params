@@ -34,10 +34,10 @@ describe("Runtime", function() {
       this.setAttribute = function(name, value) {
         this[name] = value;
       };
-      this.node = function() {
+      this.root = function() {
         return this;
       };
-      this.append = function(child) {
+      this.node = function(child) {
         this.children = this.children || [];
         this.children.push(child);
       };
@@ -53,7 +53,7 @@ describe("Runtime", function() {
         if (typeof arg1 == "string") {
           result.children = [arg1];
         }
-        this.append(result);
+        this.node(result);
         return result;
       }
     }
@@ -157,11 +157,11 @@ describe("Runtime", function() {
   it('Functions 1', function() {
     assertThat(sdk + `
       function bar(parent) {
-        parent.append("hello world");
+        parent.node("hello world");
       }
 
       div {
-        bar(node())
+        bar(root())
       }`
     ).equalsTo({
       "@type": "div",
@@ -174,7 +174,7 @@ describe("Runtime", function() {
       // TODO(goto): figure out why using "let foo" here breaks.
       var foo = "hello world";
       div {
-        append(foo)
+        node(foo)
       }`
     ).equalsTo({
       "@type": "div",
@@ -187,12 +187,12 @@ describe("Runtime", function() {
       div {
 	var a = 1;
         var b = 2;
-	append(b)
-	append(a & b)
+	node(b)
+	node(a & b)
         function foo() {
           return 1;
         }
-        append(foo())
+        node(foo())
       }`
     ).equalsTo({
       "@type": "div",
@@ -203,7 +203,7 @@ describe("Runtime", function() {
   it("Arrays can be embedded", function() {
     assertThat(sdk + `
       div {
-        ["hello", "world"].forEach(x => append(x));
+        ["hello", "world"].forEach(x => node(x));
       }`
     ).equalsTo({
       "@type": "div",
@@ -215,8 +215,8 @@ describe("Runtime", function() {
     assertThat(sdk + `
       var a = "1";
       div {
-	append(a)
-        append(a)
+	node(a)
+        node(a)
       }`
     ).equalsTo({
       "@type": "div",
@@ -284,7 +284,7 @@ describe("Runtime", function() {
       div {
         // TODO(goto): span {}; works, debug why omitting it doesn't.
         span {}
-        ["1"].map(x => append("foo" + x));
+        ["1"].map(x => node("foo" + x));
       }`
     ).equalsTo({
       "@type": "div",
@@ -298,7 +298,7 @@ describe("Runtime", function() {
     assertThat(sdk + `
       function foo(props) {
         return div {
-          append(props.foo);
+          node(props.foo);
         };
       }
       foo({foo: "bar"});
@@ -313,7 +313,7 @@ describe("Runtime", function() {
     assertThat(sdk + `
       function foo(context) {
         return div {
-          append(context.foo())
+          node(context.foo())
         };
       }
       foo({foo: function() { return "bar"} });
