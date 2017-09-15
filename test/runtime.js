@@ -21,9 +21,6 @@ describe("Runtime", function() {
     assertThat(`function foo() { return 1; } foo {}`).equalsTo(1, true);
   });
 
-  let sdk = `
-  `;
-
   it.skip('Expression Statements', function() {
     assertThat(sdk + `
       div { 1 }`
@@ -40,7 +37,9 @@ describe("Runtime", function() {
 
   it('Attributes', function() {
     assertThat(`
-      div { width = 100 }
+      div {
+        width = 100
+      }
     `).equalsTo({
       "@type": "div",
       width: 100
@@ -52,7 +51,7 @@ describe("Runtime", function() {
       div {
         setAttribute("width", 200)
       }`
-    ).equalsTo({"@type": "div", width : 200});
+    ).equalsTo({"@type": "div", width : 200}, true);
   });
 
   it('Nesting', function() {
@@ -66,7 +65,7 @@ describe("Runtime", function() {
       children: [{
 	"@type": "span"
       }]
-    });
+    }, true);
   });
 
   it('Text nodes', function() {
@@ -99,7 +98,7 @@ describe("Runtime", function() {
     });
   });
 
-  it('For-loops', function() {
+  it.only('For-loops', function() {
     assertThat(`
       div {
         for (let i = 0; i < 2; i++) {
@@ -115,7 +114,7 @@ describe("Runtime", function() {
 	"@type": "span",
 	"children": ["1"]
       }]
-    });
+    }, true);
   });
 
   it('Functions 1', function() {
@@ -287,6 +286,22 @@ describe("Runtime", function() {
       "@type": "div",
       children: ["bar"]
     });
+  });
+
+  it.skip("Simplest usage in Classes", function() {
+    assertThat(`
+      class Foo {
+        bar() {
+          return div {
+          };
+        }
+      }
+      new Foo().bar();
+    `
+    ).equalsTo({
+      name: "div",
+      children: ["bar"]
+    }, true);
   });
 
   it.skip("this reference on Classes", function() {

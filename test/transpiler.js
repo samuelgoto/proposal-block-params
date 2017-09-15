@@ -11,47 +11,47 @@ describe("Transpiler", function() {
   it("Visiting basic", function() {
     let result = DocScript.compile(`d {};`);
     Assert.equal(result,
-        `d(function() { with (this) {} });`);
+        `d(function() {});`);
   });
 
   it("Visiting empty attributes", function() {
     let result = DocScript.compile(`d({}) {};`);
     // console.log(result);
-    Assert.equal(result, `d({}, function() { with (this) {} });`);
+    Assert.equal(result, `d({}, function() {});`);
   });
 
   it("Visiting single attribute", function() {
     let result = DocScript.compile(`d(1) {};`);
     // console.log(result);
     Assert.equal(result,
-        `d(1, function() { with (this) {} });`);
+        `d(1, function() {});`);
   });
 
   it("Visiting object attribute", function() {
     let result = DocScript.compile(`d({a: 1}) {};`);
     Assert.equal(result,
-        `d({a: 1}, function() { with (this) {} });`);
+        `d({a: 1}, function() {});`);
   });
 
   it("Keeps statements in expressions", function() {
     let result = DocScript.compile(`d { a = 1 };`);
     Assert.equal(result,
-        `d(function() { with (this) { a = 1 } });`);
+        `d(function() { ("a" in this ? this.a = 1 : a = 1) });`);
   });
 
   it("Keeps statements in calls", function() {
     let result = DocScript.compile(`d(1) { a = 1 };`);
     Assert.equal(result,
-        `d(1, function() { with (this) { a = 1 } });`);
+        `d(1, function() { ("a" in this ? this.a = 1 : a = 1) });`);
   });
 
-  it("Wraps literals in __Literal__", function() {
+  it.skip("Wraps literals in __Literal__", function() {
     let result = DocScript.compile(`d { 1 };`);
     Assert.equal(result,
         `d(function() { with (this) { scope.__Literal__(1); } });`);
   });
 
-  it("Wraps variables in __Identifier__", function() {
+  it.skip("Wraps variables in __Identifier__", function() {
     let result = DocScript.compile(`d { a };`);
     Assert.equal(result,
         `d(function() { with (this) { scope.__Identifier__(a); } });`);
@@ -66,4 +66,38 @@ describe("Transpiler", function() {
     Assert.equal(result,
         `DocScript.createElement.call(this, "d", {a: (function() { return this; }).bind(this) }, function(parent) {});`);
   });
+
+  it("Literal resolution for methods", function() {
+    let result = DocScript.compile(`d { a() };`);
+    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a)() });`);
+  });
+
+  it("Property access remains the same for objects", function() {
+    let result = DocScript.compile(`d { a.b };`);
+    Assert.equal(result, `d(function() { ("a" in this ? this.a : a).b });`);
+  });
+
+  it("Property access remains the same for functions", function() {
+    let result = DocScript.compile(`d { a.b() };`);
+    Assert.equal(result, `d(function() { ("a" in this ? this.a : a).b() });`);
+  });
+
+  it("Property access remains the same for assignments", function() {
+    let result = DocScript.compile(`d { a.b = 1 };`);
+    Assert.equal(result,
+        `d(function() { ("a" in this ? this.a.b = 1 : a.b = 1) });`);
+  });
+
+  it("Literal resolution nested methods", function() {
+    let result = DocScript.compile(`d { a { } };`);
+    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a)(function() { }) });`);
+  });
+
+  it("Property access isn't done on lets", function() {
+    let result = DocScript.compile(`d { let a = 1 };`);
+    Assert.equal(result,
+        `d(function() { let a = 1 });`);
+  });
+
+
 });

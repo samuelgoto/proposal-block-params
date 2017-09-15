@@ -131,7 +131,51 @@ acorn.plugins.docscript = function(parser) {
 // return;
 
 function visitor(node) {
-  if (node.type === "CallExpression") {
+
+  function inside(node, pred) {
+    // let inside = false;
+    let parent = node.parent;
+    while (parent) {
+      if (pred(parent)) {
+	// inside = true;
+	// break;
+	return true;
+      }
+      parent = parent.parent;
+    };
+    return false;
+  }
+
+  if (node.type == "AssignmentExpression" &&
+      inside(node, n => n.docscript)) {
+    // console.log(node);
+    let left = node.left.source();
+    let right = node.right.source();
+    //console.log(node.left);
+    let prop = left;
+    if (node.left.type == "MemberExpression") {
+      prop = node.left.object.source();
+    }
+    node.update(`("${prop}" in this ? this.${left} = ${right} : ${left} = ${right})`);
+  } else if (node.type == "Identifier") {
+    // NOTE(goto): I am very confident I am forgetting a corner case here.
+    if (!(node.parent.type == "MemberExpression" &&
+	  node.parent.property == node) &&
+        !(node.parent.type == "VariableDeclarator") &&
+	inside(node, n => n.docscript) &&
+	!inside(node, n => n.type == "AssignmentExpression")) {
+
+      // console.log(node);
+      // For method calls, bind to the right instance.
+      let bind = node.parent.type == "CallExpression" ? ".bind(this)" : "";
+
+      // console.log(inside(node));
+
+      // node.update(`(this.${node.name} || ${node.name})`);
+      node.update(`("${node.name}" in this ? this.${node.name}${bind} : ${node.name})`);
+    }
+  } else if (node.type === "CallExpression") {
+    // return;
     if (node.arguments.length > 0 &&
 	node.arguments[node.arguments.length - 1].docscript) {
       let params = ``;
@@ -143,7 +187,7 @@ function visitor(node) {
 	  continue;
 	}
 
-	params += `function() { with (this) ${param.source()} }`;
+	params += `function() ${param.source() }`;
       }
 
       node.update(`${node.callee.source()}(${params})`);
