@@ -49,7 +49,7 @@ describe("Runtime", function() {
   it('Methods', function() {
     assertThat(`
       div {
-        setAttribute("width", 200)
+        this.width = 200
       }`
     ).equalsTo({"@type": "div", width : 200});
   });
@@ -413,9 +413,9 @@ describe("Runtime", function() {
   it('Attributes: functions', function() {
     let result = assertThat(`
       div {
-        setAttribute("onclick", function() {
+        this.onclick = function() {
           return "hello world";
-        })
+        }
       }
     `).evals();
     let callback = result.onclick();
@@ -427,9 +427,9 @@ describe("Runtime", function() {
       class Foo {
         render() {
           return div {
-            setAttribute("onclick", function() {
+            this.onclick = function() {
               return "hello world";
-            })
+            }
           };
         }
       }
@@ -451,10 +451,10 @@ describe("Runtime", function() {
         render() {
           let context = this;
           return div {
-            setAttribute("onclick", function() {
+            this.onclick = function() {
               context.setState();
               return context.message;
-            });
+            };
           };
         }
       }
@@ -474,10 +474,10 @@ describe("Runtime", function() {
         render() {
           let context = this;
           return div {
-            setAttribute("onclick", function() {
+            this.onclick = function() {
               context.state = "changed!";
               return context.message;
-            });
+            };
           };
         }
       }
