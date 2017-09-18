@@ -288,87 +288,102 @@ describe("Runtime", function() {
     });
   });
 
-  it.skip("Simplest usage in Classes", function() {
+  it("Simplest usage in Classes", function() {
     assertThat(`
       class Foo {
         bar() {
           return div {
+            span("bar")
           };
         }
       }
       new Foo().bar();
     `
     ).equalsTo({
-      name: "div",
-      children: ["bar"]
+      "@type": "div",
+      children: [{
+	"@type": "span",
+	children: [ "bar" ]
+      }]
     });
   });
 
-  it.skip("this reference on Classes", function() {
+  it("this reference on Classes", function() {
     assertThat(`
       class Foo {
         constructor() {
           this.foo = "bar";
         }
         bar() {
+          let context = this;
           return div {
-            this.foo;
+            span(context.foo);
           };
         }
       }
       new Foo().bar();
     `
     ).equalsTo({
-      name: "div",
-      children: ["bar"]
+      "@type": "div",
+      children: [{
+	"@type": "span",
+	children: [ "bar" ]
+      }]
     });
   });
 
-  it.skip("this.method() reference on Classes", function() {
+  it("this.method() reference on Classes", function() {
     assertThat(`
       class Foo {
         foo() {
           return "bar";
         }
         bar() {
+          let context = this;
           return div {
-            this.foo();
+            span(context.foo());
           };
         }
       }
       new Foo().bar();
     `
     ).equalsTo({
-      name: "div",
-      children: ["bar"]
+      "@type": "div",
+      children: [{
+	"@type": "span",
+	children: [ "bar" ]
+      }]
     });
   });
 
-  it.skip("Composes classes", function() {
+  it("Composes classes", function() {
     assertThat(`
       class Foo {
         render() {
           return div {
-            // if a docscript expression starts with a capital letter
-            // it refers to a custom class type rather than a literal.
-            Bar {};
+            // TODO(goto): there is probably a better syntax simplification
+            // that can aid this.
+            node(new Bar().render());
           }
         }
       }
       class Bar {
         render() {
           return div {
-            "bar";
+            span("bar");
           }
         }
       }
       new Foo().render();
     `
     ).equalsTo({
-      name: "div",
+      "@type": "div",
       children: [{
-	name: "div",
-        children: ["bar"]
+	"@type": "div",
+        children: [{
+	  "@type": "span",
+	  children: [ "bar" ]
+	}]
       }]
     });
   });
@@ -407,25 +422,24 @@ describe("Runtime", function() {
     Assert.equal("hello world", callback);
   });
 
-  it.skip('Attributes: functions, classes', function() {
+  it('Attributes: functions, classes', function() {
     let result = assertThat(`
       class Foo {
         render() {
-          return div({
-            onclick: function() {
+          return div {
+            setAttribute("onclick", function() {
               return "hello world";
-            }
-            }) {
+            })
           };
         }
       }
       new Foo()
     `).evals();
-    let callback = result.render().attributes.onclick();
+    let callback = result.render().onclick();
     Assert.equal("hello world", callback);
   });
 
-  it.skip('Attributes: classes, attributes and this', function() {
+  it('Attributes: classes, attributes and this', function() {
     let result = assertThat(`
       class Foo {
         constructor() {
@@ -435,42 +449,41 @@ describe("Runtime", function() {
           this.state = "changed!";
         }
         render() {
-          return div({
-            onclick: function() {
-              this.setState();
-              return this.message;
-            }
-            }) {
+          let context = this;
+          return div {
+            setAttribute("onclick", function() {
+              context.setState();
+              return context.message;
+            });
           };
         }
       }
       new Foo()
     `).evals();
-    let callback = result.render().attributes.onclick();
+    let callback = result.render().onclick();
     Assert.equal("hello world", callback);
     Assert.equal("changed!", result.state);
   });
 
-  it.skip('Attributes: classes, attributes and this from references', function() {
+  it('Attributes: classes, attributes and this from references', function() {
     let result = assertThat(`
       class Foo {
         constructor() {
           this.message = "hello world";
         }
         render() {
-          let props = {
-            onclick: function() {
-              this.state = "changed!";
-              return this.message;
-            }
-          };
-          return div(props) {
+          let context = this;
+          return div {
+            setAttribute("onclick", function() {
+              context.state = "changed!";
+              return context.message;
+            });
           };
         }
       }
       new Foo()
     `).evals();
-    let callback = result.render().attributes.onclick();
+    let callback = result.render().onclick();
     Assert.equal("hello world", callback);
     Assert.equal("changed!", result.state);
   });
