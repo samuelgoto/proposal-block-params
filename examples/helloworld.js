@@ -23,9 +23,16 @@ function extra() {
   return div { node("extra info") };
 }
 
+function mel() {}
+
 let html = div {
   node(head)
-  node(extra())
+  // TODO(goto): for some reasons, the access to extra() throws
+  // a ReferenceError. Fix this.
+  // node(extra())
+  // extra()
+  // console.log(extra);
+  // console.log(`hi ${this.extra} ${extra}`)
   node(body)
 }
 

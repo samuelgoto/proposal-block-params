@@ -36,13 +36,13 @@ describe("Transpiler", function() {
   it("Keeps statements in expressions", function() {
     let result = DocScript.compile(`d { a = 1 };`);
     Assert.equal(result,
-        `d(function() { ("a" in this ? this.a = 1 : a = 1) });`);
+        `d(function() { a = 1 });`);
   });
 
   it("Keeps statements in calls", function() {
     let result = DocScript.compile(`d(1) { a = 1 };`);
     Assert.equal(result,
-        `d(1, function() { ("a" in this ? this.a = 1 : a = 1) });`);
+        `d(1, function() { a = 1 });`);
   });
 
   it.skip("Wraps literals in __Literal__", function() {
@@ -69,28 +69,33 @@ describe("Transpiler", function() {
 
   it("Literal resolution for methods", function() {
     let result = DocScript.compile(`d { a() };`);
-    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a)() });`);
+    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a)(); });`);
+  });
+
+  it("Literal resolution for methods with params", function() {
+    let result = DocScript.compile(`d { a(c) };`);
+    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a)(c); });`);
+  });
+
+  it("Literal resolution nested methods", function() {
+    let result = DocScript.compile(`d { a { } };`);
+    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a)(function() { }); });`);
   });
 
   it("Property access remains the same for objects", function() {
     let result = DocScript.compile(`d { a.b };`);
-    Assert.equal(result, `d(function() { ("a" in this ? this.a : a).b });`);
+    Assert.equal(result, `d(function() { a.b });`);
   });
 
   it("Property access remains the same for functions", function() {
     let result = DocScript.compile(`d { a.b() };`);
-    Assert.equal(result, `d(function() { ("a" in this ? this.a : a).b() });`);
+    Assert.equal(result, `d(function() { a.b(); });`);
   });
 
   it("Property access remains the same for assignments", function() {
     let result = DocScript.compile(`d { a.b = 1 };`);
     Assert.equal(result,
-        `d(function() { ("a" in this ? this.a.b = 1 : a.b = 1) });`);
-  });
-
-  it("Literal resolution nested methods", function() {
-    let result = DocScript.compile(`d { a { } };`);
-    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a)(function() { }) });`);
+        `d(function() { a.b = 1 });`);
   });
 
   it("Property access isn't done on lets", function() {
@@ -98,6 +103,5 @@ describe("Transpiler", function() {
     Assert.equal(result,
         `d(function() { let a = 1 });`);
   });
-
 
 });

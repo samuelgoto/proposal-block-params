@@ -146,33 +146,12 @@ function visitor(node) {
     return false;
   }
 
-  if (node.type == "AssignmentExpression" &&
-      inside(node, n => n.docscript)) {
-    // console.log(node);
-    let left = node.left.source();
-    let right = node.right.source();
-    //console.log(node.left);
-    let prop = left;
-    if (node.left.type == "MemberExpression") {
-      prop = node.left.object.source();
-    }
-    node.update(`("${prop}" in this ? this.${left} = ${right} : ${left} = ${right})`);
-  } else if (node.type == "Identifier") {
-    // NOTE(goto): I am very confident I am forgetting a corner case here.
-    if (!(node.parent.type == "MemberExpression" &&
-	  node.parent.property == node) &&
-        !(node.parent.type == "VariableDeclarator") &&
-	inside(node, n => n.docscript) &&
-	!inside(node, n => n.type == "AssignmentExpression")) {
-
+  if (node.type == "Identifier") {
+    if (inside(node, n => n.docscript) &&
+	node.parent.type == "CallExpression" &&
+        node.parent.callee == node) {
       // console.log(node);
-      // For method calls, bind to the right instance.
-      let bind = node.parent.type == "CallExpression" ? ".bind(this)" : "";
-
-      // console.log(inside(node));
-
-      // node.update(`(this.${node.name} || ${node.name})`);
-      node.update(`("${node.name}" in this ? this.${node.name}${bind} : ${node.name})`);
+      node.update(`("${node.name}" in this ? this.${node.name}.bind(this) : ${node.name})`);
     }
   } else if (node.type === "CallExpression") {
     // return;
@@ -193,33 +172,10 @@ function visitor(node) {
       node.update(`${node.callee.source()}(${params})`);
     }
   } else if (node.type == "ExpressionStatement") {
-    var parent = node.parent;
-    var inside = false;
-    // console.log(node.parent);
-    while (parent) {
-      if (parent.type == "FunctionDeclaration" &&
-	  !parent.docscript) {
-	// If we are inside a function declaration that is not
-	// a DocScript, that crosses the boundaries of
-	// DocScript inside DocScript because the parameters are
-	// different.
-	break;
-      }
-      if (parent.docscript) {
-	inside = true;
-	break;
-      }
-      parent = parent.parent;
-    }
-    if (inside) {
-      // console.log("hi");
+    if (inside(node, n => n.docscript) &&
+	node.expression.type == "CallExpression") {
       // console.log(node);
-      // console.log(node.expression.type == "");
-      // console.log(node.source());
-      let type = node.expression.type;
-      if (type == "Identifier" || type == "Literal") {
-        node.update(`scope.__${type}__(${node.source()});`);
-      }
+      node.update(`${node.source()};`);
     }
   }
 }

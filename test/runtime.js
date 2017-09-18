@@ -18,7 +18,7 @@ describe("Runtime", function() {
   });
 
   it('Simplest', function() {
-    assertThat(`function foo() { return 1; } foo {}`).equalsTo(1, true);
+    assertThat(`function foo() { return 1; } foo {}`).equalsTo(1);
   });
 
   it.skip('Expression Statements', function() {
@@ -38,12 +38,12 @@ describe("Runtime", function() {
   it('Attributes', function() {
     assertThat(`
       div {
-        width = 100
+        this.width = 100
       }
     `).equalsTo({
       "@type": "div",
       width: 100
-    }, true);
+    });
   });
 
   it('Methods', function() {
@@ -51,7 +51,7 @@ describe("Runtime", function() {
       div {
         setAttribute("width", 200)
       }`
-    ).equalsTo({"@type": "div", width : 200}, true);
+    ).equalsTo({"@type": "div", width : 200});
   });
 
   it('Nesting', function() {
@@ -65,7 +65,7 @@ describe("Runtime", function() {
       children: [{
 	"@type": "span"
       }]
-    }, true);
+    });
   });
 
   it('Text nodes', function() {
@@ -98,7 +98,7 @@ describe("Runtime", function() {
     });
   });
 
-  it.only('For-loops', function() {
+  it('For-loops', function() {
     assertThat(`
       div {
         for (let i = 0; i < 2; i++) {
@@ -114,7 +114,7 @@ describe("Runtime", function() {
 	"@type": "span",
 	"children": ["1"]
       }]
-    }, true);
+    });
   });
 
   it('Functions 1', function() {
@@ -259,7 +259,7 @@ describe("Runtime", function() {
   });
 
   it("scope reference works on parameters", function() {
-    assertThat(sdk + `
+    assertThat(`
       function foo(props) {
         return div {
           node(props.foo);
@@ -274,7 +274,7 @@ describe("Runtime", function() {
   });
 
   it("method() reference works", function() {
-    assertThat(sdk + `
+    assertThat(`
       function foo(context) {
         return div {
           node(context.foo())
@@ -301,7 +301,7 @@ describe("Runtime", function() {
     ).equalsTo({
       name: "div",
       children: ["bar"]
-    }, true);
+    });
   });
 
   it.skip("this reference on Classes", function() {

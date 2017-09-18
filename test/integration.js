@@ -14,6 +14,9 @@ describe("Integration Tests", function(done) {
 	it(`${file}`, function() {
 	  let code = fs.readFileSync(`./examples/${file}`);
 	  let expected = fs.readFileSync(`./examples/${file}.out`);
+	  // if (file != "helloworld.js") {
+	  //   return;
+	  // }
 	  // let foo = [];
 	  // let  = ;
 	  // let result = DocScript.compile(code);
@@ -22,6 +25,7 @@ describe("Integration Tests", function(done) {
 	  let stdout = [];
 	  // console.log(`${code.toString()}`);
 	  let foo = DocScript.compile(code.toString());
+	  // console.log(foo);
 	  let debug = `
             var console = {
               log: function(str) {
@@ -31,7 +35,7 @@ describe("Integration Tests", function(done) {
          `;
 
 	  let script = `${debug} ${foo}`;
-	  console.log(script);
+	  // console.log(script);
 	  eval(script);
 	  // console.log(file);
 	  // let result = DocScript.eval(`

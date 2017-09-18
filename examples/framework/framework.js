@@ -15,7 +15,7 @@ NODE.prototype.node = function(child) {
   this.children.push(child);
 };
 NODE.prototype.setAttribute = function(name, value) {
-  console.log("hello world");
+  // console.log("hello world");
   // console.log(this);
   this[name] = value;
 };
