@@ -2,7 +2,7 @@ const Assert = require('assert');
 const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
-describe("Runtime", function() {
+describe("HTML", function() {
   it('Backwards compatible', function() {
     // Basic fundamental programs are not broken
     assertThat("").equalsTo(undefined);
