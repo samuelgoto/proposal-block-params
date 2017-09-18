@@ -1,5 +1,5 @@
-function element(constructor, arg1, arg2) {
-  let result = new constructor();
+function element(Type, arg1, arg2) {
+  let result = new Type();
   let block = function() {};
 
   if (typeof arg1 == "function") {
@@ -47,19 +47,23 @@ class Node {
   };
 };
 
-class Div extends Node {
-  constructor() {
-    super("div");
+class Base extends Node {
+  constructor(type) {
+    super(type);
     this.register("span", element.bind(this, Span));
     this.register("div", element.bind(this, Div));
   }
 }
 
-class Span extends Node {
+class Div extends Base {
+  constructor() {
+    super("div");
+  }
+}
+
+class Span extends Base {
   constructor() {
     super("span");
-    this.register("span", element.bind(this, Span));
-    this.register("div", element.bind(this, Div));
   }
 }
 
