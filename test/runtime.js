@@ -117,7 +117,7 @@ describe("Runtime", function() {
     });
   });
 
-  it('Functions 1', function() {
+  it('Functions', function() {
     assertThat(`
       function bar(parent) {
         parent.node("hello world");
@@ -332,6 +332,31 @@ describe("Runtime", function() {
     });
   });
 
+  it('Functions and Classes', function() {
+    assertThat(`
+      function bar(parent) {
+        parent.node("hello world");
+      }
+
+      // please ignore, nodejs hack not needed
+      // in browsers.
+      global.bar = bar;
+
+      class A {
+        render() {
+          return div {
+            bar(root())
+          }
+        }
+      }
+
+      new A().render()
+    `).equalsTo({
+      "@type": "div",
+      "children": [ "hello world" ]
+    })
+  });
+
   it("this.method() reference on Classes", function() {
     assertThat(`
       class Foo {
@@ -361,9 +386,8 @@ describe("Runtime", function() {
       class Foo {
         render() {
           return div {
-            // TODO(goto): there is probably a better syntax simplification
-            // that can aid this.
-            node(new Bar().render());
+            bar(this) {
+            }
           }
         }
       }
@@ -374,6 +398,12 @@ describe("Runtime", function() {
           }
         }
       }
+
+      // nodejs hack, not needed in browsers
+      global.bar = function(parent) {
+        parent.node(new Bar().render());
+      }
+
       new Foo().render();
     `
     ).equalsTo({

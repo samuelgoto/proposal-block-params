@@ -3,7 +3,6 @@ function div(block) {
   block.call(result, result);
   return result;
 }
-
 function NODE(type) {
   this["@type"] = type;
 };
