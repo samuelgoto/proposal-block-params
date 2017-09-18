@@ -37,8 +37,7 @@ describe("HTML", function() {
 
   it('Attributes', function() {
     assertThat(`
-      div {
-        this.width = 100
+      div({width: 100}) {
       }
     `).equalsTo({
       "@type": "div",
@@ -48,8 +47,7 @@ describe("HTML", function() {
 
   it('Methods', function() {
     assertThat(`
-      div {
-        this.width = 200
+      div({width: 200}) {
       }`
     ).equalsTo({"@type": "div", width : 200});
   });

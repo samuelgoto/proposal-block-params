@@ -1,26 +1,23 @@
-function div(block) {
-  let result = new DIV();
-  block.call(result, result);
-
-  // Appends itself into the parent.
-  if (this.node) {
-    this.node(result);
-  }
-
-  return result;
-}
-
-function span(arg1, arg2) {
-  let result = new SPAN();
+function element(constructor, arg1, arg2) {
+  let result = new constructor();
   let block = function() {};
+
   if (typeof arg1 == "function") {
     block = arg1;
   } else if (typeof arg2 == "function") {
     block = arg2;
   }
+
   block.call(result, result);
+
   if (typeof arg1 == "string") {
     result.children = [arg1];
+  }
+
+  if (typeof arg1 == "object") {
+    for (prop in arg1) {
+      result.setAttribute(prop, arg1[prop]);
+    }
   }
 
   // Appends itself into the parent.
@@ -31,47 +28,39 @@ function span(arg1, arg2) {
   return result;
 }
 
-function NODE(type) {
-  this["@type"] = type;
+class Node {
+  constructor(type) {
+    this["@type"] = type;
+  }
+  root() {
+    return this;
+  };
+  node(child) {
+    this.children = this.children || [];
+    this.children.push(child);
+  };
+  setAttribute(name, value) {
+    this[name] = value;
+  };
+  register(type, block) {
+    this[type] = block;
+  };
 };
-NODE.prototype.root = function() {
-  return this;
-};
-NODE.prototype.node = function(child) {
-  this.children = this.children || [];
-  this.children.push(child);
-};
-NODE.prototype.setAttribute = function(name, value) {
-  // console.log("hello world");
-  // console.log(this);
-  this[name] = value;
-};
-NODE.prototype.register = function(type, block) {
-  this[type] = block;
+
+class Div extends Node {
+  constructor() {
+    super("div");
+    this.register("span", element.bind(this, Span));
+    this.register("div", element.bind(this, Div));
+  }
 }
 
-function DIV() {
-  NODE.call(this, "div");
-  this.width = undefined;
-  this.height = undefined;
-  // this.setAttribute = function(name, value) {
-  // };
-  // this.root = function() {
-  //  return this;
-  //};
-  // this.node = function(child) {
-  // };
-  // this.span =
-  this.register("span", span);
-  this.register("div", div);
+class Span extends Node {
+  constructor() {
+    super("span");
+    this.register("span", element.bind(this, Span));
+    this.register("div", element.bind(this, Div));
+  }
 }
-DIV.prototype = Object.create(NODE.prototype);
 
-function SPAN() {
-  NODE.call(this, "span");
-  this.register("span", span);
-  this.register("div", div);
-}
-SPAN.prototype = Object.create(NODE.prototype);
-
-module.exports.div = div;
+module.exports.div = element.bind(this, Div);
