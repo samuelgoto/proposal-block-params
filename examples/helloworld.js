@@ -14,12 +14,9 @@ let body = div {
     }
   }
 
-  console.log("hi hello world");
-
-  span("click me") {
-    this.onclick = function() { console.log("Hi!"); };
-    // span("click me!")
-    // console.log("foo bar");
+  div {
+    this.onclick = function() { return "Hi!"; };
+    span("click me!")
   }
 }
 
@@ -38,4 +35,5 @@ let html = div {
 console.log(JSON.stringify(html, undefined, ' '));
 
 // Clicks on div.
-// html.children[2].children[2].attributes.onclick();
+// html.children[2].children[2].onclick();
+console.log(html.children[2].children[3].onclick());

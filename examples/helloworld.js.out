@@ -30,12 +30,18 @@
      ]
     },
     {
-     "@type": "span",
+     "@type": "div",
      "children": [
-      "click me"
+      {
+       "@type": "span",
+       "children": [
+        "click me!"
+       ]
+      }
      ]
     }
    ]
   }
  ]
 }
+Hi!
