@@ -625,7 +625,7 @@ function assertThat(code) {
   // return new That(code);
   function evals(opt_debug) {
     let script = `
-      const {div} = require("../examples/framework/framework.js");
+      const {div} = require("../examples/framework/html.js");
 
       ${code}
     `;

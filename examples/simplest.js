@@ -1,4 +1,4 @@
-const {div} = require("./../examples/framework/framework.js");
+const {div} = require("./../examples/framework/html.js");
 
 let head = div { node("hello world") };
 
