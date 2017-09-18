@@ -10,6 +10,8 @@ function element(Type, arg1, arg2) {
 
   block.call(result, result);
 
+  // console.log(`hey ${arg1}!!!`);
+
   if (typeof arg1 == "string") {
     result.children = [arg1];
   }
@@ -19,6 +21,9 @@ function element(Type, arg1, arg2) {
       result.setAttribute(prop, arg1[prop]);
     }
   }
+
+  // console.log("hello world ${Type}");
+  // console.log(this);
 
   // Appends itself into the parent.
   if (this.node) {
@@ -50,8 +55,11 @@ class Node {
 class Base extends Node {
   constructor(type) {
     super(type);
-    this.register("span", element.bind(this, Span));
-    this.register("div", element.bind(this, Div));
+  }
+  static register(type, constructor) {
+    Base.prototype[type] = function(arg1, arg2) {
+      element.call(this, constructor, arg1, arg2);
+    };
   }
 }
 
@@ -66,5 +74,8 @@ class Span extends Base {
     super("span");
   }
 }
+
+Base.register("span", Span);
+Base.register("div", Div);
 
 module.exports.div = element.bind(this, Div);
