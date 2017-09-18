@@ -10,6 +10,12 @@
   {
    "@type": "div",
    "children": [
+    "extra info"
+   ]
+  },
+  {
+   "@type": "div",
+   "children": [
     "Welcome back!",
     {
      "@type": "span",
@@ -21,6 +27,12 @@
      "@type": "span",
      "children": [
       "contact"
+     ]
+    },
+    {
+     "@type": "span",
+     "children": [
+      "click me"
      ]
     }
    ]

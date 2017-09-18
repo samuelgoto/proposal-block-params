@@ -13,26 +13,24 @@ let body = div {
       node(page)
     }
   }
-  //div {
-  //  onclick = function() { console.log("Hi!"); }
-  //  node("click me!")
-  //}
+
+  console.log("hi hello world");
+
+  span("click me") {
+    this.onclick = function() { console.log("Hi!"); };
+    // span("click me!")
+    // console.log("foo bar");
+  }
 }
 
-function extra() {
-  return div { node("extra info") };
+// NOTE(goto): "global" nodejs hack that is not needed in browsers.
+global.extra = function(parent) {
+  return parent.node(div { node("extra info") });
 }
-
-function mel() {}
 
 let html = div {
   node(head)
-  // TODO(goto): for some reasons, the access to extra() throws
-  // a ReferenceError. Fix this.
-  // node(extra())
-  // extra()
-  // console.log(extra);
-  // console.log(`hi ${this.extra} ${extra}`)
+  extra(root())
   node(body)
 }
 
