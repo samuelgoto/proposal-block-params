@@ -145,6 +145,34 @@ describe("Runtime", function() {
     });
   });
 
+  it('Children', function() {
+    assertThat(`
+      div {
+        div {
+          span {
+            div {
+            }
+            span {
+            }
+          }
+        }
+      }`
+    ).equalsTo({
+      "@type": "div",
+      children: [{
+        "@type": "div",
+	children: [{
+	  "@type": "span",
+	  children: [{
+	    "@type": "div"
+	  }, {
+	    "@type": "span"
+	  }]
+	}]
+      }]
+    });
+  });
+
   it('Scripting internal variables', function() {
     assertThat(`
       div {
