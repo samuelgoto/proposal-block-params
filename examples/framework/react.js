@@ -22,7 +22,7 @@ function element(Type, arg1, arg2) {
     }
   }
 
-  let el = React.createElement(result.type, null, ...result.children);
+  let el = React.createElement(result.type, result.attributes, ...result.children);
 
   // Appends itself into the parent.
   if (this.node) {
@@ -36,6 +36,7 @@ class Element {
   constructor(type) {
     this.type = type;
     this.children = [];
+    this.attributes = {};
   }
   root() {
     return this;
@@ -44,7 +45,7 @@ class Element {
     this.children.push(child);
   };
   setAttribute(name, value) {
-    this[name] = value;
+    this.attributes[name] = value;
   };
   static define(parent, label, Type) {
     parent.prototype[`${label}`] = function(arg1, arg2) {

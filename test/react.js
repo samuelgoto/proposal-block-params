@@ -5,7 +5,7 @@ var acorn = require("acorn");
 var React = require("react");
 var ReactDOMServer = require('react-dom/server');
 
-describe("React", function() {
+describe.only("React", function() {
   it("React hello world HTML", function() {
     let result = ReactDOMServer.renderToStaticMarkup(
       React.createElement("div", null, "hello world"));
@@ -19,12 +19,12 @@ describe("React", function() {
     Assert.equal(result, "<div><span>hello world</span></div>");
   });
 
-  it("React framework", function() {
+  it.only("React framework", function() {
     let code = DocScript.compile(`
       let {div} = require("../examples/framework/react.js");
 
       div {
-	  span {}
+	  span({width: 100}) {}
       } 
     `);
 
@@ -32,6 +32,6 @@ describe("React", function() {
 
     let result = ReactDOMServer.renderToStaticMarkup(el);
 
-    Assert.equal(result, "<div><span></span></div>");
+    Assert.equal(result, `<div><span width="100"></span></div>`);
   });
 });
