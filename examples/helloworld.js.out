@@ -1,41 +1,62 @@
 {
- "@type": "div",
+ "@type": "html",
  "children": [
   {
-   "@type": "div",
+   "@type": "head",
    "children": [
-    "Hello World!"
+    {
+     "@type": "title",
+     "children": [
+      "Sam's Website"
+     ]
+    }
    ]
   },
   {
-   "@type": "div",
+   "@type": "body",
    "children": [
-    "extra info"
-   ]
-  },
-  {
-   "@type": "div",
-   "children": [
-    "Welcome back!",
-    {
-     "@type": "span",
-     "children": [
-      "about"
-     ]
-    },
-    {
-     "@type": "span",
-     "children": [
-      "contact"
-     ]
-    },
     {
      "@type": "div",
      "children": [
       {
-       "@type": "span",
+       "@type": "div",
        "children": [
-        "click me!"
+        "Hello World!"
+       ]
+      },
+      {
+       "@type": "div",
+       "children": [
+        "extra info"
+       ]
+      },
+      {
+       "@type": "div",
+       "children": [
+        "Welcome back!",
+        {
+         "@type": "span",
+         "children": [
+          "about"
+         ]
+        },
+        {
+         "@type": "span",
+         "children": [
+          "contact"
+         ]
+        },
+        {
+         "@type": "div",
+         "children": [
+          {
+           "@type": "span",
+           "children": [
+            "click me!"
+           ]
+          }
+         ]
+        }
        ]
       }
      ]
@@ -44,4 +65,3 @@
   }
  ]
 }
-Hi!

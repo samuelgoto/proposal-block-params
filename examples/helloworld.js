@@ -1,17 +1,14 @@
-const {div} = require("./../examples/framework/html.js");
+const {html, div, title} = require("./../examples/framework/html.js");
 
-let head = div { node("Hello World!") };
+let welcome = "Hello World!";
 
-let body = div {
+let content = div {
   if (true) {
-    // TODO(goto): figure out why this isn't working.
     node("Welcome back!")
   }
+
   for (let page of ["about", "contact"]) {
-    span {
-      // href = `${page}.html`
-      node(page)
-    }
+    span(page)
   }
 
   div {
@@ -20,20 +17,26 @@ let body = div {
   }
 }
 
-// NOTE(goto): "global" nodejs hack that is not needed in browsers.
-global.extra = function(parent) {
-  return parent.node(div { node("extra info") });
+let extra = function() {
+  return div { node("extra info") };
 }
 
-let html = div {
-  node(head)
-  extra(root())
-  node(body)
+let result = html {
+  head {
+    title("Sam's Website")
+  }
+  body {
+    div {
+      div(welcome)
+      node(extra())
+      node(content)
+    }
+  }
 }
 
 // Prints the tree.
-console.log(JSON.stringify(html, undefined, ' '));
+console.log(JSON.stringify(result, undefined, ' '));
 
 // Clicks on div.
 // html.children[2].children[2].onclick();
-console.log(html.children[2].children[3].onclick());
+//console.log(result.children[2].children[3].onclick());
