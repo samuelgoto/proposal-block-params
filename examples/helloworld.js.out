@@ -14,6 +14,9 @@
   },
   {
    "@type": "body",
+   "style": {
+    "background-color": "black"
+   },
    "children": [
     {
      "@type": "div",
@@ -33,7 +36,12 @@
       {
        "@type": "div",
        "children": [
-        "Welcome back!",
+        {
+         "@type": "span",
+         "children": [
+          "Welcome back!"
+         ]
+        },
         {
          "@type": "span",
          "children": [

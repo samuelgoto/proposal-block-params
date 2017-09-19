@@ -2,11 +2,15 @@ const {html, div, title} = require("./../examples/framework/html.js");
 
 let welcome = "Hello World!";
 
+// A HTML node
 let content = div {
+
+  // If-statements!
   if (true) {
-    node("Welcome back!")
+    span("Welcome back!")
   }
 
+  // For-loops!
   for (let page of ["about", "contact"]) {
     span(page)
   }
@@ -17,20 +21,31 @@ let content = div {
   }
 }
 
+// A function that returns a HTML node
 let extra = function() {
   return div { node("extra info") };
 }
 
+// Composing multiple nodes
 let result = html {
   head {
-    title("Sam's Website")
+      title("Sam's Website")
   }
   body {
-    div {
-      div(welcome)
-      node(extra())
-      node(content)
-    }
+      // CSS in JS!
+      this.style = {
+	  "background-color": "black",
+      };
+      div {
+	  // Variables!
+	  div(welcome)
+
+	  // Functions!
+	  div(extra())
+
+	  // Composition!
+	  div(content)
+      }
   }
 }
 
