@@ -21,12 +21,10 @@ describe("React", function() {
 
   it("React framework", function() {
     let code = DocScript.compile(`
-      // framework
-      function div(block) {
-        return React.createElement("div", null, "hello world")
-      }
+      let {div} = require("../examples/framework/react.js");
 
       div {
+	  span {}
       } 
     `);
 
@@ -34,6 +32,6 @@ describe("React", function() {
 
     let result = ReactDOMServer.renderToStaticMarkup(el);
 
-    Assert.equal(result, "<div>hello world</div>");
+    Assert.equal(result, "<div><span></span></div>");
   });
 });
