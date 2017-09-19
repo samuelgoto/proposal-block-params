@@ -41,6 +41,14 @@ describe("React", function() {
       } 
     `).equalsTo(`<div><span width="100"></span></div>`);
   });
+
+  it("Text nodes", function() {
+    assertThat(`
+      div {
+	  span("hello world")
+      } 
+    `).equalsTo(`<div><span>hello world</span></div>`);
+  });
 });
 
 class That {
