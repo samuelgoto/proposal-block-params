@@ -5,7 +5,7 @@ var acorn = require("acorn");
 var React = require("react");
 var ReactDOMServer = require('react-dom/server');
 
-describe.only("React", function() {
+describe("React", function() {
   it("React hello world HTML", function() {
     let result = ReactDOMServer.renderToStaticMarkup(
       React.createElement("div", null, "hello world"));
@@ -19,19 +19,48 @@ describe.only("React", function() {
     Assert.equal(result, "<div><span>hello world</span></div>");
   });
 
-  it.only("React framework", function() {
-    let code = DocScript.compile(`
-      let {div} = require("../examples/framework/react.js");
+  it("Simplest", function() {
+    assertThat(`
+      div {
+      } 
+    `).equalsTo(`<div></div>`);
+  });
 
+  it("Nesting", function() {
+    assertThat(`
+      div {
+	  span {}
+      } 
+    `).equalsTo(`<div><span></span></div>`);
+  });
+
+  it("Attributes", function() {
+    assertThat(`
       div {
 	  span({width: 100}) {}
       } 
-    `);
-
-    let el = eval(code.toString());
-
-    let result = ReactDOMServer.renderToStaticMarkup(el);
-
-    Assert.equal(result, `<div><span width="100"></span></div>`);
+    `).equalsTo(`<div><span width="100"></span></div>`);
   });
 });
+
+class That {
+    constructor(code) {
+	this.code = code;
+    }
+    equalsTo(html, opt_debug) {
+	let code = DocScript.compile(`
+	  let {div} = require("../examples/framework/react.js");
+	  ${this.code}			     
+       `);
+
+	let el = eval(code.toString());
+
+	let result = ReactDOMServer.renderToStaticMarkup(el);
+
+	Assert.equal(result, html);
+    }
+}
+
+function assertThat(code) {
+    return new That(code);
+}
