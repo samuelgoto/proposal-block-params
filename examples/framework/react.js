@@ -1,4 +1,6 @@
-let React = require("react");
+if (typeof module != "undefined") {
+    var React = require("react");
+}
 
 function element(Type, arg1, arg2) {
   let result = new Type();
@@ -82,11 +84,36 @@ class Span extends Element {
   }
 }
 
-Element.define(Div, "span", Span);
-Element.define(Div, "div", Div);
+class Li extends Element {
+  constructor() {
+    super("li");
+  }
+}
 
-Element.define(Span, "span", Span);
-Element.define(Span, "div", Div);
+class Ol extends Element {
+  constructor() {
+    super("Ol");
+  }
+}
+
+class Button extends Element {
+  constructor() {
+    super("button");
+  }
+}
+
+class A extends Element {
+  constructor() {
+    super("a");
+  }
+}
+
+Element.define(Element, "span", Span);
+Element.define(Element, "div", Div);
+Element.define(Element, "li", Li);
+Element.define(Element, "ol", Ol);
+Element.define(Element, "button", Button);
+Element.define(Element, "a", A);
 
 class Body extends Element {
   constructor() {
@@ -117,13 +144,12 @@ class Html extends Element {
 Element.define(Html, "head", Head);
 Element.define(Html, "body", Body);
 
+let scope = typeof module != "undefined" ? module.exports : window;
 
-// Prototype in its parent.
-for (obj in Object.getPrototypeOf(Span).prototype) {
-  console.log(obj);
-}
-
-module.exports.div = element.bind(this, Div);
-module.exports.title = element.bind(this, Title);
-module.exports.html = element.bind(this, Html);
-module.exports.Element = Element;
+scope.div = element.bind(this, Div);
+scope.title = element.bind(this, Title);
+scope.html = element.bind(this, Html);
+scope.li = element.bind(this, Li);
+scope.a = element.bind(this, A);
+scope.button = element.bind(this, Button);
+scope.Element = Element;

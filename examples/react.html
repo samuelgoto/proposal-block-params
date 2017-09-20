@@ -2,44 +2,18 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>I'm in a React app!</title>
   </head>
   <body>
-    <div id="react-app"></div>
+
+    <link rel="stylesheet" href="tictactoe.css">
+
+    <div id="root"></div>
 
     <script src="https://cdn.jsdelivr.net/react/0.14.0-rc1/react.js"></script>
     <script src="https://cdn.jsdelivr.net/react/0.14.0-rc1/react-dom.js"></script>
 
-    <script>
+    <script src="framework/react.js"></script>
+    <script src="tictactoe.ds"></script>
 
-    let el =
-      React.createElement("div", {}, 
-        React.createElement("h1", {}, "Contacts"),
-        React.createElement("ul", {},
-          React.createElement("li", {},
-            React.createElement("h2", {}, "James Nelson"),
-            React.createElement("a", {href: "mailto:james@jamesknelson.com"}, "james@jamesknelson.com")
-          ),
-          React.createElement("li", {},
-            React.createElement("h2", {}, "Joe Citizen"),
-            React.createElement("a", {href: "mailto:joe@example.com"}, "joe@example.com")
-          )
-        )
-      );
-
-    class Foo extends React.Component {
-      render() {
-        return React.createElement("div", {}, "hey there");
-      }
-    }
-
-    let el2 = React.createElement("div", {}, "Hello World");
-
-    let el3 = React.createElement(Foo);
-
-    // ReactDOM.render(el2, document.getElementById('react-app'))
-    ReactDOM.render(el3, document.getElementById('react-app'))
-
-    </script>
   </body>
 </html>
