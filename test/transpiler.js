@@ -104,4 +104,9 @@ describe("Transpiler", function() {
         `d(function() { let a = 1 });`);
   });
 
+  it("Doesn't expand class extends expressions", function() {
+    let result = DocScript.compile(`class A extends b() {}`);
+    Assert.equal(result, `class A extends b() {}`);
+  });
+
 });

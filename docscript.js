@@ -32,7 +32,7 @@ acorn.plugins.docscript = function(parser) {
 	  return this.finishNode(node, "CallExpression");
 	}
       } else if (expr.type == "CallExpression") {
-	// console.log(expr);
+	  // console.log(expr);
 	if (this.type == tt.braceL) {
 	  let func = this.startNode();
 	  func.docscript = true;
@@ -40,11 +40,6 @@ acorn.plugins.docscript = function(parser) {
 	  func.params = [];
 	  func.generator = false;
 	  func.expression = false;
-	  // console.log(expr.arguments);
-	  //if (expr.arguments.length > 1 ||
-	  //    expr.arguments[0].type != "ObjectExpression") {
-	  //  this.raise(this.start, "First argument isn't an object!!");
-	  //}
 	  expr.arguments.push(this.finishNode(func, "FunctionExpression"));
 	  this.semicolon();
 	  return this.finishNode(expr, "CallExpression");
@@ -55,10 +50,33 @@ acorn.plugins.docscript = function(parser) {
     }
   });
 
+  parser.extend("parseClassSuper", function(nextMethod) {
+    return function(node) {
+      // console.log("hello world");
+      // console.log(node);
+      // node.superClass = this.eat(tt._extends) ? (this.parseExprSubscripts()) : null
+      if (this.eat(tt._extends)) {
+	this.inExtends = true;
+	node.superClass = this.parseExprSubscripts();
+        this.inExtends = false;
+      }
+    }
+  });
+
   // enables var a = b {} to be parsed
   parser.extend("parseSubscripts", function(nextMethod) {
     return function(base, startPos, startLoc, noCalls) {
       // handles a {};
+      // console.log("hi");
+      // console.log(this);
+      // console.log(noCalls);
+
+      // If we are inside a subscript of a class declaration in extends
+      // do not enable the syntax simplification.
+      if (this.inExtends) {
+	return nextMethod.call(this, base, startPos, startLoc, noCalls);
+      }
+
       if (!noCalls && this.type == tt.braceL) {
 	let func = this.startNode();
 	func.docscript = true;
