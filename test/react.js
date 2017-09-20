@@ -65,6 +65,31 @@ describe("React", function() {
       }
     `).equalsTo(`<div><div><span>hello world</span></div></div>`);
   });
+
+  it("Simplest composition", function() {
+    assertThat(`
+      class A extends React.Component {
+	  render() {
+            return div {
+  	      span("Hi, from A!")
+            } 
+          }
+      }
+      class B extends React.Component {
+	  render() {
+            return div {
+  	      span("Hi, from B!")
+	      a {}
+            } 
+          }
+      }
+      let a = Element.export(A);
+      let b = Element.export(B);
+      div {
+        b {}
+      }
+    `).equalsTo(`<div><div><span>Hi, from B!</span><div><span>Hi, from A!</span></div></div></div>`);
+  });
 });
 
 class That {
