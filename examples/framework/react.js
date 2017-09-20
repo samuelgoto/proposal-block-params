@@ -49,6 +49,9 @@ class Element {
   setAttribute(name, value) {
     this.attributes[name] = value;
   };
+  static register(Type) {
+    Element.prototype[Type.name] = Element.export(Type);
+  }
   static define(parent, label, Type) {
     parent.prototype[`${label}`] = function(arg1, arg2) {
       element.call(this, Type, arg1, arg2);

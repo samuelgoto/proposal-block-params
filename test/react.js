@@ -56,12 +56,14 @@ describe("React", function() {
 	  render() {
             return div {
   	      span("hello world")
-            } 
+            }
           }
       }
-      let a = Element.export(A);
+
+      Element.register(A);
+
       div {
-	  a({width: 100}) {}
+	  A({width: 100}) {}
       }
     `).equalsTo(`<div><div><span>hello world</span></div></div>`);
   });
@@ -79,14 +81,16 @@ describe("React", function() {
 	  render() {
             return div {
   	      span("Hi, from B!")
-	      a {}
+	      A {}
             } 
           }
       }
-      let a = Element.export(A);
-      let b = Element.export(B);
+
+      Element.register(A);
+      Element.register(B);
+
       div {
-        b {}
+        B {}
       }
     `).equalsTo(`<div><div><span>Hi, from B!</span><div><span>Hi, from A!</span></div></div></div>`);
   });
