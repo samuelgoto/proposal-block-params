@@ -94,6 +94,55 @@ describe("React", function() {
       }
     `).equalsTo(`<div><div><span>Hi, from B!</span><div><span>Hi, from A!</span></div></div></div>`);
   });
+
+  it("Properties", function() {
+    assertThat(`
+      class A extends React.Component {
+	  render() {
+            let props = this.props;
+            return div {
+  	      span(props.content)
+            }
+          }
+      }
+
+      Element.register(A);
+
+      div {
+	  A({content: "hello world"}) {}
+      }
+    `).equalsTo(`<div><div><span>hello world</span></div></div>`);
+  });
+
+  it("State", function() {
+    assertThat(`
+      class A extends React.Component {
+          constructor(props) {
+	    super(props);
+            this.state = {foo: "bar"};
+          }
+          componentWillMount() {
+	    this.setFoo("hello");
+          }
+          setFoo(value) {
+	    this.setState({foo: value});
+          }
+	  render() {
+            let state = this.state;
+            return div {
+  	      span(state.foo)
+            }
+          }
+      }
+
+      Element.register(A);
+
+      div {
+	  A {}
+      }
+    `).equalsTo(`<div><div><span>hello</span></div></div>`);
+  });
+
 });
 
 class That {
