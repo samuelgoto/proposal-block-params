@@ -22,6 +22,8 @@ function element(Type, arg1, arg2) {
     }
   }
 
+  // console.log(Type);
+  // console.log(result);
   let el = React.createElement(result.type, result.attributes, ...result.children);
 
   // Appends itself into the parent.
@@ -52,7 +54,19 @@ class Element {
       element.call(this, Type, arg1, arg2);
     };
   }
+  static register(Type) {
+    // TODO(goto): we should probably unify define and register at some point
+    Element.prototype[`${Type.name}`] = function(arg1, arg2) {
+      element.call(this, Generic.bind(Generic, Type), arg1, arg2);
+    };
+  }
 };
+
+class Generic extends Element {
+    constructor(type) {
+	super(type);
+    }
+}
 
 class Div extends Element {
   constructor() {
@@ -110,3 +124,4 @@ for (obj in Object.getPrototypeOf(Span).prototype) {
 module.exports.div = element.bind(this, Div);
 module.exports.title = element.bind(this, Title);
 module.exports.html = element.bind(this, Html);
+module.exports.Element = Element;

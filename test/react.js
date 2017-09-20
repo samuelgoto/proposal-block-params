@@ -49,6 +49,26 @@ describe("React", function() {
       } 
     `).equalsTo(`<div><span>hello world</span></div>`);
   });
+
+  it("Simplest component", function() {
+    assertThat(`
+      class A extends React.Component {
+	  render() {
+            return div {
+  	      span("hello world")
+            } 
+          }
+      }
+      // NOTE(goto): there is something wrong about this ... we
+      // are polluting the global namespace with all of the classes
+      // which doesn't sound right. Lets explore some other alternatives
+      // here.
+      Element.register(A);
+      div {
+	  A {}
+      }
+    `).equalsTo(`<div><div><span>hello world</span></div></div>`);
+  });
 });
 
 class That {
@@ -57,7 +77,7 @@ class That {
     }
     equalsTo(html, opt_debug) {
 	let code = DocScript.compile(`
-	  let {div} = require("../examples/framework/react.js");
+	  let {div, Element} = require("../examples/framework/react.js");
 	  ${this.code}			     
        `);
 

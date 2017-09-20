@@ -27,9 +27,18 @@
         )
       );
 
+    class Foo extends React.Component {
+      render() {
+        return React.createElement("div", {}, "hey there");
+      }
+    }
+
     let el2 = React.createElement("div", {}, "Hello World");
 
-    ReactDOM.render(el2, document.getElementById('react-app'))
+    let el3 = React.createElement(Foo);
+
+    // ReactDOM.render(el2, document.getElementById('react-app'))
+    ReactDOM.render(el3, document.getElementById('react-app'))
 
     </script>
   </body>
