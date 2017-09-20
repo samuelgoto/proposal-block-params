@@ -151,7 +151,7 @@ function visitor(node) {
 	node.parent.type == "CallExpression" &&
         node.parent.callee == node) {
       // console.log(node);
-      node.update(`("${node.name}" in this ? this.${node.name}.bind(this) : ${node.name})`);
+      node.update(`("${node.name}" in this ? this.${node.name}.bind(this) : ${node.name}.bind(this))`);
     }
   } else if (node.type === "CallExpression") {
     // return;

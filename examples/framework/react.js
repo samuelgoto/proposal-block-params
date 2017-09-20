@@ -54,9 +54,8 @@ class Element {
       element.call(this, Type, arg1, arg2);
     };
   }
-  static register(Type) {
-    // TODO(goto): we should probably unify define and register at some point
-    Element.prototype[`${Type.name}`] = function(arg1, arg2) {
+  static export(Type) {
+    return function(arg1, arg2) {
       element.call(this, Generic.bind(Generic, Type), arg1, arg2);
     };
   }

@@ -46,7 +46,7 @@ describe("React", function() {
     assertThat(`
       div {
 	  span("hello world")
-      } 
+      }
     `).equalsTo(`<div><span>hello world</span></div>`);
   });
 
@@ -59,13 +59,9 @@ describe("React", function() {
             } 
           }
       }
-      // NOTE(goto): there is something wrong about this ... we
-      // are polluting the global namespace with all of the classes
-      // which doesn't sound right. Lets explore some other alternatives
-      // here.
-      Element.register(A);
+      let a = Element.export(A);
       div {
-	  A {}
+	  a({width: 100}) {}
       }
     `).equalsTo(`<div><div><span>hello world</span></div></div>`);
   });
