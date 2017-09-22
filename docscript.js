@@ -3,6 +3,7 @@ const astring = require('astring');
 const walk = require("acorn/dist/walk");
 const falafel = require('falafel');
 var tt = acorn.tokTypes;
+const babel = require("babel-core");
 
 acorn.plugins.docscript = function(parser) {
   parser.extend("parseExpressionStatement", function(nextMethod) {
@@ -212,6 +213,12 @@ class DocScript {
     //  plugins: {docscript: true}
     // });
     // let generated = astring.generate(ast);
+
+    // Uses the babel transform to transform @decorators
+    // let decorated = babel.transform(code, {
+    //  plugins: ["transform-decorators-legacy"]
+    // }).code;
+
     var result = falafel(code, {
       parser: acorn, plugins: { docscript: true }
     }, visitor);
