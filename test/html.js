@@ -409,6 +409,7 @@ describe("HTML", function() {
 
   it("Composes classes", function() {
     assertThat(`
+      @component
       class Foo {
         render() {
           return div {
@@ -417,6 +418,8 @@ describe("HTML", function() {
           }
         }
       }
+
+      @component
       class Bar {
         render() {
           return div {
@@ -480,6 +483,7 @@ describe("HTML", function() {
 
   it('Attributes: functions, classes', function() {
     let result = assertThat(`
+      @component
       class Foo {
         render() {
           return div {
@@ -497,6 +501,7 @@ describe("HTML", function() {
 
   it('Attributes: classes, attributes and this', function() {
     let result = assertThat(`
+      @component
       class Foo {
         constructor() {
           this.message = "hello world";
@@ -523,6 +528,7 @@ describe("HTML", function() {
 
   it('Attributes: classes, attributes and this from references', function() {
     let result = assertThat(`
+      @component
       class Foo {
         constructor() {
           this.message = "hello world";
@@ -546,6 +552,7 @@ describe("HTML", function() {
 
   it.skip("React-like component testing most features", function() {
     assertThat(`
+      @component
       class React {
         constructor() {
           this.state = {foo: "this-state-foo"};
@@ -599,6 +606,7 @@ describe("HTML", function() {
 
   it.skip("React ShoppingList example", function() {
     assertThat(`
+      @component
       class ShoppingList {
         constructor() {
           this.props = {name: "Sam Goto"};
@@ -651,7 +659,7 @@ function assertThat(code) {
   // return new That(code);
   function evals(opt_debug) {
     let script = `
-      const {div} = require("../examples/framework/html.js");
+      const {div, component} = require("../examples/framework/html.js");
 
       ${code}
     `;

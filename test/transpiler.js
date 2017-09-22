@@ -116,10 +116,11 @@ describe("Transpiler", function() {
     // > require("babel-core").transform("@foo class A {}", {
     //     plugins: ["transform-decorators-legacy"]}).code
     // > 'var _class;\n\nlet A = foo(_class = class A {}) || _class;'
-
+    //
+    // NOTE(goto): only delta is that we use "let" as opposed to "var".
     let result = DocScript.compile(`@foo class A { b() { return 1;} }`);
     Assert.equal(result,`
-        var A = (function() {
+        let A = (function() {
           class A { b() { return 1;} }
 
           A = foo(A) || A;

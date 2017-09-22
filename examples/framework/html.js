@@ -97,11 +97,14 @@ Element.define(Html, "head", Head);
 Element.define(Html, "body", Body);
 
 
-// Prototype in its parent.
-for (obj in Object.getPrototypeOf(Span).prototype) {
-  console.log(obj);
+// This is the function that gets called when one
+// annotates a class with @component
+function component(type) {
+  // console.log(type);
+  return type;
 }
 
 module.exports.div = element.bind(this, Div);
 module.exports.title = element.bind(this, Title);
 module.exports.html = element.bind(this, Html);
+module.exports.component = component;

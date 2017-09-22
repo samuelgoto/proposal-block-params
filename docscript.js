@@ -205,7 +205,7 @@ function visitor(node) {
     let name = node.id.source();
     let decorator = node.decorators[0].expression.source();
     node.update(`
-        var ${name} = (function() {
+        let ${name} = (function() {
           class ${name} ${node.body.source()}
 
           ${name} = ${decorator}(${name}) || ${name};
