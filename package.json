@@ -32,6 +32,8 @@
   "homepage": "https://github.com/samuelgoto/docscript#readme",
   "dependencies": {
     "acorn": "^5.1.1",
+    "acorn-es7": "git+https://github.com/angelozerr/acorn-es7.git",
+    "acorn-es7-plugin": "^1.1.7",
     "astring": "^1.0.3",
     "commander": "^2.11.0",
     "falafel": "^2.1.0",
