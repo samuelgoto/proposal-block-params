@@ -22,7 +22,7 @@ describe("React", function() {
   it("Simplest", function() {
     assertThat(`
       div {
-      } 
+      }
     `).equalsTo(`<div></div>`);
   });
 
@@ -30,7 +30,7 @@ describe("React", function() {
     assertThat(`
       div {
 	  span {}
-      } 
+      }
     `).equalsTo(`<div><span></span></div>`);
   });
 
@@ -38,7 +38,7 @@ describe("React", function() {
     assertThat(`
       div {
 	  span({width: 100}) {}
-      } 
+      }
     `).equalsTo(`<div><span width="100"></span></div>`);
   });
 
@@ -52,6 +52,7 @@ describe("React", function() {
 
   it("Simplest component", function() {
     assertThat(`
+      // @component
       class A extends React.Component {
 	  render() {
             return div {
@@ -60,12 +61,15 @@ describe("React", function() {
           }
       }
 
+      // console.log(A);
+      // let A = B;
+
       Element.register(A);
 
       div {
 	  A({width: 100}) {}
       }
-    `).equalsTo(`<div><div><span>hello world</span></div></div>`);
+    `).equalsTo(`<div><div><span>hello world</span></div></div>`, true);
   });
 
   it("Simplest composition", function() {
@@ -74,7 +78,7 @@ describe("React", function() {
 	  render() {
             return div {
   	      span("Hi, from A!")
-            } 
+            }
           }
       }
       class B extends React.Component {
@@ -151,15 +155,20 @@ class That {
     }
     equalsTo(html, opt_debug) {
 	let code = DocScript.compile(`
-	  let {div, Element} = require("../examples/framework/react.js");
-	  ${this.code}			     
+	  let {div, Element, component} =
+              require("../examples/framework/react.js");
+	  ${this.code}
        `);
 
-	let el = eval(code.toString());
+      if (opt_debug) {
+	console.log(code.toString());
+      }
 
-	let result = ReactDOMServer.renderToStaticMarkup(el);
+      let el = eval(code.toString());
 
-	Assert.equal(result, html);
+      let result = ReactDOMServer.renderToStaticMarkup(el);
+
+      Assert.equal(result, html);
     }
 }
 

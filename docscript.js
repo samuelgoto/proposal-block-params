@@ -3,6 +3,9 @@ const astring = require('astring');
 const walk = require("acorn/dist/walk");
 const falafel = require('falafel');
 var tt = acorn.tokTypes;
+const babel = require("babel-core");
+const es7 = require('acorn-es7')(acorn);
+
 
 acorn.plugins.docscript = function(parser) {
   parser.extend("parseExpressionStatement", function(nextMethod) {
@@ -195,6 +198,19 @@ function visitor(node) {
       // console.log(node);
       node.update(`${node.source()};`);
     }
+  } else if (node.type == "ClassDeclaration" &&
+	     node.decorators &&
+             // TODO(goto): deal with multiple decorators.
+	     node.decorators.length == 1) {
+    let name = node.id.source();
+    let decorator = node.decorators[0].expression.source();
+    node.update(`
+        let ${name} = (function() {
+          class ${name} ${node.body.source()}
+
+          ${name} = ${decorator}(${name}) || ${name};
+          return ${name};
+        })();`);
   }
 }
 
@@ -212,88 +228,18 @@ class DocScript {
     //  plugins: {docscript: true}
     // });
     // let generated = astring.generate(ast);
+
+    // Uses the babel transform to transform @decorators
+    // let decorated = babel.transform(code, {
+    //  plugins: ["transform-decorators-legacy"]
+    // }).code;
+
     var result = falafel(code, {
-      parser: acorn, plugins: { docscript: true }
+      parser: acorn,
+      plugins: { docscript: true, es7: true },
+      ecmaVersion: 7
     }, visitor);
     return result;
-  }
-
-  static api() {
-    return `
-class Element {
-  constructor(name, opt_attributes) {
-    this.name = name;
-    if (opt_attributes) {
-      this.attributes = opt_attributes || {};
-    }
-  }
-
-  addChild(el) {
-    if (!this.children) {
-      // evaluates lazily.
-      this.children = [];
-    }
-    this.children.push(el);
-  }
-}
-
-class DocScript {
-
-  static createExpression(parent, el) {
-      if (!(parent instanceof Element)) {
-	  return;
-      }
-
-      // el can be either an Element, a string or an array of those things.
-      let children = el instanceof Array ? el : [el];
-
-      children.forEach(x => {
-        if (x == null || x == undefined) {
-	  // Throws errors for null and undefined to enable developers to catch
-          // MemberExpressions early.
-	  throw new Error("Tried to add an invalid element into the tree");
-        }
-
-	if (x instanceof Element || typeof x == "string") {
-	  // Ignores anything that isn't an Element or a String.
-          parent.addChild(x);
-        }
-      });
-  }
-
-  static createElement(type, props, body, opt_parent) {
-    let el;
-
-    let attributes = props.length > 0 ? {} : undefined;
-
-    props.forEach(arg => {
-      if (typeof arg == "object") {
-        for (let prop in arg) {
-          if (!(arg[prop] instanceof Function)) {
-            attributes[prop] = arg[prop];
-          } else {
-            attributes[prop] = (arg[prop]).bind(this);
-          }
-        }
-      }
-    });
-
-    if (typeof type == "string") {
-      el = new Element(type, attributes);
-    } else {
-      // TODO(goto): this makes things specific to a render()
-      // method. Generalize this.
-      el = new type().render();
-    }
-
-    body.call(this, el);
-    if (opt_parent) {
-      opt_parent.addChild(el);
-    }
-    return el;
-  }
-}
-`;
   }
 
   static eval(code, opt_stdout) {
@@ -312,6 +258,9 @@ class DocScript {
     return eval(`${DocScript.api()}; ${stdout}; ${result}`);
   }
 }
+
+// let result = DocScript.compile("let a = 1; @foo class A {} hello {}");
+// console.log(result);
 
 //console.log(JSON.stringify(acorn.parse(`d() { 1 };`, {
 //    plugins: {docscript: true}

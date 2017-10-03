@@ -32,12 +32,20 @@
   "homepage": "https://github.com/samuelgoto/docscript#readme",
   "dependencies": {
     "acorn": "^5.1.1",
+    "acorn-es7": "git+https://github.com/angelozerr/acorn-es7.git",
+    "acorn-es7-plugin": "^1.1.7",
     "astring": "^1.0.3",
     "commander": "^2.11.0",
     "falafel": "^2.1.0",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-dom-server": "0.0.5",
     "should": "^11.2.1"
   },
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-decorators": "^6.24.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "chai": "^4.1.0",
     "mocha": "^3.5.0"
   }

@@ -144,6 +144,18 @@ class Html extends Element {
 Element.define(Html, "head", Head);
 Element.define(Html, "body", Body);
 
+// NOTE(goto): this is the function that gets called everytime
+// an @component annotation gets attached to a class.
+function component(type) {
+  return function(props) {
+    console.log("hi");
+    console.log(props);
+    console.log(type.toString());
+    return new type(props);
+  }
+  // return type;
+}
+
 let scope = typeof module != "undefined" ? module.exports : window;
 
 scope.div = element.bind(this, Div);
@@ -153,3 +165,4 @@ scope.li = element.bind(this, Li);
 scope.a = element.bind(this, A);
 scope.button = element.bind(this, Button);
 scope.Element = Element;
+scope.component = component;
