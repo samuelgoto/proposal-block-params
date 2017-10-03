@@ -15,7 +15,7 @@ describe("Integration Tests", function(done) {
 	  let code = fs.readFileSync(`./examples/${file}`);
 
           // TODO(goto): huge hack, fix this.
-	  if (file == "tictactoe.js") {
+	  if (file == "tictactoe.js" || file == "tictactoe.ds.js") {
 	    return;
 	  }
 
