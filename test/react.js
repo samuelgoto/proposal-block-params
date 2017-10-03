@@ -69,7 +69,7 @@ describe("React", function() {
       div {
 	  A({width: 100}) {}
       }
-    `).equalsTo(`<div><div><span>hello world</span></div></div>`, true);
+    `).equalsTo(`<div><div><span>hello world</span></div></div>`);
   });
 
   it("Simplest composition", function() {
