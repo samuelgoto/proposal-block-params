@@ -20,6 +20,14 @@ describe("Parser", function() {
     assertThat(`d({a: "hi"}) {};`).parses();
   });
 
+  it("Parsing full lambda", function() {
+    assertThat(`d { return 1; };`).parses();
+  });
+
+  it("Parsing full lambda with parameters", function() {
+    assertThat(`d(1) { return 1; };`).parses();
+  });
+
   it("Parsing attributes inside functions", function() {
     assertThat(`
       function bar() {

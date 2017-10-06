@@ -83,7 +83,10 @@ acorn.plugins.docscript = function(parser) {
       if (!noCalls && this.type == tt.braceL) {
 	let func = this.startNode();
 	func.docscript = true;
+        let oldInFunction = this.inFunction;
+        this.inFunction = true;
 	func.body = this.parseBlock();
+        this.inFunction = oldInFunction;
 	func.params = [];
 	func.generator = false;
 	func.expression = false;
@@ -114,8 +117,11 @@ acorn.plugins.docscript = function(parser) {
 
 	let func = this.startNode();
 	func.docscript = true;
+        let oldInFunction = this.inFunction;
+        this.inFunction = true;
 	func.body = this.parseBlock();
-	func.params = [];
+	this.inFunction = oldInFunction;
+        func.params = [];
 	func.generator = false;
 	func.expression = false;
 	// func.parent = undefined;
