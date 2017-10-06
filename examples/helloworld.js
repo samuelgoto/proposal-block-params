@@ -1,4 +1,4 @@
-const {html, div, title} = require("./../examples/framework/html.js");
+const {html, head, title, body, div, span} = require("./../examples/framework/html.js");
 
 let welcome = "Hello World!";
 
@@ -7,7 +7,7 @@ let content = div {
 
   // If-statements!
   if (true) {
-    span("Welcome back!")
+      span("Welcome back!")
   }
 
   // For-loops!
@@ -23,7 +23,7 @@ let content = div {
 
 // A function that returns a HTML node
 let extra = function() {
-  return div { node("extra info") };
+  return div { this.node("extra info") };
 }
 
 // Composing multiple nodes

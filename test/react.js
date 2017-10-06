@@ -61,13 +61,10 @@ describe("React", function() {
           }
       }
 
-      // console.log(A);
-      // let A = B;
-
-      Element.register(A);
+      let a = Element.export(A);
 
       div {
-	  A({width: 100}) {}
+	  a({width: 100}) {}
       }
     `).equalsTo(`<div><div><span>hello world</span></div></div>`);
   });
@@ -85,16 +82,16 @@ describe("React", function() {
 	  render() {
             return div {
   	      span("Hi, from B!")
-	      A {}
+	      a {}
             } 
           }
       }
 
-      Element.register(A);
-      Element.register(B);
+      let a = Element.export(A);
+      let b = Element.export(B);
 
       div {
-        B {}
+        b {}
       }
     `).equalsTo(`<div><div><span>Hi, from B!</span><div><span>Hi, from A!</span></div></div></div>`);
   });
@@ -110,10 +107,10 @@ describe("React", function() {
           }
       }
 
-      Element.register(A);
+      let a = Element.export(A);
 
       div {
-	  A({content: "hello world"}) {}
+	  a({content: "hello world"}) {}
       }
     `).equalsTo(`<div><div><span>hello world</span></div></div>`);
   });
@@ -139,10 +136,10 @@ describe("React", function() {
           }
       }
 
-      Element.register(A);
+      let a = Element.export(A);
 
       div {
-	  A {}
+	  a {}
       }
     `).equalsTo(`<div><div><span>hello</span></div></div>`);
   });
@@ -155,7 +152,7 @@ class That {
     }
     equalsTo(html, opt_debug) {
 	let code = DocScript.compile(`
-	  let {div, Element, component} =
+	  let {div, span, Element, component} =
               require("../examples/framework/react.js");
 	  ${this.code}
        `);

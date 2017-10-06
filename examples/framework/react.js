@@ -24,8 +24,6 @@ function element(Type, arg1, arg2) {
     }
   }
 
-  // console.log(Type);
-  // console.log(result);
   let el = React.createElement(result.type, result.attributes, ...result.children);
 
   // Appends itself into the parent.
@@ -51,18 +49,10 @@ class Element {
   setAttribute(name, value) {
     this.attributes[name] = value;
   };
-  static register(Type) {
-    Element.prototype[Type.name] = Element.export(Type);
-  }
-  static define(parent, label, Type) {
-    parent.prototype[`${label}`] = function(arg1, arg2) {
-      element.call(this, Type, arg1, arg2);
-    };
-  }
   static export(Type) {
     return function(arg1, arg2) {
-      element.call(this, Generic.bind(Generic, Type), arg1, arg2);
-    };
+      return element.call(this, Generic.bind(null, Type), arg1, arg2);
+    }
   }
 };
 
@@ -108,20 +98,11 @@ class A extends Element {
   }
 }
 
-Element.define(Element, "span", Span);
-Element.define(Element, "div", Div);
-Element.define(Element, "li", Li);
-Element.define(Element, "ol", Ol);
-Element.define(Element, "button", Button);
-Element.define(Element, "a", A);
-
 class Body extends Element {
   constructor() {
     super("body");
   }
 }
-Element.define(Body, "div", Div);
-Element.define(Body, "span", Span);
 
 class Title extends Element {
   constructor() {
@@ -134,15 +115,12 @@ class Head extends Element {
     super("head");
   }
 }
-Element.define(Head, "title", Title);
 
 class Html extends Element {
   constructor() {
     super("html");
   }
 }
-Element.define(Html, "head", Head);
-Element.define(Html, "body", Body);
 
 // NOTE(goto): this is the function that gets called everytime
 // an @component annotation gets attached to a class.
@@ -158,11 +136,12 @@ function component(type) {
 
 let scope = typeof module != "undefined" ? module.exports : window;
 
-scope.div = element.bind(this, Div);
-scope.title = element.bind(this, Title);
-scope.html = element.bind(this, Html);
-scope.li = element.bind(this, Li);
-scope.a = element.bind(this, A);
-scope.button = element.bind(this, Button);
+scope.div = function(arg1, arg2) { return element.call(this, Div, arg1, arg2); };
+scope.span = function(arg1, arg2) { return element.call(this, Span, arg1, arg2); };
+scope.title = function(arg1, arg2) { return element.call(this, Title, arg1, arg2); };
+scope.html = function(arg1, arg2) { return element.call(this, Html, arg1, arg2); };
+scope.li = function(arg1, arg2) { return element.call(this, Li, arg1, arg2); };
+scope.a = function(arg1, arg2) { return element.call(this, A, arg1, arg2); };
+scope.button = function(arg1, arg2) { return element.call(this, Button, arg1, arg2); };
 scope.Element = Element;
 scope.component = component;

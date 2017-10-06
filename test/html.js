@@ -118,11 +118,11 @@ describe("HTML", function() {
   it('Functions', function() {
     assertThat(`
       function bar(parent) {
-        parent.node("hello world");
+        this.node("hello world");
       }
 
       div {
-        bar(root())
+        bar()
       }`
     ).equalsTo({
       "@type": "div",
@@ -135,7 +135,7 @@ describe("HTML", function() {
       // TODO(goto): figure out why using "let foo" here breaks.
       var foo = "hello world";
       div {
-        node(foo)
+        this.node(foo)
       }`
     ).equalsTo({
       "@type": "div",
@@ -176,12 +176,12 @@ describe("HTML", function() {
       div {
 	var a = 1;
         var b = 2;
-	node(b)
-	node(a & b)
+	this.node(b)
+	this.node(a & b)
         function foo() {
           return 1;
         }
-        node(foo())
+        this.node(foo())
       }`
     ).equalsTo({
       "@type": "div",
@@ -192,7 +192,7 @@ describe("HTML", function() {
   it("Arrays can be embedded", function() {
     assertThat(`
       div {
-        ["hello", "world"].forEach(x => node(x));
+        ["hello", "world"].forEach(function(x) { this.node(x) }, this);
       }`
     ).equalsTo({
       "@type": "div",
@@ -204,8 +204,8 @@ describe("HTML", function() {
     assertThat(`
       var a = "1";
       div {
-	node(a)
-        node(a)
+	this.node(a)
+        this.node(a)
       }`
     ).equalsTo({
       "@type": "div",
@@ -287,8 +287,8 @@ describe("HTML", function() {
   it("scope reference works on parameters", function() {
     assertThat(`
       function foo(props) {
-        return div {
-          node(props.foo);
+	return div {
+	  this.node(props.foo);
         };
       }
       foo({foo: "bar"});
@@ -303,7 +303,7 @@ describe("HTML", function() {
     assertThat(`
       function foo(context) {
         return div {
-          node(context.foo())
+          this.node(context.foo())
         };
       }
       foo({foo: function() { return "bar"} });
@@ -360,8 +360,8 @@ describe("HTML", function() {
 
   it('Functions and Classes', function() {
     assertThat(`
-      function bar(parent) {
-        parent.node("hello world");
+      function bar() {
+        this.node("hello world");
       }
 
       // please ignore, nodejs hack not needed
@@ -371,7 +371,7 @@ describe("HTML", function() {
       class A {
         render() {
           return div {
-            bar(root())
+            bar()
           }
         }
       }
@@ -659,7 +659,7 @@ function assertThat(code) {
   // return new That(code);
   function evals(opt_debug) {
     let script = `
-      const {div, component} = require("../examples/framework/html.js");
+      const {div, span, component} = require("../examples/framework/html.js");
 
       ${code}
     `;

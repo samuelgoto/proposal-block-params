@@ -8,7 +8,7 @@ function element(Type, arg1, arg2) {
     block = arg2;
   }
 
-  block.call(result, result);
+  block.call(result);
 
   if (typeof arg1 == "string") {
     result.children = [arg1];
@@ -21,6 +21,7 @@ function element(Type, arg1, arg2) {
   }
 
   // Appends itself into the parent.
+
   if (this.node) {
     this.node(result);
   }
@@ -42,11 +43,6 @@ class Element {
   setAttribute(name, value) {
     this[name] = value;
   };
-  static define(parent, label, Type) {
-    parent.prototype[`${label}`] = function(arg1, arg2) {
-      element.call(this, Type, arg1, arg2);
-    };
-  }
 };
 
 class Div extends Element {
@@ -61,19 +57,11 @@ class Span extends Element {
   }
 }
 
-Element.define(Div, "span", Span);
-Element.define(Div, "div", Div);
-
-Element.define(Span, "span", Span);
-Element.define(Span, "div", Div);
-
 class Body extends Element {
   constructor() {
     super("body");
   }
 }
-Element.define(Body, "div", Div);
-Element.define(Body, "span", Span);
 
 class Title extends Element {
   constructor() {
@@ -86,16 +74,12 @@ class Head extends Element {
     super("head");
   }
 }
-Element.define(Head, "title", Title);
 
 class Html extends Element {
   constructor() {
     super("html");
   }
 }
-Element.define(Html, "head", Head);
-Element.define(Html, "body", Body);
-
 
 // This is the function that gets called when one
 // annotates a class with @component
@@ -104,7 +88,10 @@ function component(type) {
   return type;
 }
 
-module.exports.div = element.bind(this, Div);
-module.exports.title = element.bind(this, Title);
-module.exports.html = element.bind(this, Html);
+module.exports.span = function(arg1, arg2) { return element.call(this, Span, arg1, arg2); };
+module.exports.div = function(arg1, arg2) { return element.call(this, Div, arg1, arg2); };
+module.exports.title = function(arg1, arg2) { return element.call(this, Title, arg1, arg2); };
+module.exports.html = function(arg1, arg2) { return element.call(this, Html, arg1, arg2); };
+module.exports.body = function(arg1, arg2) { return element.call(this, Body, arg1, arg2); };
+module.exports.head = function(arg1, arg2) { return element.call(this, Head, arg1, arg2); };
 module.exports.component = component;

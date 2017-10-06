@@ -172,26 +172,37 @@ function visitor(node) {
 	node.parent.type == "CallExpression" &&
         node.parent.callee == node) {
       // console.log(node);
-      node.update(`("${node.name}" in this ? this.${node.name}.bind(this) : ${node.name}.bind(this))`);
+      // node.update(`("${node.name}" in this ? this.${node.name}.bind(this) : ${node.name}.bind(this))`);
+      // node.update(`${node.name}.call(this)`);
     }
   } else if (node.type === "CallExpression") {
     // return;
-    if (node.arguments.length > 0 &&
-	node.arguments[node.arguments.length - 1].docscript) {
-      let params = ``;
-      for (let i = 0; i < node.arguments.length; i++) {
-	// console.log(i);
-	let param = node.arguments[i];
-	if (!param.docscript) {
-	  params += `${param.source()}, `;
-	  continue;
-	}
 
-	params += `function() ${param.source() }`;
-      }
+    let method = node.callee.type == "MemberExpression";
 
-      node.update(`${node.callee.source()}(${params})`);
+    if (method) {
+	// do not interfere with method calls.
+	return;
     }
+
+    let expand = inside(node, n => n.docscript);
+    // if (node.arguments.length > 0 &&
+    //	node.arguments[node.arguments.length - 1].docscript) {
+    let params = ``;
+    for (let i = 0; i < node.arguments.length; i++) {
+      // console.log(i);
+      let param = node.arguments[i];
+      if (!param.docscript) {
+        params += `${param.source()}`;
+      } else {
+        params += `function() ${param.source() }`;
+      }
+      if (i < (node.arguments.length - 1)) {
+        params += ", ";
+      }
+    }
+    let expansion = expand ? (".call(this" + (node.arguments.length > 0 ? ", " : "")) : "(";
+    node.update(`${node.callee.source()}${expansion}${params})`);
   } else if (node.type == "ExpressionStatement") {
     if (inside(node, n => n.docscript) &&
 	node.expression.type == "CallExpression") {

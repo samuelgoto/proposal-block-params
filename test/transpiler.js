@@ -67,19 +67,19 @@ describe("Transpiler", function() {
         `DocScript.createElement.call(this, "d", {a: (function() { return this; }).bind(this) }, function(parent) {});`);
   });
 
-  it("Literal resolution for methods", function() {
+  it("Inner functions", function() {
     let result = DocScript.compile(`d { a() };`);
-    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a.bind(this))(); });`);
+    Assert.equal(result, `d(function() { a.call(this); });`);
   });
 
-  it("Literal resolution for methods with params", function() {
+  it("Inner functions with params", function() {
     let result = DocScript.compile(`d { a(c) };`);
-    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a.bind(this))(c); });`);
+    Assert.equal(result, `d(function() { a.call(this, c); });`);
   });
 
-  it("Literal resolution nested methods", function() {
+  it("Inner nested functions", function() {
     let result = DocScript.compile(`d { a { } };`);
-    Assert.equal(result, `d(function() { ("a" in this ? this.a.bind(this) : a.bind(this))(function() { }); });`);
+    Assert.equal(result, `d(function() { a.call(this, function() { }); });`);
   });
 
   it("Property access remains the same for objects", function() {
