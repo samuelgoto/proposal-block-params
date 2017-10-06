@@ -45,6 +45,34 @@ describe("Semantics", function() {
    `).deepEquals({hello: "world"});
   });
 
+  it("Nesting function declarations", function() {
+   assertThat(`
+     function a(lambda) {
+       return lambda.call(2);
+     }
+     a {
+       function b() {
+	 return this;
+       }
+       return b();
+     }
+   `).equals(2);
+  });
+
+  it("Methods do not get this overriden", function() {
+   assertThat(`
+     function a(lambda) {
+       return lambda.call(2);
+     }
+     a {
+       function b() {
+	 return this;
+       }
+       return b();
+     }
+   `).equals(2);
+  });
+
 });
 
 class That {
@@ -53,9 +81,10 @@ class That {
   }
 
   eval(opt_debug) {
-    let result = eval(DocScript.compile(this.code).toString());
+    let code = DocScript.compile(this.code).toString();
+    let result = eval(code);
     if (opt_debug) {
-      console.log(JSON.stringify(result, undefined, ' '));
+      console.log(code);
     }
     return result;
   }
