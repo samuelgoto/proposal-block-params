@@ -5,7 +5,7 @@ This is a very early [stage 0](https://tc39.github.io/process-document/) explora
 
 Inspired by [kotlin](https://kotlinlang.org/docs/reference/lambdas.html), it is syntactic sugar that allows:
 
-* on function calls, omitting parantheses on the ***las*** parameter when that's a lambda
+* on function calls, omitting parantheses around the ***last*** parameter when that's a lambda
 * on function calls inside the lambda, passing the context of the lambda
 
 For example, ```a("hello") { ... }``` is desugared to ```a("hello", function() { ... })```.
