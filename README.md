@@ -1,13 +1,19 @@
 Domain Specific Languages
 =========
 
-This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/lambdas.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be polyfilled.
+This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/lambdas.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
-In its basic form, it is an affordance (against, inspired by [kotlin's affordance](https://kotlinlang.org/docs/reference/lambdas.html)) that lets you omit parantheses around the arguments of function calls for lambdas.
+In its basic form, it is an affordance (against, inspired by [kotlin's affordance](https://kotlinlang.org/docs/reference/lambdas.html)) that lets you omit parantheses around the ***last*** argument of function calls for lambdas.
 
-For example, ```a {}``` is isomorphic to ```a(function() {})``` or ```a(1) {b()}``` is equivalent to ```a(1, function() {b()})```.
+For example, ```a("hello") { ... }``` is desugared to ```a("hello", function() { ... })```.
 
-While a simple syntactical change, it enables an interesting set of code patterns.
+Functions that take just a single parameter can also be called as ```a { ... }``` which is desugared to ```a(function() { ... })```.
+
+To enable inner calls to keep track of the context, calls inside the statement blocks are passed the outer ```this``` as a ```call`` reference.
+
+For example, ```a { b("hi") }``` is desugared to ```a(function() { b.call(this, "hi") })```.
+
+While a simple syntactical change, it enables an interesting set of userland frameworks to be built.
 
 # Use cases
 
@@ -18,6 +24,46 @@ A random list of possibilities collected from kotlin/groovy (links to equivalent
 ```javascript
 lock (resource) {
   resource.kill();
+}
+```
+
+## [unless](https://www.slideshare.net/glaforge/practical-groovy-dsl)
+
+```javascript
+unless (expr) {
+  // statements
+}
+```
+
+## [HTML](https://kotlinlang.org/docs/reference/type-safe-builders.html)
+
+```javascript
+let body = html {
+  head {
+    title("Welcome!")
+  }
+  body {
+    div {
+      span("Hello World")
+    }
+    a({href: "contact.html"}) { span("contact me") }
+  }
+}
+```
+
+## [assert](https://artemzin.com/blog/ui-testing-separating-assertions-from-actions-with-kotlin-dsl/)
+
+```javascript
+assert (expr) {
+  console.log("blahh something went wrong!");
+}
+```
+## [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
+
+```javascript
+run (100) {
+  // internally calls setTimeout
+  alert("hello world");
 }
 ```
 
@@ -38,19 +84,19 @@ server (app) {
 }
 ```
 
-## [HTML](https://kotlinlang.org/docs/reference/type-safe-builders.html)
+## [regexes](https://github.com/h0tk3y/regex-dsl)
 
 ```javascript
-let body = html {
-  head {
-    title("Welcome!")
+// NOTE(goto): inspired by https://github.com/MaxArt2501/re-build too.
+let re = regex {
+  start()
+  literally("a")
+  optionally("b")
+  one().of() {
+    exactly(5).characters()
+    some(3).words()
   }
-  body {
-    div {
-      span("Hello World")
-    }
-    a({href: "contact.html"}) { span("contact me") }
-  }
+  end()
 }
 ```
 
@@ -104,39 +150,6 @@ VerticalLayout {
 }
 ```
 
-## [assert](https://artemzin.com/blog/ui-testing-separating-assertions-from-actions-with-kotlin-dsl/)
-
-```javascript
-assert (expr) {
-  console.log("blahh something went wrong!");
-}
-```
-
-## [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
-
-```javascript
-run (100) {
-  // internally calls setTimeout
-  alert("hello world");
-}
-```
-
-## [regexes](https://github.com/h0tk3y/regex-dsl)
-
-```javascript
-// NOTE(goto): inspired by https://github.com/MaxArt2501/re-build too.
-let re = regex {
-  start()
-  literally("a")
-  optionally("b")
-  one().of() {
-    exactly(5).characters()
-    some(3).words()
-  }
-  end()
-}
-```
-
 ## [testing](http://hadihariri.com/2013/01/21/extension-function-literals-in-kotlin-or-how-to-enforce-restrictions-on-your-dsl/)
 
 ```javascript
@@ -155,26 +168,6 @@ given("a calculator", {
   }
 }
 ```
-
-## do
-
-```javascript
-let a = do {  
-  if (expr)
-    return 1;
-  else
-    return 2;
-};
-```
-
-## [unless](https://www.slideshare.net/glaforge/practical-groovy-dsl)
-
-```javascript
-unless (expr) {
-  // statements
-}
-```
-
 
 # Polyfill
 
