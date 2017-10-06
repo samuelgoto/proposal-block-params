@@ -3,17 +3,20 @@ Domain Specific Languages
 
 This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/lambdas.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
-In its basic form, it is an affordance (inspired by [kotlin's affordance](https://kotlinlang.org/docs/reference/lambdas.html)) that lets you omit parantheses around the ***last*** argument of function calls for lambdas.
+Inspired by [kotlin](https://kotlinlang.org/docs/reference/lambdas.html), it is syntactic sugar that allows:
+
+* on function calls, omitting parantheses on the ***las*** parameter when that's a lambda
+* on function calls inside the lambda, passing the context of the lambda
 
 For example, ```a("hello") { ... }``` is desugared to ```a("hello", function() { ... })```.
 
 Functions that take just a single parameter can also be called as ```a { ... }``` which is desugared to ```a(function() { ... })```.
 
-To enable inner calls to keep track of the context, calls inside the statement blocks are passed the outer ```this``` as a ```.call``` argument.
+To enable calls inside the lambda to keep track of the context, function calls are passed the context ```this``` as a ```.call``` argument.
 
 For example, ```a { b("hi") }``` is desugared to ```a(function() { b.call(this, "hi") })```.
 
-While a simple syntactical change, it enables an interesting set of userland frameworks to be built.
+While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built.
 
 # Use cases
 
