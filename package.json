@@ -37,6 +37,7 @@
     "astring": "^1.0.3",
     "commander": "^2.11.0",
     "falafel": "^2.1.0",
+    "lit-html": "^0.7.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-dom-server": "0.0.5",

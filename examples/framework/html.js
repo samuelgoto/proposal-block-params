@@ -88,10 +88,44 @@ function component(type) {
   return type;
 }
 
+// let module = (typeof module != "undefined") ? module : {exports: {}};
+if (typeof module == "undefined") {
+    // console.log("hi");
+    var module = {exports: {}};
+}
+
 module.exports.span = function(arg1, arg2) { return element.call(this, Span, arg1, arg2); };
 module.exports.div = function(arg1, arg2) { return element.call(this, Div, arg1, arg2); };
 module.exports.title = function(arg1, arg2) { return element.call(this, Title, arg1, arg2); };
 module.exports.html = function(arg1, arg2) { return element.call(this, Html, arg1, arg2); };
 module.exports.body = function(arg1, arg2) { return element.call(this, Body, arg1, arg2); };
 module.exports.head = function(arg1, arg2) { return element.call(this, Head, arg1, arg2); };
+
+// Elements
+
+function register(type) {
+  module.exports[type] = function(arg1, arg2) { return element.call(this, Element.bind(null, type), arg1, arg2); };
+}
+
+let elements = ["style", "svg"];
+
+for (let i in elements) {
+  let el = elements[i];
+  // console.log(el);
+  register(el);
+}
+
 module.exports.component = component;
+
+/*
+export const {
+  div, 
+  span,
+  title,
+  html,
+  body,
+  head,
+  style,
+  svg
+} = module.exports;
+*/
