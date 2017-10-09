@@ -122,7 +122,7 @@ export class LitClock extends HTMLElement {
 }
 customElements.define('lit-clock', LitClock);
 
-const minuteTicks = () => {
+const minuteTicks = (() => {
   const lines = [];
   for (let i = 0; i < 60; i++) {
     lines.push(svg`
@@ -134,9 +134,9 @@ const minuteTicks = () => {
     `);
   }
   return lines;
-}();
+})();
 
-const hourTicks = () => {
+const hourTicks = (() => {
   const lines = [];
   for (let i = 0; i < 12; i++) {
     lines.push(svg`
@@ -148,5 +148,4 @@ const hourTicks = () => {
     `);
   }
   return lines;
-}();
-
+})();

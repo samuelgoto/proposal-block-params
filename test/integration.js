@@ -17,7 +17,8 @@ describe("Integration Tests", function(done) {
           // TODO(goto): huge hack, fix this.
 	  if (file == "tictactoe.js" ||
               file == "tictactoe.ds.js" ||
-              file == "clock.js") {
+              file == "clock.js" ||
+              file == "clock.ds.js") {
 	    return;
 	  }
 

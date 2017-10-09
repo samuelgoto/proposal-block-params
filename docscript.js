@@ -254,7 +254,8 @@ class DocScript {
     var result = falafel(code, {
       parser: acorn,
       plugins: { docscript: true, es7: true },
-      ecmaVersion: 7
+      ecmaVersion: 7,
+      sourceType: "module"
     }, visitor);
     return result;
   }
