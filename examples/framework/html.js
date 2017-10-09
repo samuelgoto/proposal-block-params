@@ -43,6 +43,31 @@ class Element {
   setAttribute(name, value) {
     this[name] = value;
   };
+  toXml() {
+    let type = this["@type"];
+    let attributes = ``;
+    for (let name in this) {
+      if (name == "@type" || name == "children") {
+	continue;
+      }
+
+      attributes += ` ${name}="${this[name]}"`;  
+    }
+    let result = `<${type}${attributes}>`;
+
+    for (let i in this.children) {
+      let child = this.children[i];
+      if (child instanceof Element) {
+	result += child.toXml();
+      } else {
+	// text node.
+        result += child;
+      }
+    }
+
+    result += `</${type}>`;
+    return result;
+  };
 };
 
 class Div extends Element {
@@ -88,10 +113,8 @@ function component(type) {
   return type;
 }
 
-// let module = (typeof module != "undefined") ? module : {exports: {}};
 if (typeof module == "undefined") {
-    // console.log("hi");
-    var module = {exports: {}};
+  var module = {exports: {}};
 }
 
 module.exports.span = function(arg1, arg2) { return element.call(this, Span, arg1, arg2); };
@@ -107,25 +130,11 @@ function register(type) {
   module.exports[type] = function(arg1, arg2) { return element.call(this, Element.bind(null, type), arg1, arg2); };
 }
 
-let elements = ["style", "svg"];
+let elements = ["style", "svg", "g", "circle", "line", "a"];
 
 for (let i in elements) {
   let el = elements[i];
-  // console.log(el);
   register(el);
 }
 
 module.exports.component = component;
-
-/*
-export const {
-  div, 
-  span,
-  title,
-  html,
-  body,
-  head,
-  style,
-  svg
-} = module.exports;
-*/

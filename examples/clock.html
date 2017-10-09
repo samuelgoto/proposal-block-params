@@ -11,6 +11,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <!doctype html>
 <html>
   <head>
+    <script src="/examples/framework/html.js"></script>
+    <script>
+      for (let i in module.exports) {
+        window[i] = module.exports[i];
+      }
+    </script>
     <script type="module" src="./clock.js"></script>
   </head>
   <body>

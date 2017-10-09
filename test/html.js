@@ -10,11 +10,11 @@ describe("HTML", function() {
     assertThat("`hello`").equalsTo(`hello`);
     assertThat("undefined").equalsTo(undefined);
     assertThat("null").equalsTo(null);
-    assertThat("function a() {}").contains({});
-    assertThat("function a() { return 1; } a()").equalsTo(1);
-    assertThat("var a = 1;").contains({});
-    assertThat("var a = 1; a").contains({});
-    assertThat("let a = 1; a").contains({});
+    assertThat("function b() {}").contains({});
+    assertThat("function b() { return 1; } b()").equalsTo(1);
+    assertThat("var b = 1;").contains({});
+    assertThat("var b = 1; b").contains({});
+    assertThat("let b = 1; b").contains({});
   });
 
   it('Simplest', function() {
@@ -174,10 +174,10 @@ describe("HTML", function() {
   it('Scripting internal variables', function() {
     assertThat(`
       div {
-	var a = 1;
+	var c = 1;
         var b = 2;
 	this.node(b)
-	this.node(a & b)
+	this.node(c & b)
         function foo() {
           return 1;
         }
@@ -202,10 +202,10 @@ describe("HTML", function() {
 
   it("Two variables", function() {
     assertThat(`
-      var a = "1";
+      var b = "1";
       div {
-	this.node(a)
-        this.node(a)
+	this.node(b)
+        this.node(b)
       }`
     ).equalsTo({
       "@type": "div",
@@ -646,6 +646,29 @@ describe("HTML", function() {
       }]
     });
   });
+
+  it('XML', function() {
+    assertThat(`
+      html {
+        head {
+	  title("hello world")
+        }
+        body {
+	  a({href: "home.html"}) {
+	    span("click here!")
+          }
+        }
+      }
+    `).equalsTo(`
+      <html>
+        <head><title>hello world</title></head>
+        <body>
+          <a href="home.html"><span>click here!</span></a>
+        </body>
+      </html>
+    `, false, true);
+  });
+
 });
 
 class That {
@@ -659,7 +682,7 @@ function assertThat(code) {
   // return new That(code);
   function evals(opt_debug) {
     let script = `
-      const {div, span, component} = require("../examples/framework/html.js");
+      const {html, head, title, body, a, div, span, component} = require("../examples/framework/html.js");
 
       ${code}
     `;
@@ -690,9 +713,16 @@ function assertThat(code) {
     evals: function(opt_debug) {
       return evals(opt_debug);
     },
-    equalsTo: function(expected, opt_debug) {
+    equalsTo: function(expected, opt_debug, opt_xml) {
       let result = evals(opt_debug);
-      Assert.deepEqual(clean(result), expected);
+      if (opt_xml) {
+          // NOTE(goto): poor man version of comparing XML :)
+	  Assert.equal(
+            result.toXml().replace(/ /g, "").replace(/\n/g, ""),
+            expected.replace(/ /g, "").replace(/\n/g, ''));
+      } else {
+        Assert.deepEqual(clean(result), expected);
+      }
     },
     contains: function(expected, opt_debug) {
       let result = evals(opt_debug);

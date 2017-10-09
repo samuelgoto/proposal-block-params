@@ -13,11 +13,6 @@
  */
 
 import {html, render, svg} from '/node_modules/lit-html/lit-html.js';
-import {div, style, span} from '/examples/framework/html.js';
-
-
-console.log(span);
-
 
 /** 
  * Adapted from the Ractive.js clock example: http://www.ractivejs.org/examples/clock/
