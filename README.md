@@ -3,7 +3,7 @@ Domain Specific Languages
 
 This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/lambdas.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
-Inspired by [kotlin](https://kotlinlang.org/docs/reference/lambdas.html), it is syntactic sugar that allows:
+It is syntactic sugar that allows:
 
 * on function calls, omitting parantheses around the ***last*** parameter when that's a lambda
 * on function calls inside the lambda, passing the context of the lambda
@@ -20,9 +20,9 @@ While a simple syntactical simplification, it enables an interesting set of user
 
 There are interesting scenarios in:
 
-* [flow control](#flow-control) (e.g. [lock](#lock), [unless](#unless), [guard](#guard), [defer](#defer), [foreach](#foreach), [select](#select))
-* [builders](#builders) (e.g. [map](#map), [dot](#dot), [graph](#graph))
-* [layout](#layout) (e.g. [html](#html), [xml](#xml), [trees](#android))
+* [flow control](#flow-control) (e.g. [lock](#lock), [unless](#perls-unless), [guard](#swifts-guard), [defer](#swifts-defer), [foreach](#cs-foreach), [vbs-select](#select))
+* [builders](#builders) (e.g. [map](#map), [dot](#dot), [data](#custom-data))
+* [layout](#layout) (e.g. [html](#kotlins-template), [android](#android))
 * [configuration](#configuration) (e.g. [node](#node), [makefiles](#makefiles))
 * [others](#misc) (e.g. [regexes](#regexes), [graphql](#graphql), [testing](#testing))
 
@@ -115,7 +115,9 @@ using (stream) {
 
 ## builders
 
-### [Java's maps, sets](http://openjdk.java.net/jeps/269)
+### [maps](http://openjdk.java.net/jeps/269)
+
+... and sets ...
 
 ```javascript
 let a = map {
@@ -325,7 +327,6 @@ For example, instead of:
 
 ```javascript
 let html = `<div>`;
-// String building works great until we hit a statement.
 for (let product of ["apple", "oranges"]) {
   html += `<span>${product}</span>`;
 }
