@@ -280,6 +280,44 @@ describe("a calculator") {
 
 ## JSX
 
+This proposal opens the door to making JSX have more statement-like constructs. So, instead of:
+
+
+```jsx
+// JSX
+var box =
+  <Box>
+    {
+      shouldShowAnswer(user) ?
+      <Answer value={false}>no</Answer> :
+      <Box.Comment>
+         Text Content
+      </Box.Comment>
+    }
+  </Box>;
+```
+
+One could write:
+
+```jsx
+// JSX
+var box =
+  <Box>
+    {
+      select (shouldShowAnswer(user)) {
+        when (true) {
+          <Answer value={false}>no</Answer>
+        }
+        when (false) {
+          <Box.Comment>
+             Text Content
+          </Box.Comment>
+        }
+      }
+    }
+  </Box>;
+```
+
 ## Template Literals
 
 # Prior Art
@@ -288,14 +326,13 @@ describe("a calculator") {
 
 * Do the benefits of growing the language outweight its cost?
 * Do you corner yourself from ever enabling further control structures (e.g. match? do?)?
-
+* What would it take to enable things like if {} else {} to be done? do {}? match {}? for (;;) {}?
 
 # Polyfill
 
   This is currently polyfilled as a transpiler. You can find a lot of examples [here](test/runtime.js).
 
   `npm install -g @docscript/docscript`
-  
 
 # Tests
 
