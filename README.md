@@ -20,7 +20,7 @@ While a simple syntactical simplification, it enables an interesting set of user
 
 There are interesting scenarios in:
 
-* [flow control](#flow-control) (e.g. [lock](#lock), [unless](#perls-unless), [guard](#swifts-guard), [defer](#swifts-defer), [foreach](#cs-foreach), [vbs-select](#select))
+* [flow control](#flow-control) (e.g. [lock](#lock), [unless](#perls-unless), [guard](#swifts-guard), [defer](#swifts-defer), [foreach](#cs-foreach), [select](#vbs-select))
 * [builders](#builders) (e.g. [map](#map), [dot](#dot), [data](#custom-data))
 * [layout](#layout) (e.g. [html](#kotlins-template), [android](#android))
 * [configuration](#configuration) (e.g. [node](#node), [makefiles](#makefiles))
