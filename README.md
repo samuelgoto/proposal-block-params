@@ -359,9 +359,42 @@ let html = `
 
 # FAQ
 
-* Do the benefits of growing the language outweight its cost?
-* Do you corner yourself from ever enabling further control structures (e.g. match? do?)?
-* What would it take to enable things like if {} else {} to be done? do {}? match {}? for (;;) {}?
+## Do the benefits of growing the language outweight its cost ([mark miller](https://mail.mozilla.org/pipermail/es-discuss/2015-June/043307.html), [guy steele](https://www.youtube.com/watch?v=_ahvzDzKdB0))?
+
+We are still evaluating feasibility and long term benefits. The intuition is that it may (particurlary when it comes to constructing DOM, which accounts to a significant portion of the time spent developing on the web), but we certainly acknowledge that there is a significant cognitive growth of the language.
+
+## Do you corner yourself from ever enabling further control structures (e.g. match?)?
+
+Unclear. Here are some of the alternatives we are considering, somewhat sorted by most to least appealing:
+
+* user defined forms take precendence over {"future", "all"} built-in ones
+* enumerate and reserve all keywords
+* sigils (e.g. for! {})
+
+## Do you allow ```return```, ```throws```, ```break``` and ```continue``` inside the lambdas?
+
+Unclear. Here are some alternatives we are considering, somewhat sorted by most to least compelling:
+
+* yes, burden on the user to know the transformation
+* no
+
+## What would it take to enable things like if {} else {} to be done? do {}? match {}? for (;;) {}?
+
+Unclear at this point if DSLs are a good idea or not, so these are left as possible future extensions:
+
+* if () {} elseif() {} else {} would require some sort of chaining between the calls. something along the lines of ```if(expr, () => { ... }).else( ... )```.
+* for (;;) would require some sort of: (a) a ```;``` divider for parameters and (b) passing expressions as functions that can be re-evaluated.
+
+## What else do other languages support for DSL?
+
+TBD.
+
+## What other mechanisms have you explored for identifier resolution?
+
+* with (this) {}
+* receivers
+* for (let i in foo) {}
+* named parameters
 
 # Polyfill
 
