@@ -40,7 +40,7 @@ unless (expr) {
 }
 ```
 
-## [swift's guard](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/ErrorHandling.html)
+### [swift's guard](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/ErrorHandling.html)
 
 * aka [assert](https://artemzin.com/blog/ui-testing-separating-assertions-from-actions-with-kotlin-dsl/)
 
@@ -62,7 +62,7 @@ defer {
 ```
 
 
-### [foreach]
+### [C#s foreach](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/foreach-in)
 
 ```javascript
 foreach (array) {
@@ -76,7 +76,7 @@ foreach (stream) {
 }
 ```
 
-### [select](https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/statements/select-case-statement)
+### [VB's select](https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/statements/select-case-statement)
 
 ```javascript
 let a = select (foo) {
@@ -86,7 +86,7 @@ let a = select (foo) {
 }
 ```
 
-### [using](https://stackoverflow.com/questions/212198/what-is-the-c-sharp-using-block-and-why-should-i-use-it)
+### [C#'s using](https://stackoverflow.com/questions/212198/what-is-the-c-sharp-using-block-and-why-should-i-use-it)
 
 ```javascript
 using (stream) {
@@ -96,15 +96,12 @@ using (stream) {
 
 ## builders
 
-### maps, sets
+### [Java's maps, sets](http://openjdk.java.net/jeps/269)
 
 ```javascript
 let a = map {
   put("hello", "world")
   put("foo, "bar")
-}
-let b = set {
-  put("hi")
 }
 ```
 
@@ -132,7 +129,7 @@ let data = survey("TC39 Meeting Schedule") {
 
 ## layout
 
-### [templates](https://kotlinlang.org/docs/reference/type-safe-builders.html)
+### [kotlin's templates](https://kotlinlang.org/docs/reference/type-safe-builders.html)
 
 ```javascript
 let body = html {
@@ -184,7 +181,7 @@ server (app) {
 }
 ```
 
-### [configuration ](https://github.com/jenkinsci/job-dsl-plugin)
+### [makefiles](https://github.com/jenkinsci/job-dsl-plugin)
 
 ```javascript
 job('PROJ-unit-tests') {
