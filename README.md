@@ -20,18 +20,18 @@ While a simple syntactical simplification, it enables an interesting set of user
 
 There are interesting scenarios in:
 
-* [flow control](#flow-control), e.g. [lock](#lock), [unless](#unless), [guard](#guard), [defer](#defer), [foreach](#foreach), [select](#select)
-* [builders](#builders), e.g. [map](#map), [dot](#dot), [graph](#graph)
-* [layout](#layout), e.g. [html](#html), [xml](#xml), [trees](#android)
-* [configuration](#configuration), e.g. [node](#node), [makefiles](#makefiles)
-* [other](#misc), e.g. [regexes](#regexes), [graphql](#graphql), [testing](#testing)
+* [flow control](#flow-control) (e.g. [lock](#lock), [unless](#unless), [guard](#guard), [defer](#defer), [foreach](#foreach), [select](#select))
+* [builders](#builders) (e.g. [map](#map), [dot](#dot), [graph](#graph))
+* [layout](#layout) (e.g. [html](#html), [xml](#xml), [trees](#android))
+* [configuration](#configuration) (e.g. [node](#node), [makefiles](#makefiles))
+* [others](#misc) (e.g. [regexes](#regexes), [graphql](#graphql), [testing](#testing))
 
 And interesting applications in:
 
 * [JSX](#jsx)
 * [template literals](#template-literals)
 
-This is early, so have a list of open questions in the form of an [FAQ](#FAQ).
+This is early, so we have a list of open questions in the form of an [FAQ](#FAQ).
 
 # Use cases
 
