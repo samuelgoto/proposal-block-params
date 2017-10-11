@@ -22,7 +22,9 @@ While a simple syntactical simplification, it enables an interesting set of user
 
 A random list of possibilities collected from kotlin/groovy (links to equivalent idea in kotlin/groovy at the headers), somewhat sorted by most to least compelling.
 
-## [lock](https://kotlinlang.org/docs/reference/lambdas.html)
+## flow control
+
+### [lock](https://kotlinlang.org/docs/reference/lambdas.html)
 
 ```javascript
 lock (resource) {
@@ -30,7 +32,7 @@ lock (resource) {
 }
 ```
 
-## [unless](https://www.slideshare.net/glaforge/practical-groovy-dsl)
+### [unless](https://www.slideshare.net/glaforge/practical-groovy-dsl)
 
 ```javascript
 unless (expr) {
@@ -38,7 +40,99 @@ unless (expr) {
 }
 ```
 
-## [templates](https://kotlinlang.org/docs/reference/type-safe-builders.html)
+## [swift's guard](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/ErrorHandling.html)
+
+* aka [assert](https://artemzin.com/blog/ui-testing-separating-assertions-from-actions-with-kotlin-dsl/)
+
+```javascript
+guard (document.cookie) {
+  alert("blargh, you are not signed in!");
+}
+```
+
+### [swift's defer](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/ErrorHandling.html)
+
+* aka [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
+
+```javascript
+defer {
+  // internally calls setTimeout(0)
+  alert("hello world");
+}
+```
+
+
+### [foreach]
+
+```javascript
+foreach (array) {
+  console.log(item());
+}
+foreach (map) {
+  console.log(`${key()}: ${value()}`);
+}
+foreach (stream) {
+  console.log(`new piece! ${value}`);
+}
+```
+
+### [select](https://docs.microsoft.com/en-us/dotnet/visual-basic/language-reference/statements/select-case-statement)
+
+```javascript
+let a = select (foo) {
+  when (bar) { 1 }
+  when (hello) { 2 }
+  otherwise { 3 }
+}
+```
+
+### [using](https://stackoverflow.com/questions/212198/what-is-the-c-sharp-using-block-and-why-should-i-use-it)
+
+```javascript
+using (stream) {
+  // stream gets closed automatically.
+}
+```
+
+## builders
+
+### maps, sets
+
+```javascript
+let a = map {
+  put("hello", "world")
+  put("foo, "bar")
+}
+let b = set {
+  put("hi")
+}
+```
+
+### [dot](https://en.wikipedia.org/wiki/DOT_(graph_description_language))
+
+```javascript
+let a = graph("architecture") {
+  edge("a", "b")
+  edge("b", "c")
+  // ...
+}
+```
+
+### custom data
+
+```javascript
+let data = survey("TC39 Meeting Schedule") {
+  question("Where should we host the European meeting?") {
+    option("Paris")
+    option("Barcelona")
+    option("London")
+  }
+}
+```
+
+## layout
+
+### [templates](https://kotlinlang.org/docs/reference/type-safe-builders.html)
 
 ```javascript
 let body = html {
@@ -54,23 +148,26 @@ let body = html {
 }
 ```
 
-## [assert](https://artemzin.com/blog/ui-testing-separating-assertions-from-actions-with-kotlin-dsl/)
+### [android](https://github.com/Kotlin/anko)
 
 ```javascript
-assert (expr) {
-  console.log("blahh something went wrong!");
+VerticalLayout {
+  ImageView ({width: matchParent}) {
+      padding = dip(20)
+      margin = dip(15)
+    }
+    Button("Tap to Like") {
+      onclick { toast("Thanks for the love!") }
+    }
+  }
 }
 ```
-## [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
 
-```javascript
-run (100) {
-  // internally calls setTimeout
-  alert("hello world");
-}
-```
+## Configuration
 
-## [node](http://melix.github.io/javaone-groovy-dsls/#/ratpack)
+### [node](http://melix.github.io/javaone-groovy-dsls/#/ratpack)
+
+* http://www.sinatrarb.com/
 
 ```javascript
 const express = require("express");
@@ -87,23 +184,41 @@ server (app) {
 }
 ```
 
-## [regexes](https://github.com/h0tk3y/regex-dsl)
+### [configuration ](https://github.com/jenkinsci/job-dsl-plugin)
+
+```javascript
+job('PROJ-unit-tests') {
+  scm {
+      git(gitUrl)
+  }
+  triggers {
+      scm('*/15 * * * *')
+  }
+  steps {
+      maven('-e clean test')
+  }
+}
+```
+
+## Misc
+
+### [regexes](https://github.com/h0tk3y/regex-dsl)
 
 ```javascript
 // NOTE(goto): inspired by https://github.com/MaxArt2501/re-build too.
 let re = regex {
-  start {}
-  literally("a")
-  optionally("b")
-  xor() {
-    exactly(5).characters()
-    some(3).words()
-  }
-  end {}
+  start()
+  then("a")
+  then(2, "letters")
+  maybe("#")
+  oneof("a", "b")
+  between([2, 4], "a")
+  insensitively()
+  end()
 }
 ```
 
-## [graphql](https://www.kotlinresources.com/library/kraph/)
+### [graphql](https://www.kotlinresources.com/library/kraph/)
 
 ```javascript
 // NOTE(goto): hero uses proxies/getters to know when properties
@@ -123,49 +238,21 @@ let heroes = hero {
 }
 ```
 
-## [configuration ](https://github.com/jenkinsci/job-dsl-plugin)
+### [testing](http://hadihariri.com/2013/01/21/extension-function-literals-in-kotlin-or-how-to-enforce-restrictions-on-your-dsl/)
+
+* http://rspec.info/
 
 ```javascript
-job('PROJ-unit-tests') {
-  scm {
-      git(gitUrl)
-  }
-  triggers {
-      scm('*/15 * * * *')
-  }
-  steps {
-      maven('-e clean test')
-  }
-}
-```
-
-## [android](https://github.com/Kotlin/anko)
-
-```javascript
-VerticalLayout {
-  ImageView ({width: matchParent}) {
-      padding = dip(20)
-      margin = dip(15)
-    }
-    Button("Tap to Like") {
-      onclick { toast("Thanks for the love!") }
-    }
-  }
-}
-```
-
-## [testing](http://hadihariri.com/2013/01/21/extension-function-literals-in-kotlin-or-how-to-enforce-restrictions-on-your-dsl/)
-
-```javascript
-given("a calculator", {
+// mocha
+describe("a calculator") {
 
   val calculator = Calculator()
 
-  on("calling sum with two numbers", {
+  on("calling sum with two numbers") {
 
     val sum = calculator.sum(2, 3)
 
-    it("should return the sum of the two numbers", {
+    it("should return the sum of the two numbers") {
 
       shouldEqual(5, sum)
     }
