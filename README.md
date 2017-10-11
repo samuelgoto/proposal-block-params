@@ -18,6 +18,21 @@ For example, ```a { b("hi") }``` is desugared to ```a(function() { b.call(this, 
 
 While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built.
 
+There are interesting scenarios in:
+
+* [flow control](#flow-control), e.g. [lock](#lock), [unless](#unless), [guard](#guard), [defer](#defer), [foreach](#foreach), [select](#select)
+* [builders](#builders), e.g. [map](#map), [dot](#dot), [graph](#graph)
+* [layout](#layout), e.g. [html](#html), [xml](#xml), [trees](#android)
+* [configuration](#configuration), e.g. [node](#node), [makefiles](#makefiles)
+* [other](#misc), e.g. [regexes](#regexes), [graphql](#graphql), [testing](#testing)
+
+And interesting applications in:
+
+* [JSX](#jsx)
+* [template literals](#template-literals)
+
+This is early, so have a list of open questions in the form of an [FAQ](#FAQ).
+
 # Use cases
 
 A random list of possibilities collected from kotlin/groovy (links to equivalent idea in kotlin/groovy at the headers), somewhat sorted by most to least compelling.
@@ -26,13 +41,17 @@ A random list of possibilities collected from kotlin/groovy (links to equivalent
 
 ### [lock](https://kotlinlang.org/docs/reference/lambdas.html)
 
+* [java's synchronized](http://winterbe.com/posts/2015/04/30/java8-concurrency-tutorial-synchronized-locks-examples/x)
+
 ```javascript
 lock (resource) {
   resource.kill();
 }
 ```
 
-### [unless](https://www.slideshare.net/glaforge/practical-groovy-dsl)
+### [Perl's unless](https://www.tutorialspoint.com/perl/perl_unless_statement.htm)
+
+* [groovy's](https://www.slideshare.net/glaforge/practical-groovy-dsl)
 
 ```javascript
 unless (expr) {
@@ -40,7 +59,7 @@ unless (expr) {
 }
 ```
 
-### [swift's guard](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/ErrorHandling.html)
+### [Swift's guard](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/ErrorHandling.html)
 
 * aka [assert](https://artemzin.com/blog/ui-testing-separating-assertions-from-actions-with-kotlin-dsl/)
 
@@ -50,7 +69,7 @@ guard (document.cookie) {
 }
 ```
 
-### [swift's defer](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/ErrorHandling.html)
+### [Swift's defer](https://developer.apple.com/library/content/documentation/Swift/Conceptual/Swift_Programming_Language/ErrorHandling.html)
 
 * aka [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
 
@@ -62,7 +81,7 @@ defer {
 ```
 
 
-### [C#s foreach](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/foreach-in)
+### [C#'s foreach](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/foreach-in)
 
 ```javascript
 foreach (array) {
@@ -256,6 +275,20 @@ describe("a calculator") {
   }
 }
 ```
+
+# Applications
+
+## JSX
+
+## Template Literals
+
+# Prior Art
+
+# FAQ
+
+* Do the benefits of growing the language outweight its cost?
+* Do you corner yourself from ever enabling further control structures (e.g. match? do?)?
+
 
 # Polyfill
 
