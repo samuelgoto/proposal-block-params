@@ -365,7 +365,11 @@ We are still evaluating feasibility and long term benefits. The intuition is tha
 
 ## Do you corner yourself from ever enabling further control structures (e.g. match?)?
 
-Unclear. Here are some of the alternatives we are considering, somewhat sorted by most to least appealing:
+Unclear.
+
+TODO(goto): how does kotlin/groovy get away with this?
+
+Here are some of the alternatives we are considering, somewhat sorted by most to least appealing:
 
 * user defined forms take precendence over {"future", "all"} built-in ones
 * enumerate and reserve all keywords
@@ -373,7 +377,11 @@ Unclear. Here are some of the alternatives we are considering, somewhat sorted b
 
 ## Do you allow ```return```, ```throws```, ```break``` and ```continue``` inside the lambdas?
 
-Unclear. Here are some alternatives we are considering, somewhat sorted by most to least compelling:
+Unclear.
+
+TODO(goto): kotlin does, has it been a problem?
+
+Here are some alternatives we are considering, somewhat sorted by most to least compelling:
 
 * yes, burden on the user to know the transformation
 * no
@@ -382,8 +390,8 @@ Unclear. Here are some alternatives we are considering, somewhat sorted by most 
 
 Unclear at this point if DSLs are a good idea or not, so these are left as possible future extensions:
 
-* if () {} elseif() {} else {} would require some sort of chaining between the calls. something along the lines of ```if(expr, () => { ... }).else( ... )```.
-* for (;;) would require some sort of: (a) a ```;``` divider for parameters and (b) passing expressions as functions that can be re-evaluated.
+* ```if () {} elseif() {} else {}``` would require some sort of chaining between the calls. something along the lines of ```if(expr, () => { ... }).else( ... )```.
+* ```for (;;)``` would require some sort of: (a) a ```;``` divider for parameters and (b) passing expressions as functions that can be re-evaluated.
 
 ## What else do other languages support for DSL?
 
