@@ -278,10 +278,11 @@ describe("a calculator") {
 
 # Applications
 
+One of the most interesting aspects of this proposal is that it opens the door to statement-like structures inside expressions, which are most notably useful in constructing the DOM.
+
 ## JSX
 
-This proposal opens the door to making JSX have more statement-like constructs. So, instead of:
-
+For example, instead of:
 
 ```jsx
 // JSX
@@ -319,6 +320,39 @@ var box =
 ```
 
 ## Template Literals
+
+For example, instead of:
+
+```javascript
+let html = `<div>`;
+// String building works great until we hit a statement.
+for (let product of ["apple", "oranges"]) {
+  html += `<span>${product}</span>`;
+}
+html += `</div>`;
+```
+
+or
+
+```javascript
+let html = `
+  <div>
+  ${["apple", "oranges"].forEach(product => `<span>${product}</span>`)}
+  </div>
+`;
+```
+
+One could write:
+
+```javascript
+let html = `
+  <div>
+  ${foreach (["apple", "orange"]) {
+    `<span>${item()}</span>`
+  }}
+  </div>
+`;
+```
 
 # Prior Art
 
