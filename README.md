@@ -44,7 +44,7 @@ And interesting applications in [DOM construction](https://medium.com/@daveford/
 
 This is early, so there are still lots of [alternatives to consider](#alternatives-considered) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)).
 
-There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions) (e.g. [return](#return-continue-break) and [bindings]()).
+There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions) (e.g. [return](#return) and [bindings]()).
 
 There is a [polyfill](#polyfill), but I wouldn't say it is a great one quite yet :)
 
@@ -376,7 +376,7 @@ To preserve tennent's correspondence principle as much as possible, here are som
 * ```throw``` works
 * the last statement expression is used to return values from the block param (strategy borrowed from [kotlin](#kotlin))
 
-It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#return-continue-break)).
+It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#return)).
 
 # Forward Compatibility
 
@@ -437,11 +437,11 @@ foreach (map) { |key, value|
 }
 ```
 
-## return, continue, break
+## return
 
 From @bterlson:
 
-It would be great if we could make ```return```, ```break``` and ```continue``` to work. 
+It would be great if we could make ```return``` to return from the lexically enclosing function.
 
 Kotlin allows ```return``` from inlined functions, so maybe semantically there is a way out here.
 
@@ -460,6 +460,39 @@ foobar() // returns 2
 // block() returns 1. does that get ignored?
 ```
 
+## continue, break
+
+```Continue``` and ```break``` are interesting cases because they could have different interpretations. For example:
+
+```javascript
+for (let i = 0; i < 10; i++) {
+  unless (i == 5) {
+    // You'd expect the continue to apply to the
+    // lexical for, not to the unless
+    continue;
+  }
+}
+```
+
+Whereas:
+
+```javascript
+for (let i = 0; i < 10; i++) {
+  foreach (array) {
+    if (::item == 5) {
+      // You'd expect the continue here to apply to
+      // the foreach, not the lexical for.
+      continue;
+    }
+  }
+}
+```
+
+One interesting approach here is to make ```continue``` and ```break``` throw a special standard Exception (say, ContinueException and BreakException), which can then be re-thrown or not (and understood by the lexical blocks).
+
+TODO(goto): check how kotlin is planning to include [continue/break](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns).
+
+NOTE(goto): would love to hear about alternatives here.
 
 # Alternatives Considered
 
@@ -519,6 +552,17 @@ let html = <div> {
 ```
 
 # Prior Art
+
+## TC39
+
+* [block lambdas](https://web.archive.org/web/20161123223104/http://wiki.ecmascript.org/doku.php?id=strawman:block_lambda_revival) and [discussion](https://esdiscuss.org/topic/block-lambdas-break-and-continue)
+* [javascript needs blocks](http://yehudakatz.com/2012/01/10/javascript-needs-blocks/) by @wycats
+
+## SmallTalk
+
+## Ruby
+
+## Groovy
 
 ## Kotlin
 
