@@ -26,7 +26,9 @@ Functions that take just a single block parameter can also be called:
 ``` 
 To preserve Tennent's Corresponde Principle, certain [restrictions apply](#tennents-correspondence-principle) into the block param.
 
-While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built:
+While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built, taking off presure from TC39 to design them (and an extensible [shadowing mechanism](#forward-compatibility) that enables TC39 to bake them natively when/if time comes):
+
+Here are some interesting scenarios:
 
 * [flow control](#flow-control) (e.g. [lock](#lock), [unless](#perls-unless), [guard](#swifts-guard), [defer](#swifts-defer), [foreach](#cs-foreach), [select](#vbs-select))
 * [builders](#builders) (e.g. [map](#map), [dot](#dot), [data](#custom-data))
