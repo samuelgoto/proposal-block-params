@@ -5,10 +5,7 @@ Early feedback from @adamk, @domenic, @slightlyoff, @erights and @waldemarhowart
 
 This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
-It is syntactic sugar that allows:
-
-* on function calls, omitting parantheses around the ***last*** parameter when that's a lambda.
-* on function calls inside the lambda, passing the context of the lambda
+It is syntactic sugar that allows on function calls, omitting parantheses around the ***last*** parameter when that's a lambda.
 
 For example:
 
@@ -29,9 +26,7 @@ Functions that take just a single block parameter can also be called:
 ``` 
 To preserve Tennent's Corresponde Principle, certain [restrictions apply](#tennents-correspondence-principle) into the block param.
 
-While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built.
-
-Here are some interesting scenarios:
+While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built:
 
 * [flow control](#flow-control) (e.g. [lock](#lock), [unless](#perls-unless), [guard](#swifts-guard), [defer](#swifts-defer), [foreach](#cs-foreach), [select](#vbs-select))
 * [builders](#builders) (e.g. [map](#map), [dot](#dot), [data](#custom-data))
