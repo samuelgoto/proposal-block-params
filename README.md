@@ -26,7 +26,7 @@ Functions that take just a single block parameter can also be called:
 ``` 
 To preserve Tennent's Corresponde Principle, certain [restrictions apply](#tennents-correspondence-principle) into the block param.
 
-While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built, taking off presure from TC39 to design them (and an extensible [shadowing mechanism](#forward-compatibility) that enables TC39 to bake them natively when/if time comes):
+While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built, taking off presure from TC39 to design them (and an extensible [shadowing mechanism](#forward-compatibility) that enables to bake them natively when/if time comes):
 
 Here are some interesting scenarios:
 
@@ -36,10 +36,11 @@ Here are some interesting scenarios:
 * [configuration](#configuration) (e.g. [node](#node), [makefiles](#makefiles))
 * [others](#misc) (e.g. [regexes](#regexes), [graphql](#graphql), [testing](#testing))
 
-And interesting applications in:
+And interesting applications in [DOM construction](https://medium.com/@daveford/80-of-my-coding-is-doing-this-or-why-templates-are-dead-b640fc149e22):
 
 * [JSX](#jsx)
 * [template literals](#template-literals)
+* [new paradigms](#kotlins-templates)
 
 This is early, so there are still lots of [alternatives to consider](#alternatives-considered) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)).
 
