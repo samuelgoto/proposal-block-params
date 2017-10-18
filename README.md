@@ -1,7 +1,7 @@
 Block Params
 =========
 
-Early feedback from @adamk, @domenic, @slightlyoff, @erights and @waldemarhowart (click [here](https://github.com/samuelgoto/proposal-block-params/issues/new) to send feedback).
+Early feedback from @adamk, @domenic, @slightlyoff, @erights, @waldemarhowart and @bterlson (click [here](https://github.com/samuelgoto/proposal-block-params/issues/new) to send feedback).
 
 This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
@@ -12,7 +12,7 @@ For example:
 ```javascript
 // this ...
 a("hello") { ... }
-// ... is desugared to 
+// ... is desugared to ...
 a.call(this, "hello", function() { ... })
 ```
 
@@ -21,10 +21,10 @@ Functions that take just a single block parameter can also be called:
 ```javascript
  // this ...
  a { ... }
- // ... is desugared to
+ // ... is desugared to ...
  a.call(this, function() { ... })
 ``` 
-To preserve Tennent's Corresponde Principle, certain [restrictions apply](#tennents-correspondence-principle) into the block param.
+To preserve Tennent's Corresponde Principle, certain [restrictions apply](#tennents-correspondence-principle) inside the block param.
 
 While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built, taking off presure from TC39 to design them (and an extensible [shadowing mechanism](#forward-compatibility) that enables to bake them natively when/if time comes):
 
@@ -44,7 +44,7 @@ And interesting applications in [DOM construction](https://medium.com/@daveford/
 
 This is early, so there are still lots of [alternatives to consider](#alternatives-considered) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)).
 
-There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions).
+There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions) (e.g. [return](#return-continue-break) and [bindings]()).
 
 There is a [polyfill](#polyfill), but I wouldn't say it is a great one quite yet :)
 
@@ -374,9 +374,9 @@ To preserve tennent's correspondence principle as much as possible, here are som
 * ```return``` statements inside the block throws ```SyntaxError``` (same strategy as kotlin's [non-local returns](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns))
 * ```break```, ```continue```  and ```yield``` can't be used as top level statements (same strategy as ```() => { ... }```)
 * ```throw``` works
-* the last statement expression is used to return values from the block param (similar strategy to ```(a) => a * 2```)
+* the last statement expression is used to return values from the block param (strategy borrowed from [kotlin](#kotlin))
 
-It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#extensions)).
+It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#return-continue-break)).
 
 # Forward Compatibility
 
@@ -393,13 +393,19 @@ It is important to note that the **current** built-in ones can't be shadowed bec
 
 This can open a stream of future extensions that would enable further constructs to be added. Here are some that occurred to us while developing this.
 
+These are listed here as extensions because I believe we don't corner ourselves by shipping without them (i.e. they can be sequenced independently).
+
 ## chaining
+
+From @erights:
 
 To enable something like ```if (arg1) { ... } else if (arg2) { ... } else { ... }``` you'd have to chain the various things together. @erights proposed something along the lines of making the chains be passed as parameters to the first function. So, that would transpile to something like ```if(arg1, function() { ... }, "else if", arg2, function { ... }, "else", function () { ... })```.
 
 Another notable example may be to enable ```try { ... } catch (e) { ... } finally { ... }```
 
 ## functization
+
+From @erights:
 
 To enable control structures that repeat over the lambda (e.g. for-loops), we would need to re-execute the stop condition. Something along the lines of:
 
@@ -409,9 +415,51 @@ TODO(goto): should we do that by default with all parameters?
 
 ## binding
 
+From @bterlson:
+
 There are a variety of cases where binding helps. Currently, we pass parameters back to the block via ```this```. For example, we would want to enable something like the following:
 
-```foreach ({key, value} in map) { ... }``` to be given by the forach function implementation.
+```foreach ({key, value} in map) { ... }``` to be given by the foreach function implementation.
+
+```javascript
+foreach ({key, value} in map) {
+  // ...
+}
+// ... gets desugared to ...
+foreach (map, function({key, value}) {
+})
+```
+Another alternative syntax could be something along the lines of:
+
+```javascript
+foreach (map) { |key, value|
+  // ...
+}
+```
+
+## return, continue, break
+
+From @bterlson:
+
+It would be great if we could make ```return```, ```break``` and ```continue``` to work. 
+
+Kotlin allows ```return``` from inlined functions, so maybe semantically there is a way out here.
+
+One challenge with ```return``` is for block params that outlive the outer scope. For example:
+
+```javascript
+function foobar() {
+  start (100) {
+    // calls setTimeout(1, block) internally
+    return 1;
+  }
+  return 2;
+}
+foobar() // returns 2
+// after 100 ms
+// block() returns 1. does that get ignored?
+```
+
 
 # Alternatives Considered
 
@@ -471,6 +519,65 @@ let html = <div> {
 ```
 
 # Prior Art
+
+## Kotlin
+
+```kotlin
+fun main(args: Array<String>) {
+    unless (false) {
+      println("foo bar");
+      "hello"  // "this expression is unused"
+      "world" // "this expression is unused"
+      1  // last expression statement is used as return value
+        
+      // "return is not allowed here"
+      // return "hello"
+      // 
+      // "break and continue are only allowed inside a loop"
+      // continue;
+      // 
+      // throwing is allowed.
+      // throw IllegalArgumentException("hello world"); 
+    };
+    
+    var foo = "hello";
+    
+    switch (foo) {
+        case ("hello") {
+            
+        } 
+        case ("world") {
+            
+        }
+    }
+}
+
+fun unless(expr: Boolean, block: () -> Any) {
+    if (!expr) {
+      var bar = block();
+      println("Got: ${bar}") 
+    }
+}
+
+fun switch(expr: Any, block: Select.() -> Any) {
+    var structure = Select(expr);
+    structure.block();
+}
+
+fun case() {
+    println("hi from global case");
+}
+
+class Select constructor (head: Any) {
+    var result = null;
+    fun case(expr: Any, block: () -> Any) {
+        if (this.head == expr) {
+          println("hi from case");
+          result = block();
+        }
+    }
+}
+```
 
 # Polyfill
 
