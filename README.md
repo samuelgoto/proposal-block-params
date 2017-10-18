@@ -1,24 +1,37 @@
-Domain Specific Languages
+Block Params
 =========
+
+Early feedback from @adamk, @domenic, @slightlyoff, @erights and @waldemarhowart (click [here](https://github.com/samuelgoto/proposal-block-params/issues/new) to send feedback).
 
 This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
 It is syntactic sugar that allows:
 
-* on function calls, omitting parantheses around the ***last*** parameter when that's a lambda
+* on function calls, omitting parantheses around the ***last*** parameter when that's a lambda block.
 * on function calls inside the lambda, passing the context of the lambda
 
-For example, ```a("hello") { ... }``` is desugared to ```a("hello", function() { ... })```.
+For example:
 
-Functions that take just a single parameter can also be called as ```a { ... }``` which is desugared to ```a(function() { ... })```.
+```javascript
+// this ...
+a("hello") { ... }
+// ... is desugared to 
+a.call(this, "hello", function() { ... })
+```
 
-To enable calls inside the lambda to keep track of the context, function calls are passed the context ```this``` as a ```.call``` argument.
+Functions that take just a single block parameter can also be called:
 
-For example, ```a { b("hi") }``` is desugared to ```a(function() { b.call(this, "hi") })```.
+```javascript
+ // this ...
+ a { ... }
+ // ... is desugared to
+ a.call(this, function() { ... })
+``` 
+To preserve Tennent's Corresponde Principle, certain [restrictions apply](#tennents-correspondence-principle) into the block param.
 
 While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built.
 
-There are interesting scenarios in:
+Here are some interesting scenarios:
 
 * [flow control](#flow-control) (e.g. [lock](#lock), [unless](#perls-unless), [guard](#swifts-guard), [defer](#swifts-defer), [foreach](#cs-foreach), [select](#vbs-select))
 * [builders](#builders) (e.g. [map](#map), [dot](#dot), [data](#custom-data))
@@ -31,7 +44,11 @@ And interesting applications in:
 * [JSX](#jsx)
 * [template literals](#template-literals)
 
-This is early, so we have a list of open questions in the form of an [FAQ](#FAQ).
+This is early, so there are still lots of [alternatives to consider](#alternatives-considered) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)).
+
+There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions).
+
+There is a [polyfill](#polyfill), but I wouldn't say it is a great one quite yet :)
 
 # Use cases
 
@@ -64,7 +81,7 @@ unless (expr) {
 * aka [assert](https://artemzin.com/blog/ui-testing-separating-assertions-from-actions-with-kotlin-dsl/)
 
 ```javascript
-guard (document.cookie) {
+assert (document.cookie) {
   alert("blargh, you are not signed in!");
 }
 ```
@@ -74,8 +91,8 @@ guard (document.cookie) {
 * aka [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
 
 ```javascript
-defer {
-  // internally calls setTimeout(0)
+defer(100) {
+  // internally calls setTimeout(100)
   alert("hello world");
 }
 ```
@@ -84,14 +101,9 @@ defer {
 ### [C#'s foreach](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/foreach-in)
 
 ```javascript
+// works on arrays, maps and streams
 foreach (array) {
   console.log(item());
-}
-foreach (map) {
-  console.log(`${key()}: ${value()}`);
-}
-foreach (stream) {
-  console.log(`new piece! ${value}`);
 }
 ```
 
@@ -117,9 +129,8 @@ using (stream) {
 
 ### [maps](http://openjdk.java.net/jeps/269)
 
-... and sets ...
-
 ```javascript
+// ... and sets ...
 let a = map {
   put("hello", "world")
   put("foo, "bar")
@@ -155,13 +166,15 @@ let data = survey("TC39 Meeting Schedule") {
 ```javascript
 let body = html {
   head {
-    title("Welcome!")
+    title("Hello World!")
   }
   body {
     div {
-      span("Hello World")
+      span("Welcome to my Blog!")
     }
-    a({href: "contact.html"}) { span("contact me") }
+    for (page of ["contact", "guestbook"]) {
+      a({href: `${page}.html`}) { span(`${page}`) }
+    }
   }
 }
 ```
@@ -355,54 +368,110 @@ let html = `
 `;
 ```
 
-# Prior Art
+# Tennent's Correspondence Principle
 
-# FAQ
+To preserve tennent's correspondence principle as much as possible, here are some considerations of what goes into a block param:
 
-## Do the benefits of growing the language outweight its cost ([mark miller](https://mail.mozilla.org/pipermail/es-discuss/2015-June/043307.html), [guy steele](https://www.youtube.com/watch?v=_ahvzDzKdB0))?
+* ```return``` statements inside the block throws ```SyntaxError``` (same strategy as kotlin's [non-local returns](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns))
+* ```break```, ```continue```  and ```yield``` can't be used as top level statements (same strategy as ```() => { ... }```)
+* ```throw``` works
+* the last statement expression is used to return values from the block param (similar strategy to ```(a) => a * 2```)
 
-We are still evaluating feasibility and long term benefits. The intuition is that it may (particurlary when it comes to constructing DOM, which accounts to a significant portion of the time spent developing on the web), but we certainly acknowledge that there is a significant cognitive growth of the language.
+It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#extensions)).
 
-## Do you corner yourself from ever enabling further control structures (e.g. match?)?
+# Forward Compatibility
 
-Unclear.
+If we bake this in, do we corner ourselves from ever exposing new control structures (e.g. unless () {})?
 
-TODO(goto): how does kotlin/groovy get away with this?
+That's a good question, and we are still evaluating what the answer should be. Here are a few ideas that have been thrown around:
 
-Here are some of the alternatives we are considering, somewhat sorted by most to least appealing:
-
-* user defined forms take precendence over {"future", "all"} built-in ones
-* enumerate and reserve all keywords
+* user defined form shadows built-in ones
 * sigils (e.g. for! {})
 
-## Do you allow ```return```, ```throws```, ```break``` and ```continue``` inside the lambdas?
+It is important to note that the **current** built-in ones can't be shadowed because they are ```reserved keywords```. So, you can't override ```for``` or ```if``` or ```while``` (which I think is working as intended), but you could override ones that are not reserved keywords (e.g. ```until```).
 
-Unclear.
+# Extensions
 
-TODO(goto): kotlin does, has it been a problem?
+This can open a stream of future extensions that would enable further constructs to be added. Here are some that occurred to us while developing this.
 
-Here are some alternatives we are considering, somewhat sorted by most to least compelling:
+## chaining
 
-* yes, burden on the user to know the transformation
-* no
+To enable something like ```if (arg1) { ... } else if (arg2) { ... } else { ... }``` you'd have to chain the various things together. @erights proposed something along the lines of making the chains be passed as parameters to the first function. So, that would transpile to something like ```if(arg1, function() { ... }, "else if", arg2, function { ... }, "else", function () { ... })```.
 
-## What would it take to enable things like if {} else {} to be done? do {}? match {}? for (;;) {}?
+Another notable example may be to enable ```try { ... } catch (e) { ... } finally { ... }```
 
-Unclear at this point if DSLs are a good idea or not, so these are left as possible future extensions:
+## functization
 
-* ```if () {} elseif() {} else {}``` would require some sort of chaining between the calls. something along the lines of ```if(expr, () => { ... }).else( ... )```.
-* ```for (;;)``` would require some sort of: (a) a ```;``` divider for parameters and (b) passing expressions as functions that can be re-evaluated.
+To enable control structures that repeat over the lambda (e.g. for-loops), we would need to re-execute the stop condition. Something along the lines of:
 
-## What else do other languages support for DSL?
+```repeat { ... } until ( expr )``` we would want to turn ```expr``` into a function that evaluates ```expr``` so that it could be re-evaluated multiple times. For example ```repeat { ... } until (() => expr)```.
 
-TBD.
+TODO(goto): should we do that by default with all parameters?
 
-## What other mechanisms have you explored for identifier resolution?
+## binding
 
-* with (this) {}
-* receivers
-* for (let i in foo) {}
-* named parameters
+There are a variety of cases where binding helps. Currently, we pass parameters back to the block via ```this```. For example, we would want to enable something like the following:
+
+```foreach ({key, value} in map) { ... }``` to be given by the forach function implementation.
+
+# Alternatives Considered
+
+The DOM construction mechanisms depend on being able to hang things into a tree-like structure. So, one needs to find the reference of the parent context to hang to. Here are some of the ideas that were thrown before:
+
+## Implicit
+
+In this formulation, the expansion would implicitly include the ```this``` binding. So, ```a { ... }``` would be equivalent to ```a.call(function { ... })```.
+
+```javascript
+let html = div {
+  span("hello world") {}
+}
+```
+## ```this``` method resolution
+
+In this formulation, the resolution of methods looks first for the presence in the ```this``` object for function calls before looking at the local scope and later at the global scope. e.g. ```a { b() }``` is equivalent to ```a(function() { (b in this ? this.b : b)() }).
+
+For example:
+
+```javascript
+let html = div {
+  // "span" would first be looked at 'this' before looking at the global scope
+  span {
+  }
+}
+```
+
+This may be isomorphic to the equivalency ```a { b() }``` to ```a(function() { with (this) { b() } })```
+
+## bind operator
+
+In this formulation, the expansion would be simply ```a { ... }``` to ```a(function() { ... })``` and ```this``` would be passed via the [bind operator](https://github.com/tc39/proposal-bind-operator)
+
+```javascript
+let html = div {
+  ::div {
+    ::span {
+      ::p("hello world")
+    }
+  }
+}
+```
+
+## special character
+
+In this formulation, we would pick a special syntax space to make the distinction between the ```this``` binding and regular function calls.
+
+```javascript
+let html = <div> {
+  <div> {
+    <span> {
+      <p>("hello world")
+    }
+  }
+}
+```
+
+# Prior Art
 
 # Polyfill
 
