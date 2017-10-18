@@ -7,7 +7,7 @@ This is a very early [stage 0](https://tc39.github.io/process-document/) explora
 
 It is syntactic sugar that allows:
 
-* on function calls, omitting parantheses around the ***last*** parameter when that's a lambda block.
+* on function calls, omitting parantheses around the ***last*** parameter when that's a lambda.
 * on function calls inside the lambda, passing the context of the lambda
 
 For example:
@@ -141,8 +141,8 @@ let a = map {
 
 ```javascript
 let a = graph("architecture") {
-  edge("a", "b")
-  edge("b", "c")
+  edge("a", "b") {}
+  edge("b", "c") {}
   // ...
 }
 ```
@@ -152,9 +152,9 @@ let a = graph("architecture") {
 ```javascript
 let data = survey("TC39 Meeting Schedule") {
   question("Where should we host the European meeting?") {
-    option("Paris")
-    option("Barcelona")
-    option("London")
+    option("Paris") {}
+    option("Barcelona") {}
+    option("London") {}
   }
 }
 ```
@@ -166,14 +166,14 @@ let data = survey("TC39 Meeting Schedule") {
 ```javascript
 let body = html {
   head {
-    title("Hello World!")
+    title("Hello World!") {}
   }
   body {
     div {
-      span("Welcome to my Blog!")
+      span("Welcome to my Blog!") {}
     }
     for (page of ["contact", "guestbook"]) {
-      a({href: `${page}.html`}) { span(`${page}`) }
+      a({href: `${page}.html`}) { span(`${page}`) } {}
     }
   }
 }
@@ -182,16 +182,17 @@ let body = html {
 ### [android](https://github.com/Kotlin/anko)
 
 ```javascript
-VerticalLayout {
-  ImageView ({width: matchParent}) {
-      padding = dip(20)
-      margin = dip(15)
-    }
-    Button("Tap to Like") {
-      onclick { toast("Thanks for the love!") }
+let layout =
+  VerticalLayout {
+    ImageView ({width: matchParent}) {
+        ::padding = dip(20)
+        ::margin = dip(15)
+      }
+      Button("Tap to Like") {
+        ::onclick { toast("Thanks for the love!") }
+      }
     }
   }
-}
 ```
 
 ## Configuration
@@ -206,7 +207,7 @@ const app = express();
 
 server (app) {
   get("/") {
-     response().send("hello world" + request().get("param1"));
+     this.response.send("hello world" + request().get("param1"));
   }
 
   listen(3000) {
@@ -220,13 +221,13 @@ server (app) {
 ```javascript
 job('PROJ-unit-tests') {
   scm {
-      git(gitUrl)
+      git(gitUrl) {}
   }
   triggers {
-      scm('*/15 * * * *')
+      scm('*/15 * * * *') {}
   }
   steps {
-      maven('-e clean test')
+      maven('-e clean test') {}
   }
 }
 ```
@@ -238,14 +239,14 @@ job('PROJ-unit-tests') {
 ```javascript
 // NOTE(goto): inspired by https://github.com/MaxArt2501/re-build too.
 let re = regex {
-  start()
-  then("a")
-  then(2, "letters")
-  maybe("#")
-  oneof("a", "b")
-  between([2, 4], "a")
-  insensitively()
-  end()
+  ::start()
+  ::then("a")
+  ::then(2, "letters")
+  ::maybe("#")
+  ::oneof("a", "b")
+  ::between([2, 4], "a")
+  ::insensitively()
+  ::end()
 }
 ```
 
