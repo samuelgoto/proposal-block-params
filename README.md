@@ -399,7 +399,30 @@ These are listed here as extensions because I believe we don't corner ourselves 
 
 From @erights:
 
-To enable something like ```if (arg1) { ... } else if (arg2) { ... } else { ... }``` you'd have to chain the various things together. @erights proposed something along the lines of making the chains be passed as parameters to the first function. So, that would transpile to something like ```if(arg1, function() { ... }, "else if", arg2, function { ... }, "else", function () { ... })```.
+To enable something like
+```javascript 
+if (arg1) {
+  ...
+} else if (arg2) {
+  ...
+} else {
+  ...
+}
+```
+
+You'd have to chain the various things together. @erights proposed something along the lines of making the chains be passed as parameters to the first function. So, that would transpile to something like
+
+```javascript 
+if (arg1, function() {
+  ...
+},
+"else if", arg2, function {
+  ...
+},
+"else", function () {
+  ...
+})
+```
 
 Another notable example may be to enable ```try { ... } catch (e) { ... } finally { ... }```
 
@@ -409,7 +432,23 @@ From @erights:
 
 To enable control structures that repeat over the lambda (e.g. for-loops), we would need to re-execute the stop condition. Something along the lines of:
 
-```repeat { ... } until ( expr )``` we would want to turn ```expr``` into a function that evaluates ```expr``` so that it could be re-evaluated multiple times. For example ```repeat { ... } until (() => expr)```.
+```javascript
+let i = 0;
+until (i == 10) {
+  ...
+  i++
+}
+```
+
+We would want to turn ```expr``` into a function that evaluates ```expr``` so that it could be re-evaluated multiple times. For example
+
+```javascript
+let i = 0;
+until (() => i == 10, function() {
+  ...
+  i++
+})
+```
 
 TODO(goto): should we do that by default with all parameters?
 
