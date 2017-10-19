@@ -376,7 +376,18 @@ To preserve tennent's correspondence principle as much as possible, here are som
 * ```throw``` works
 * the last statement expression is used to return values from the block param (strategy borrowed from [kotlin](#kotlin))
 
-It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#return)).
+It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#extensions)).
+
+## Completion Value
+
+Like Kotlin, it is possible to return values from the block params. It uses the last expression statement executed before leaving the block lambda (here is [an example](#kotlin) in kotlin). For example:
+
+```javascript
+let result = foreach (numbers) {
+  let number = this.item;
+  number * 2 // gets returned to foreach
+}
+``` 
 
 # Forward Compatibility
 
@@ -498,10 +509,11 @@ foobar() // returns 2
 // after 100 ms
 // block() returns 1. does that get ignored?
 ```
+Note that Java throws a [```TransferException```](http://tronicek.blogspot.com/2008/08/nonlocal-transfer.html) when that happens.
 
 ## continue, break
 
-```Continue``` and ```break``` are interesting cases because they could have different interpretations. For example:
+```continue``` and ```break``` are interesting cases because they could have different interpretations. For example:
 
 ```javascript
 for (let i = 0; i < 10; i++) {
@@ -527,9 +539,116 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-One interesting approach here is to make ```continue``` and ```break``` throw a special standard Exception (say, ContinueException and BreakException), which can then be re-thrown or not (and understood by the lexical blocks).
+### Inline
 
-TODO(goto): check how kotlin is planning to include [continue/break](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns).
+Inspired by [kotlin's inline functions](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns), in this formulation, the semantics of ```break``` and ```continue``` would be determined evaluating the result of inlining (metaphorically, not literally wrt performance) the entire function call (e.g. like a C macro works). For example:
+
+```javascript
+// ... for example ...
+function unless(expr, block) {
+  if (!expr) {
+    block();
+  }
+}
+for (let i = 0; ) {
+  unless (i % 2 == 0) {
+    continue;
+  }
+}
+// ... gets interpreted as ...
+for (let i = 0; ) {
+  if (!(i % 2 == 0)) {
+    continue;
+  }
+}
+// ... i.e. the continue applies to the for ...
+```
+
+Whereas
+
+```javascript
+// ... whereas foreach ...
+function foreach(collection, block) {
+  for (let v of collection) {
+    block.call({item: v});
+  }
+}
+foreach ([1, 2, 3]) {
+  if (::item % 2 == 0) {
+    continue;
+  }
+}
+// ... gets inline as ...
+let collection = [1, 2, 3];
+for (let v of collection) {
+  this.item = v;
+  if (::item % 2 == 0) {
+    // gets applied to the internal for-loop
+    // created inside for-each
+    continue;
+  }
+}
+```
+
+### Modifier
+
+Inspired by [kotlin's inline functions](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns), in this formulation, we could make the semantics switch based on the declaraction of the function.
+
+```javascript
+inline function unless(expr, block) {
+  // ... breaks and continues bound lexically ...
+}
+function foreach (collection) {
+  // ... breaks and continues bound locally ...
+}
+```
+
+### Call modifier
+
+inspired by [java's for](http://www.javac.info/closures-v05.html), in this formulation the distinction in behavior would be done at all site. For example:
+
+```javascript
+loop foreach () {
+  // ... breaks and continues bound lexically ...
+}
+foreach () {
+  // ... breaks and continue bound locally ...
+}
+```
+
+### Standard Exceptions
+
+One interesting approach here is to make ```continue``` and ```break``` throw a special [standard Exception](https://esdiscuss.org/topic/block-lambdas-break-and-continue#content-2) (say, ContinueException and BreakException), which can then be re-thrown or not (and understood by the lexical blocks).
+
+```javascript
+foreach (array) {
+  continue;
+}
+// ... is sugar for ...
+foreach (array, function() {
+  throw new ContinueException();
+});
+// ... which can be caught and re-thrown depending on context ...
+```
+
+Comes with [challenges](https://esdiscuss.org/topic/block-lambdas-break-and-continue#content-12).
+
+### Labels
+
+Another interesting approach here is to make ```continue``` and ```break``` behave lexically, but explicit labels to mean the local ones. For examples:
+
+```javascript
+unless (...) {
+  continue; // lexical scope
+}
+foreach (...) {
+  continue foreach; // local scope
+}
+```
+
+This pulls the responsibility to the user to know the distinction, which I'm not sure if the right trade-off.
+
+NOTE(goto): kotlin is planning to include [continue/break](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns) but for inline functions only, meaning that you can't do a foreach with continue/break.
 
 NOTE(goto): would love to hear about alternatives here.
 
@@ -662,6 +781,16 @@ class Select constructor (head: Any) {
 }
 ```
 
+## [Java](http://www.javac.info/closures-v05.html)
+
+```java
+ for eachEntry(String name, Integer value : map) {
+  if ("end".equals(name)) break;
+  if (name.startsWith("com.sun.")) continue;
+  System.out.println(name + ":" + value);
+ }
+```
+
 # Polyfill
 
   This is currently polyfilled as a transpiler. You can find a lot of examples [here](test/runtime.js).
@@ -678,6 +807,8 @@ class Select constructor (head: Any) {
 
 # Related work
 
+## DOM construction
+
 * JSX
 * Kotlin typed builders
 * Elm
@@ -692,3 +823,8 @@ class Select constructor (head: Any) {
 * [JXON](https://developer.mozilla.org/en-US/docs/Archive/JXON)
 * [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview)
 * [JSON-ish](http://blog.sgo.to/2015/09/json-ish.html)
+
+### Languages
+
+* [user defined loops](http://gafter.blogspot.com/2006/10/iterative-control-abstraction-user.html)
+* [non-local transfers](http://tronicek.blogspot.com/2008/08/nonlocal-transfer.html)
