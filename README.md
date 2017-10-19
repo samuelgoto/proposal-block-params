@@ -42,9 +42,9 @@ And interesting applications in [DOM construction](https://medium.com/@daveford/
 * [template literals](#template-literals)
 * [new paradigms](#kotlins-templates)
 
-This is early, so there are still lots of [alternatives to consider](#alternatives-considered) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)).
+This is early, so there are still lots of alternatives to consider (e.g. [```continue``` and ```break```](https://github.com/samuelgoto/proposal-block-params/issues/8) and [```this```](https://github.com/samuelgoto/proposal-block-params/issues/9)) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)).
 
-There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions) (e.g. [return](#return) and [bindings]()).
+There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions) (e.g. [return](#return) and [bindings](#bindings)).
 
 There is a [polyfill](#polyfill), but I wouldn't say it is a great one quite yet :)
 
@@ -466,7 +466,7 @@ until (() => i == 10, function() {
 
 TODO(goto): should we do that by default with all parameters?
 
-## binding
+## bindings
 
 From @bterlson:
 
@@ -543,63 +543,6 @@ for (let i = 0; i < 10; i++) {
 ```
 
 We are exploring options [here](https://github.com/samuelgoto/proposal-block-params/issues/8).
-
-# Alternatives Considered
-
-The DOM construction mechanisms depend on being able to hang things into a tree-like structure. So, one needs to find the reference of the parent context to hang to. Here are some of the ideas that were thrown before:
-
-## Implicit
-
-In this formulation, the expansion would implicitly include the ```this``` binding. So, ```a { ... }``` would be equivalent to ```a.call(function { ... })```.
-
-```javascript
-let html = div {
-  span("hello world") {}
-}
-```
-## ```this``` method resolution
-
-In this formulation, the resolution of methods looks first for the presence in the ```this``` object for function calls before looking at the local scope and later at the global scope. e.g. ```a { b() }``` is equivalent to ```a(function() { (b in this ? this.b : b)() }).
-
-For example:
-
-```javascript
-let html = div {
-  // "span" would first be looked at 'this' before looking at the global scope
-  span {
-  }
-}
-```
-
-This may be isomorphic to the equivalency ```a { b() }``` to ```a(function() { with (this) { b() } })```
-
-## bind operator
-
-In this formulation, the expansion would be simply ```a { ... }``` to ```a(function() { ... })``` and ```this``` would be passed via the [bind operator](https://github.com/tc39/proposal-bind-operator)
-
-```javascript
-let html = div {
-  ::div {
-    ::span {
-      ::p("hello world")
-    }
-  }
-}
-```
-
-## special character
-
-In this formulation, we would pick a special syntax space to make the distinction between the ```this``` binding and regular function calls.
-
-```javascript
-let html = <div> {
-  <div> {
-    <span> {
-      <p>("hello world")
-    }
-  }
-}
-```
 
 # Prior Art
 
