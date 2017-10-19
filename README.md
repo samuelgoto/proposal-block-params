@@ -378,7 +378,7 @@ To preserve tennent's correspondence principle as much as possible, here are som
 
 It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#extensions)).
 
-## Completion Value
+## Completion Values
 
 Like Kotlin, it is possible to return values from the block params. It uses the last expression statement executed before leaving the block lambda (here is [an example](#kotlin) in kotlin). For example:
 
