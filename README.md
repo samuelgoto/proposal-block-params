@@ -389,6 +389,9 @@ let result = foreach (numbers) {
 }
 ``` 
 
+Since this is a new syntatic structure (i.e. there is no backwards incompatible precedent), we should probably use these [completion reforms](https://web.archive.org/web/20170117211244/http://wiki.ecmascript.org/doku.php?id=harmony:completion_reform) too.
+
+
 # Forward Compatibility
 
 If we bake this in, do we corner ourselves from ever exposing new control structures (e.g. unless () {})?
@@ -539,118 +542,7 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-### Inline
-
-Inspired by [kotlin's inline functions](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns), in this formulation, the semantics of ```break``` and ```continue``` would be determined evaluating the result of inlining (metaphorically, not literally wrt performance) the entire function call (e.g. like a C macro works). For example:
-
-```javascript
-// ... for example ...
-function unless(expr, block) {
-  if (!expr) {
-    block();
-  }
-}
-for (let i = 0; ) {
-  unless (i % 2 == 0) {
-    continue;
-  }
-}
-// ... gets interpreted as ...
-for (let i = 0; ) {
-  if (!(i % 2 == 0)) {
-    continue;
-  }
-}
-// ... i.e. the continue applies to the for ...
-```
-
-Whereas
-
-```javascript
-// ... whereas foreach ...
-function foreach(collection, block) {
-  for (let v of collection) {
-    block.call({item: v});
-  }
-}
-foreach ([1, 2, 3]) {
-  if (::item % 2 == 0) {
-    continue;
-  }
-}
-// ... gets inline as ...
-let collection = [1, 2, 3];
-for (let v of collection) {
-  this.item = v;
-  if (::item % 2 == 0) {
-    // gets applied to the internal for-loop
-    // created inside for-each
-    continue;
-  }
-}
-```
-
-### Modifier
-
-Inspired by [kotlin's inline functions](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns), in this formulation, we could make the semantics switch based on the declaraction of the function.
-
-```javascript
-inline function unless(expr, block) {
-  // ... breaks and continues bound lexically ...
-}
-function foreach (collection) {
-  // ... breaks and continues bound locally ...
-}
-```
-
-### Call modifier
-
-inspired by [java's for](http://www.javac.info/closures-v05.html), in this formulation the distinction in behavior would be done at all site. For example:
-
-```javascript
-loop foreach () {
-  // ... breaks and continues bound lexically ...
-}
-foreach () {
-  // ... breaks and continue bound locally ...
-}
-```
-
-### Standard Exceptions
-
-One interesting approach here is to make ```continue``` and ```break``` throw a special [standard Exception](https://esdiscuss.org/topic/block-lambdas-break-and-continue#content-2) (say, ContinueException and BreakException), which can then be re-thrown or not (and understood by the lexical blocks).
-
-```javascript
-foreach (array) {
-  continue;
-}
-// ... is sugar for ...
-foreach (array, function() {
-  throw new ContinueException();
-});
-// ... which can be caught and re-thrown depending on context ...
-```
-
-Comes with [challenges](https://esdiscuss.org/topic/block-lambdas-break-and-continue#content-12).
-
-### Labels
-
-Another interesting approach here is to make ```continue``` and ```break``` behave lexically, but explicit labels to mean the local ones. For examples:
-
-```javascript
-unless (...) {
-  continue; // lexical scope
-}
-foreach (...) {
-  continue foreach; // local scope
-}
-```
-
-This pulls the responsibility to the user to know the distinction, which I'm not sure if the right trade-off.
-
-NOTE(goto): kotlin is planning to include [continue/break](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns) but for inline functions only, meaning that you can't do a foreach with continue/break.
-
-NOTE(goto): would love to hear about alternatives here.
+We are exploring options [here](https://github.com/samuelgoto/proposal-block-params/issues/8).
 
 # Alternatives Considered
 
