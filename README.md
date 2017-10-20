@@ -42,7 +42,7 @@ And interesting applications in [DOM construction](https://medium.com/@daveford/
 * [template literals](#template-literals)
 * [new paradigms](#kotlins-templates)
 
-This is early, so there are still lots of alternatives to consider (e.g. [```continue``` and ```break```](https://github.com/samuelgoto/proposal-block-params/issues/8) and [```this```](https://github.com/samuelgoto/proposal-block-params/issues/9)) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)) and things to check feasibility (e.g. [completion values](#completion-values)).
+This is early, so there are still lots of alternatives to consider (e.g. [```continue``` and ```break```](#continue-break) and [```this```](https://github.com/samuelgoto/proposal-block-params/issues/9)) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)) and things to check feasibility (e.g. [completion values](#completion-values)).
 
 There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions) (e.g. [return](#return) and [bindings](#bindings)).
 
@@ -131,7 +131,7 @@ using (stream) {
 // ... and sets ...
 let a = map {
   put("hello", "world") {}
-  put("foo, "bar") {}
+  put("foo", "bar") {}
 }
 ```
 
