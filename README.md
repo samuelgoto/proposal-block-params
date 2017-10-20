@@ -89,7 +89,7 @@ assert (document.cookie) {
 * aka [run](http://melix.github.io/javaone-groovy-dsls/#/gradle-task-execution)
 
 ```javascript
-defer(100) {
+defer (100) {
   // internally calls setTimeout(100)
   alert("hello world");
 }
@@ -101,7 +101,7 @@ defer(100) {
 ```javascript
 // works on arrays, maps and streams
 foreach (array) {
-  console.log(item());
+  console.log(this.item);
 }
 ```
 
@@ -130,8 +130,8 @@ using (stream) {
 ```javascript
 // ... and sets ...
 let a = map {
-  put("hello", "world")
-  put("foo, "bar")
+  put("hello", "world") {}
+  put("foo, "bar") {}
 }
 ```
 
@@ -371,16 +371,16 @@ let html = `
 
 To preserve tennent's correspondence principle as much as possible, here are some considerations of what goes into a block param:
 
-* ```return``` statements inside the block throws ```SyntaxError``` (same strategy as kotlin's [non-local returns](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns))
-* ```break```, ```continue```  and ```yield``` can't be used as top level statements (same strategy as ```() => { ... }```)
+* ```return``` statements inside the block throws ```SyntaxError``` (same strategy as kotlin's [non-local returns](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns), left out purely as a sequencing strategy, see some [explorations](#return) on how to introduce them)
+* ```break```, ```continue```  can't be used as top level statements (purely as a sequencing strategy, see some [explorations](#continue-break) on how to introduce them)
+* ```yield``` can't be used as top level statements (same strategy as ```() => { ... }```)
 * ```throw``` works
-* the last statement expression is used to return values from the block param (strategy borrowed from [kotlin](#kotlin))
-
-It is important to note that ```return```, ```break``` and ```continue``` could be made to work but are left as a non-cornering extension of this minimally-viable proposal (see [extensions](#extensions)).
+* the [completion values](#completion-value) are used to return values from the block param (strategy borrowed from [kotlin](#kotlin))
+* as opposed to arrow functions, ```this``` can be bound.
 
 ## Completion Values
 
-Like Kotlin, it is possible to return values from the block params. It uses the last expression statement executed before leaving the block lambda (here is [an example](#kotlin) in kotlin). For example:
+Like Kotlin, it is possible to return values from the block params. It (roughly) uses the last expression statement executed before leaving the block lambda (here is [an example](#kotlin) in kotlin). For example:
 
 ```javascript
 let result = foreach (numbers) {
@@ -400,6 +400,8 @@ That's a good question, and we are still evaluating what the answer should be. H
 
 * user defined form shadows built-in ones
 * sigils (e.g. for! {})
+
+In this formulation, we are leaning towards the former.
 
 It is important to note that the **current** built-in ones can't be shadowed because they are ```reserved keywords```. So, you can't override ```for``` or ```if``` or ```while``` (which I think is working as intended), but you could override ones that are not reserved keywords (e.g. ```until```).
 
@@ -470,7 +472,15 @@ TODO(goto): should we do that by default with all parameters?
 
 From @bterlson:
 
-There are a variety of cases where binding helps. Currently, we pass parameters back to the block via ```this```. For example, we would want to enable something like the following:
+There are a variety of cases where binding helps. Currently, we pass parameters back to the block via ```this```. For example:
+
+```javascript
+foreach ([1, 2, 3]) {
+  console.log(this.item);
+}
+```
+
+For example, we would want to enable something like the following:
 
 ```foreach ({key, value} in map) { ... }``` to be given by the foreach function implementation.
 
@@ -482,6 +492,9 @@ foreach ({key, value} in map) {
 foreach (map, function({key, value}) {
 })
 ```
+
+Exactly which keyword we pick (e.g. ```in``` or ```with``` or ```:``` etc) and its position (e.g. ```foreach (item in array)``` or ```foreach (array with item)```) TBD.
+
 Another alternative syntax could be something along the lines of:
 
 ```javascript
@@ -489,6 +502,8 @@ foreach (map) { |key, value|
   // ...
 }
 ```
+
+We probably need to do a better job at exploring the design space of use cases before debating syntax, hence leaving this as a future extension.
 
 ## return
 
@@ -512,11 +527,11 @@ foobar() // returns 2
 // after 100 ms
 // block() returns 1. does that get ignored?
 ```
-Note that Java throws a [```TransferException```](http://tronicek.blogspot.com/2008/08/nonlocal-transfer.html) when that happens.
+Note that Java throws a [```TransferException```](http://tronicek.blogspot.com/2008/08/nonlocal-transfer.html) when that happens. SmallTalk allows that too, so the intuition is that this is fine.
 
 ## continue, break
 
-```continue``` and ```break``` are interesting cases because they could have different interpretations. For example:
+```continue``` and ```break``` are interesting because their interpretation is defined by the user. For example:
 
 ```javascript
 for (let i = 0; i < 10; i++) {
@@ -542,7 +557,77 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-We are exploring options [here](https://github.com/samuelgoto/proposal-block-params/issues/8).
+It is still unclear if this can be left as an extension.
+
+We are exploring other alternatives [here](https://github.com/samuelgoto/proposal-block-params/issues/8), but here is how we are thinking:
+
+By default, ```break``` and ```continue``` works lexically: they act on the closest enclosing loop block. For example:
+
+```javascript
+while (true) {
+  unless (false) {
+    // ...
+    break;
+    // ...
+    continue;
+  }
+}
+```
+Gets desugared to
+
+```javascript
+// ... inserts __loop__ lexically ...
+__loop__: while (true) {
+  unless (false) {
+    // ...
+    break __loop__;
+    // ...
+    continue __loop__;
+  }
+}
+```
+
+To support looping control structures (e.g. ```foreach () {}```) we introduce a modifier (e.g. a contextual keyword like ```loop```) to the function declaration (or alternatively at the function call site, e.g. [```for each() {}```](http://www.javac.info/closures-v05.html)) that generates a different sugar:
+
+```javascript
+// ... modifier name, syntax, position TBD ...
+loop function foreach(iterable, block) {
+}
+foreach ([1, 2, 3]) {
+  // ...
+  break;
+  // ...
+  continue;
+}
+```
+It gets desugared into:
+
+ 1. the head is wrapped into a ```__loop__``` label
+ 3. the body is wrapped into a ```__block__: do { ... } while (false)``` bock and
+ 2. all ```breaks``` and ```continues``` inside the body are re-written.
+
+For example:
+
+```javascript
+__loop__: foreach ([1, 2, 3]) {
+  __block__: do {
+    // ...
+    break __loop__;
+    // ...
+    continue __block__;
+  } while (false);
+}
+```
+
+Alternatively, this transformation could be identified at the call site, but I think that would put the responsibility in the wrong hands:
+
+```javascript
+// ... the contextual keyword for triggers the local interpretation ...
+for each ([1, 2, 3]) {
+}
+```
+
+This is an [active area of exploration](https://github.com/samuelgoto/proposal-block-params/issues/8) and we would love to get more eyes on this design space].
 
 # Prior Art
 
