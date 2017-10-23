@@ -9,7 +9,10 @@
 +++
 
 ```javascript
-// This ...
+// Blocks of code can be declared outside of parenthesis of function
+// calls when the last parameter is a lambda.
+//
+// For example, this ...
 a(1) {
   // ...
 }
@@ -20,15 +23,15 @@ a(1, function() {
 });
 ```
 
-@[1-4] (You write this ...)
-@[5-8] (... and it is equivalent to this.)
-
-###### Blocks of code can be declared outside of parenthesis of function calls when the last parameter is a lambda.
+@[1-4] (This is what you write ...)
+@[5-8] (... and this is what you get.)
 
 +++
 
 ```javascript
-// This ...
+// Parenthesis can also be skipped.
+//
+// For example, this ...
 a {
   // ...
 }
@@ -39,10 +42,9 @@ a(function() {
 });
 ```
 
-@[1-4] (You write this ...)
-@[5-8] (... and it is equivalent to this.)
+@[1-4] (This is what you write ...)
+@[5-8] (... and this is what you get.)
 
-###### Parenthesis can also be skipped.
 
 ---
 
