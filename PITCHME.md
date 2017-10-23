@@ -337,12 +337,12 @@ let html = `
 function match () {
 }
 
-// Should we reserve match?
-// Should user defined shadow built-ins?
 match (cond) {
   // ...
 }
 ```
+
+@[4-6](Should we reserve match? Should userland shadow built-ins?)
 
 +++
 
@@ -359,6 +359,31 @@ function even(number) {
 ```
 
 @[2-5](non local return?)
+
+### break and continue
+
+```javascript
+for (let i = 0; i < 10; i++) {
+  unless (i == 5) {
+    // You'd expect the continue to apply to the
+    // lexical for, not to the unless
+    continue;
+  }
+}
+
+for (let i = 0; i < 10; i++) {
+  foreach (array) {
+    if (::item == 5) {
+      // You'd expect the continue here to apply to
+      // the foreach, not the lexical for.
+      continue;
+    }
+  }
+}
+```
+
+@[2-6](You'd expect continue to continue the for-loop)
+@[10-16](Whereas inside foreaches you'd expect continue to continue the foreaech)
 
 ---
 
