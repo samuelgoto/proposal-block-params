@@ -491,6 +491,23 @@ function even(number) {
 
 +++
 
+### return
+
+```javascript
+function dostuff() {
+  run (100) {
+    // What happens if this completes after the
+    // function completed? 
+    return "hello world";
+  }
+  return false;
+}
+```
+
+@[2-6](async returns?)
+
++++
+
 ### break and continues ...
 
 ```javascript
