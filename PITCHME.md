@@ -51,7 +51,7 @@ a(function() {
 
 +++
 
-### Control structures
+### unless
 
 ```javascript
 // ... this is what you write ...
@@ -67,6 +67,38 @@ unless (expr, function() {
 
 @[1-4] (This is what you write ...)
 @[6-9] (... and this is what you get.)
+
++++
+
+### lock
+
+```javascript
+// ... this is what you write ...
+lock (buffer) {
+  buffer.write();
+}
+
+// ... this is what you get ...
+buffer (buffer, function() {
+  buffer.write();
+})
+```
+
++++
+
+### assert
+
+```javascript
+// ... this is what you write ...
+assert (document.cookie) {
+  alert("Blargh, you are not signed in!");
+}
+
+// ... this is what you get ...
+assert (document.cookie, function() {
+  assert("Blargh, you are not signed in!");
+})
+```
 
 ---
 
