@@ -358,9 +358,11 @@ function even(number) {
 }
 ```
 
++++
+
 @[2-5](non local return?)
 
-### break and continue
+### break and continues ...
 
 ```javascript
 for (let i = 0; i < 10; i++) {
@@ -370,7 +372,15 @@ for (let i = 0; i < 10; i++) {
     continue;
   }
 }
+```
 
+@[2-6](You'd expect continue to continue the for-loop)
+
++++
+
+### ... are weird ...
+
+```javascript
 for (let i = 0; i < 10; i++) {
   foreach (array) {
     if (::item == 5) {
@@ -382,8 +392,7 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-@[2-6](You'd expect continue to continue the for-loop)
-@[10-16](Whereas inside foreaches you'd expect continue to continue the foreaech)
+@[2-8](Whereas inside foreaches you'd expect continue to continue the foreaech)
 
 ---
 
