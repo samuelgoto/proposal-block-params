@@ -325,6 +325,85 @@ let html = `
 
 ---
 
+### Extensions
+
++++
+
+### Chaining
+
+```javascript
+if (arg1) {
+  ...
+} else if (arg2) {
+  ...
+} else {
+  ...
+}
+```
+
++++
+
+```javascript
+if (arg1, function() {
+  ...
+},
+"else if", arg2, function {
+  ...
+},
+"else", function () {
+  ...
+})
+```
+
++++
+
+### functization
+
+```javascript
+let i = 0;
+until (i == 10) {
+  ...
+  i++
+}
+```
+
++++
+
+```javascript
+let i = 0;
+until (() => i == 10, function() {
+  ...
+  i++
+})
+```
+
++++
+
+### bindings
+
+```javascript
+foreach ([1, 2, 3]) {
+  console.log(this.item);
+}
+```
+
++++
+
+```javascript
+foreach ({key, value} in map) {
+  // ...
+}
+
+// ... gets desugared to ...
+foreach (map, function({key, value}) {
+})
+```
+
+@[1-3](Syntax TBD)
+@[5-7](Gets passed as a parameter)
+
+---
+
 ### Challenges
 
 +++
@@ -378,12 +457,12 @@ for (let i = 0; i < 10; i++) {
 
 +++
 
-### ... are weird ...
+### ... but not always ...
 
 ```javascript
 for (let i = 0; i < 10; i++) {
   foreach (array) {
-    if (::item == 5) {
+    if (this.item == 5) {
       // You'd expect the continue here to apply to
       // the foreach, not the lexical for.
       continue;
