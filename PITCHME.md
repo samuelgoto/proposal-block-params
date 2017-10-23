@@ -16,17 +16,19 @@
 ### Syntactic Sugar for function calls.
 
 ```javascript
+// ... this is what you write ...
 a {
   // ...
 }
 
+// ... this is what you get ...
 a(function() {
   // ...
 });
 ```
 
-@[1-3] (This is what you write ...)
-@[5-7] (... and this is what you get.)
+@[1-4] (This is what you write ...)
+@[6-9] (... and this is what you get.)
 
 
 +++
@@ -34,23 +36,26 @@ a(function() {
 ### Other parameters allowed ...
 
 ```javascript
+// ... this is what you write ...
 a(1, "hello") {
   // ...
 }
 
+// ... this is what you get ...
 a(1, "hello", function() {
   // ...
 });
 ```
 
-@[1-3] (This is what you write ...)
-@[5-7] (... and this is what you get.)
+@[1-4] (This is what you write ...)
+@[6-9] (... and this is what you get.)
 
 +++
 
 ### Inner block params get "this".
 
 ```javascript
+// ... this is what you write ...
 a {
   // ...
   b {
@@ -67,8 +72,8 @@ a(function() {
 });
 ```
 
-@[1-7] (This is what you write ...)
-@[9-14] (... and this is what you get.)
+@[1-8] (This is what you write ...)
+@[10-15] (... and this is what you get.)
 
 ---
 
@@ -410,6 +415,8 @@ until (() => i == 10, function() {
 
 ```javascript
 foreach ([1, 2, 3]) {
+  // passing parameters to the block param is awkward ...
+  // ... right now, using 'this'.
   console.log(this.item);
 }
 ```
