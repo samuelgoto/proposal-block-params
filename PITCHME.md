@@ -100,6 +100,22 @@ unless (expr, function() {
 
 +++
 
+### Userland defined structures ...
+
+```javascript
+function unless(expr, block) {
+  if (!expr) {
+    block();
+  }
+}
+
+unless (expr, function() {
+  // ... statements ...
+})
+```
+
++++
+
 ### lock
 
 ```javascript
