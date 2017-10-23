@@ -286,8 +286,8 @@ var box =
   </Box>;
 ```
 
-@[1-12] (This is what you write ...)
-@[13-28] (... and this is what you get.)
+@[1-11] (Instead of a ternary operator ...)
+@[12-28] (... a select "statement".)
 
 
 ---
