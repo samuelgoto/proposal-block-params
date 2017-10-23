@@ -11,19 +11,52 @@ For example:
 
 ```javascript
 // this ...
-a("hello") { ... }
+a("hello") {
+  ...
+}
+
 // ... is desugared to ...
-a.call(this, "hello", function() { ... })
+a("hello", function() {
+  ...
+})
 ```
 
 Functions that take just a single block parameter can also be called:
 
 ```javascript
- // this ...
- a { ... }
- // ... is desugared to ...
- a.call(this, function() { ... })
-``` 
+// this ...
+a {
+  ...
+}
+
+// ... is desugared to ...
+a(function() {
+  ...
+})
+```
+
+Block params that are lexically nested in block params get a reference to this:
+
+```javascript
+// this ...
+a {
+  ...
+  b {
+    ...
+  }
+  ...
+}
+
+// ... is desugared to ...
+a(function() {
+  ...
+  this.b(function() {
+    ...
+  })
+  ...
+});
+```
+
 To preserve Tennent's Corresponde Principle, certain [restrictions apply](#tennents-correspondence-principle) inside the block param.
 
 While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built, taking off presure from TC39 to design them (and an extensible [shadowing mechanism](#forward-compatibility) that enables to bake them natively when/if time comes):
