@@ -77,6 +77,37 @@ a(function() {
 
 ---
 
+### Example
+
++++
+
+### assert
+
+```javascript
+// ... this is what you write ...
+import {assert} from "polyfill"
+
+assert (document.cookie) {
+  alert("Blargh, you are not signed in!");
+}
+
+// ... this is what you get ...
+function assert(expr, block) {
+  if (!expr) {
+    block();
+  }
+}
+
+assert (document.cookie, function() {
+  assert("Blargh, you are not signed in!");
+})
+```
+
+@[1-6]
+@[8-16]
+
+---
+
 ### Use Cases
 
 +++
@@ -127,22 +158,6 @@ lock (buffer) {
 // ... this is what you get ...
 lock (buffer, function() {
   buffer.write();
-})
-```
-
-+++
-
-### assert
-
-```javascript
-// ... this is what you write ...
-assert (document.cookie) {
-  alert("Blargh, you are not signed in!");
-}
-
-// ... this is what you get ...
-assert (document.cookie, function() {
-  assert("Blargh, you are not signed in!");
 })
 ```
 
