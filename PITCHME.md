@@ -357,6 +357,7 @@ let html = `
 ### Chaining
 
 ```javascript
+// ... this is what you write ...
 if (arg1) {
   ...
 } else if (arg2) {
@@ -364,11 +365,8 @@ if (arg1) {
 } else {
   ...
 }
-```
 
-+++
-
-```javascript
+// ... this is what you get ...
 if (arg1, function() {
   ...
 },
@@ -380,27 +378,31 @@ if (arg1, function() {
 })
 ```
 
+@[1-8]
+@[10-19]
+
 +++
 
 ### functization
 
 ```javascript
+// ... this is what you write ...
 let i = 0;
 until (i == 10) {
   ...
   i++
 }
-```
 
-+++
-
-```javascript
+// ... this is what you get ...
 let i = 0;
 until (() => i == 10, function() {
   ...
   i++
 })
 ```
+
+@[1-6]
+@[8-13]
 
 +++
 
