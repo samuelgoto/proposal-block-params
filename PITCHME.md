@@ -79,7 +79,7 @@ lock (buffer) {
 }
 
 // ... this is what you get ...
-buffer (buffer, function() {
+lock (buffer, function() {
   buffer.write();
 })
 ```
@@ -98,6 +98,40 @@ assert (document.cookie) {
 assert (document.cookie, function() {
   assert("Blargh, you are not signed in!");
 })
+```
+
++++
+
+### defer
+
+```javascript
+defer (100) {
+  // internally, calls setTimeout()
+  stuff.cleanUp();
+}
+```
+
++++
+
+### foreach
+
+```javascript
+foreach (array) {
+  console.log(this.item);
+}
+```
+
++++
+
+### select
+
+```javascript
+select (expr) {
+  when (foo) { 1 }
+  when (bar) { 2 }
+  when (hello) { 3 }
+  when (world) { 3 }
+}
 ```
 
 ---
