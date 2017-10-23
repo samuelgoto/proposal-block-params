@@ -304,7 +304,8 @@ html += `</div>`;
 // ... or this ...
 let html = `
   <div>
-  ${["apple", "oranges"].forEach(product => `<span>${product}</span>`)}
+  ${["apple", "oranges"].forEach(
+      product => `<span>${product}</span>`)}
   </div>
 `;
 
@@ -312,15 +313,15 @@ let html = `
 let html = `
   <div>
   ${foreach (["apple", "orange"]) {
-    `<span>${item()}</span>`
+    `<span>${this.item}</span>`
   }}
   </div>
 `;
 ```
 
 @[1-6]
-@[8-13]
-@[15-21]
+@[8-14]
+@[16-22]
 
 ---
 
@@ -328,86 +329,37 @@ let html = `
 
 +++
 
-###
+### forward compatibility
 
-```python
-from time import localtime
+#### Do we corner ourselves?
 
-activities = {8: 'Sleeping', 9: 'Commuting', 17: 'Working',
-              18: 'Commuting', 20: 'Eating', 22: 'Resting' }
+```javascript
+function match () {
+}
 
-time_now = localtime()
-hour = time_now.tm_hour
-
-for activity_time in sorted(activities.keys()):
-    if hour < activity_time:
-        print activities[activity_time]
-        break
-else:
-    print 'Unknown, AFK or sleeping!'
+// Should we reserve match?
+// Should user defined shadow built-ins?
+match (cond) {
+  // ...
+}
 ```
 
-@[1](Python from..import statement)
-@[3-4](Python dictionary initialization block)
-@[6-7](Python working with time)
-@[9-14](Python for..else statement)
++++
 
----
+### return
 
-### Naturally
-### Code-Presenting
-### works in exactly the same way on [Code-Delimiter Slides](https://github.com/gitpitch/gitpitch/wiki/Code-Delimiter-Slides) as it does on [Code-Blocks](https://github.com/gitpitch/gitpitch/wiki/Code-Slides).
-
----
-
-### Code-Delimiter Slides
-
-```
-                  ---?code=path/to/source.file
+```javascript
+function even(number) {
+  unless (number % 2 == 1) {
+    // non local return?
+    return true;
+  }
+  return false;
+}
 ```
 
-#### The Basics
-
-![Press Down Key](assets/down-arrow.png)
-
-+++?code=src/python/time.py&lang=python
-
-###### Code delimiters let you present any <p> **code file** with auto-syntax highlighting
+@[2-5](non local return?)
 
 ---
 
-### Code-Delimiter Slides
-##### Using
-#### **Code-Presenting**
-
-![Press Down Key](assets/down-arrow.png)
-
-+++?code=src/javascript/config.js&lang=javascript
-
-@[1-3]
-@[5-8]
-@[10-16]
-@[18-24]
-
-###### Use code-presenting to **step-thru** code <p> from directly within your presentation 
-
----
-
-### Code-Delimiter Slides
-##### Using
-#### Code-Presenting
-#### **With Annotations**
-
-![Press Down Key](assets/down-arrow.png)
-
-+++?code=src/elixir/monitor.ex&lang=elixir
-
-@[11-14](Elixir module-attributes as constants)
-@[22-28](Elixir with-statement for conciseness)
-@[171-177](Elixir case-statement pattern matching)
-@[179-185](Elixir pipe-mechanism for composing functions)
-
----
-
-### Learn By Example
-#### View The [Presentation Markdown](https://github.com/gitpitch/code-presenting/blob/master/PITCHME.md)
+### Stage 1?
