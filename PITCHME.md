@@ -109,8 +109,8 @@ function unless(expr, block) {
   }
 }
 
-unless (expr, function() {
-  // ... statements ...
+unless (document.cookie, function() {
+  alert("Not signed in!");
 })
 ```
 
