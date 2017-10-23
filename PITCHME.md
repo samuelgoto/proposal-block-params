@@ -1,34 +1,27 @@
-# Code
-# Presenting
+# Block Params
 
 ---
 
-### Code-Blocks
+### Syntax Sugar
 
-#### The Basics
-
-![Press Down Key](assets/down-arrow.png)
+#### The basics
 
 +++
 
-```python
-from time import localtime
+```javascript
+// For example ...
+//
+a(1) {
+  // ...
+}
 
-activities = {8: 'Sleeping', 9: 'Commuting', 17: 'Working',
-              18: 'Commuting', 20: 'Eating', 22: 'Resting' }
-
-time_now = localtime()
-hour = time_now.tm_hour
-
-for activity_time in sorted(activities.keys()):
-    if hour < activity_time:
-        print activities[activity_time]
-        break
-else:
-    print 'Unknown, AFK or sleeping!'
+// ... is equivalent to ...
+a(1, function() {
+  // ...
+});
 ```
 
-###### Code-blocks let you present any <p> **static code** with auto-syntax highlighting
+###### Blocks of code can be declared outside of parenthesis of function calls when the last parameter is a lambda.
 
 ---
 
