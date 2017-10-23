@@ -3,6 +3,7 @@
 ---
 
 ### Overview
+### Example
 ### Use Cases
 ### Extensions
 ### Challenges
@@ -99,12 +100,12 @@ function assert(expr, block) {
 }
 
 assert (document.cookie, function() {
-  assert("Blargh, you are not signed in!");
+  alert("Blargh, you are not signed in!");
 })
 ```
 
 @[1-6]
-@[8-16]
+@[8-17]
 
 ---
 
@@ -128,22 +129,6 @@ unless (expr, function() {
 
 @[1-4] (This is what you write ...)
 @[6-9] (... and this is what you get.)
-
-+++
-
-### Userland defined structures ...
-
-```javascript
-function unless(expr, block) {
-  if (!expr) {
-    block();
-  }
-}
-
-unless (document.cookie, function() {
-  alert("Not signed in!");
-})
-```
 
 +++
 
