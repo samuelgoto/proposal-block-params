@@ -289,6 +289,38 @@ var box =
 @[1-11] (Instead of a ternary operator ...)
 @[12-28] (... a select 'statement'.)
 
++++
+
+### templates
+
+```javascript
+// ... instead of this ...
+let html = `<div>`;
+for (let product of ["apple", "oranges"]) {
+  html += `<span>${product}</span>`;
+}
+html += `</div>`;
+
+// ... or this ...
+let html = `
+  <div>
+  ${["apple", "oranges"].forEach(product => `<span>${product}</span>`)}
+  </div>
+`;
+
+// ... you could write this ...
+let html = `
+  <div>
+  ${foreach (["apple", "orange"]) {
+    `<span>${item()}</span>`
+  }}
+  </div>
+`;
+```
+
+@[1-6]
+@[8-13]
+@[15-21]
 
 ---
 
