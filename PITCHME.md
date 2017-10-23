@@ -2,15 +2,14 @@
 
 ---
 
-### Syntax Sugar
+### Example
 
 #### The basics
 
 +++
 
 ```javascript
-// For example ...
-//
+// This ...
 a(1) {
   // ...
 }
@@ -21,7 +20,29 @@ a(1, function() {
 });
 ```
 
+@[1-4] (You write this ...)
+@[5-8] (... and it is equivalent to this.)
+
 ###### Blocks of code can be declared outside of parenthesis of function calls when the last parameter is a lambda.
+
++++
+
+```javascript
+// This ...
+a {
+  // ...
+}
+
+// ... is equivalent to ...
+a(function() {
+  // ...
+});
+```
+
+@[1-4] (You write this ...)
+@[5-8] (... and it is equivalent to this.)
+
+###### Parenthesis can also be skipped.
 
 ---
 
