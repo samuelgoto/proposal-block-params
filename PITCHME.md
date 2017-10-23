@@ -2,9 +2,14 @@
 
 ---
 
-### Example
+### Overview
+### Use Cases
+### Extensions
+### Challenges
 
-#### The basics
+---
+
+### Overview
 
 +++
 
@@ -44,6 +49,28 @@ a(function() {
 
 @[1-6] (This is what you write ...)
 @[7-11] (... and this is what you get.)
+
++++
+
+```javascript
+a {
+  // ...
+  b {
+    // ...
+  }
+  // ...
+}
+
+// ... is equivalent to ...
+a(function() {
+  this.b(function () {
+    // ...
+  })
+});
+```
+
+@[1-7] (This is what you write ...)
+@[9-14] (... and this is what you get.)
 
 ---
 
