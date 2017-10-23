@@ -185,7 +185,8 @@ const app = express();
 
 server (app) {
   get("/") {
-     this.response.send("hello world" + request().get("param1"));
+     this.response.send(
+       "hello world" + this.request.get("param1"));
   }
 
   listen(3000) {
@@ -250,16 +251,52 @@ describe("a calculator") {
 }
 ```
 
++++
+
+### JSX
+
+```javascript
+// ... instead of this ...
+var box =
+  <Box>
+    {
+      shouldShowAnswer(user) ?
+      <Answer value={false}>no</Answer> :
+      <Box.Comment>
+         Text Content
+      </Box.Comment>
+    }
+  </Box>;
+
+// ... you could write this ...
+var box =
+  <Box>
+    {
+      select (shouldShowAnswer(user)) {
+        when (true) {
+          <Answer value={false}>no</Answer>
+        }
+        when (false) {
+          <Box.Comment>
+             Text Content
+          </Box.Comment>
+        }
+      }
+    }
+  </Box>;
+```
+
+@[1-12] (This is what you write ...)
+@[13-28] (... and this is what you get.)
+
+
 ---
 
-### Code-Blocks
-##### Using
-#### Code-Presenting
-#### **With Annotations**
-
-![Press Down Key](assets/down-arrow.png)
+### Challenges
 
 +++
+
+###
 
 ```python
 from time import localtime
