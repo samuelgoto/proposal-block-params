@@ -287,7 +287,7 @@ var box =
 ```
 
 @[1-11] (Instead of a ternary operator ...)
-@[12-28] (... a select "statement".)
+@[12-28] (... a select 'statement'.)
 
 
 ---
