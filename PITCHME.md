@@ -6,7 +6,7 @@
 ### Example
 ### Use Cases
 ### Extensions
-### Challenges
+### Areas of Investigation
 
 ---
 
@@ -454,7 +454,7 @@ foreach (map, function({key, value}) {
 
 ---
 
-### Challenges
+### Areas of Investigation
 
 +++
 
