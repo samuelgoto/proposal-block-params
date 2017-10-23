@@ -134,6 +134,122 @@ select (expr) {
 }
 ```
 
++++
+
+### using
+
+```javascript
+using (stream) {
+  // .. closes stream automatically ...
+}
+```
+
++++
+
+### maps
+
+```javascript
+let a = map {
+  put("hello", "world") {}
+  put("foo", "bar") {}
+}
+```
+
++++
+
+### layout
+
+```javascript
+let dom = html {
+  head {
+    title("Hello World!") {}
+  }
+  body {
+    div {
+      span("Welcome to my Blog!") {}
+    }
+    for (page of ["contact", "guestbook"]) {
+      a({href: `${page}.html`}) { span(`${page}`) } {}
+    }
+  }
+}
+```
+
++++
+
+### node
+
+```javascript
+const express = require("express");
+const app = express();
+
+server (app) {
+  get("/") {
+     this.response.send("hello world" + request().get("param1"));
+  }
+
+  listen(3000) {
+    console.log("hello world");
+  }
+}
+```
+
++++
+
+### makefiles
+
+```javascript
+job('PROJ-unit-tests') {
+  scm {
+      git(gitUrl) {}
+  }
+  triggers {
+      scm('*/15 * * * *') {}
+  }
+  steps {
+      maven('-e clean test') {}
+  }
+}
+```
+
++++
+
+### regexes
+
+```javascript
+let re = regex {
+  ::start()
+  ::then("a")
+  ::then(2, "letters")
+  ::maybe("#")
+  ::oneof("a", "b")
+  ::between([2, 4], "a")
+  ::insensitively()
+  ::end()
+}
+```
+
++++
+
+### testing
+
+```javascript
+describe("a calculator") {
+
+  val calculator = Calculator()
+
+  on("calling sum with two numbers") {
+
+    val sum = calculator.sum(2, 3)
+
+    it("should return the sum of the two numbers") {
+
+      shouldEqual(5, sum)
+    }
+  }
+}
+```
+
 ---
 
 ### Code-Blocks
