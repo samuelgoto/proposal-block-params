@@ -1,7 +1,7 @@
 Block Params
 =========
 
-Early feedback from @adamk, @domenic, @slightlyoff, @erights, @waldemarhowart and @bterlson (click [here](https://github.com/samuelgoto/proposal-block-params/issues/new) to send feedback).
+Early feedback from @adamk, @domenic, @slightlyoff, @erights, @waldemarhowart, @bterlson and @rwaldron (click [here](https://github.com/samuelgoto/proposal-block-params/issues/new) to send feedback).
 
 This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
@@ -21,7 +21,7 @@ a("hello", function() {
 })
 ```
 
-Functions that take just a single block parameter can also be called:
+Functions that take just a single block parameter can also be called parenthesis-less:
 
 ```javascript
 // this ...
@@ -57,7 +57,7 @@ a(function() {
 });
 ```
 
-To preserve Tennent's Corresponde Principle, certain [restrictions apply](#tennents-correspondence-principle) inside the block param.
+To preserve Tennent's Corresponde Principle, we are exploring which  [restrictions apply](#tennents-correspondence-principle) inside the block param.
 
 While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built, taking off presure from TC39 to design them (and an extensible [shadowing mechanism](#forward-compatibility) that enables to bake them natively when/if time comes):
 
@@ -75,9 +75,7 @@ And interesting applications in [DOM construction](https://medium.com/@daveford/
 * [template literals](#template-literals)
 * [new paradigms](#kotlins-templates)
 
-This is early, so there are still lots of alternatives to consider (e.g. [```continue``` and ```break```](#continue-break) and [```this```](https://github.com/samuelgoto/proposal-block-params/issues/9)) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)) and things to check feasibility (e.g. [completion values](#completion-values)).
-
-There are many ways this could evolve too, so we list here a few ideas that could serve as [extensions](#extensions) (e.g. [return](#return) and [bindings](#bindings)).
+This is early, so there are still a lot of [areas to explore](#areas-of-exploration) (e.g. [```continue``` and ```break```](#continue-break), [return](#return), [bindings](#bindings) and [```this```](https://github.com/samuelgoto/proposal-block-params/issues/9)) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)) and things to check feasibility (e.g. [completion values](#completion-values)).
 
 There is a [polyfill](#polyfill), but I wouldn't say it is a great one quite yet :)
 
@@ -402,28 +400,24 @@ let html = `
 
 # Tennent's Correspondence Principle
 
-To preserve tennent's correspondence principle as much as possible, here are some considerations of what goes into a block param:
+To preserve tennent's correspondence principle as much as possible, here are some considerations as we decide what can go into block params:
 
-* ```return``` statements inside the block throws ```SyntaxError``` (same strategy as kotlin's [non-local returns](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns), left out purely as a sequencing strategy, see some [explorations](#return) on how to introduce them)
-* ```break```, ```continue```  can't be used as top level statements (purely as a sequencing strategy, see some [explorations](#continue-break) on how to introduce them)
+* ```return``` statements inside the block should either throw ```SyntaxError```  (e.g. kotlin) or jump to a [non-local return](#return) (e.g. kotlin's inline functions [non-local returns](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns))
+* ```break```, ```continue```  should either throw ```SyntaxError``` or control the [lexical flow](#continue-break)
 * ```yield``` can't be used as top level statements (same strategy as ```() => { ... }```)
-* ```throw``` works
+* ```throw``` works (e.g. can be re-thrown from function that takes the block param)
 * the [completion values](#completion-value) are used to return values from the block param (strategy borrowed from [kotlin](#kotlin))
 * as opposed to arrow functions, ```this``` can be bound.
 
 ## Completion Values
 
-Like Kotlin, it is possible to return values from the block params. It (roughly) uses the last expression statement executed before leaving the block lambda (here is [an example](#kotlin) in kotlin). For example:
+Like Kotlin, it is possible to return values from the block params to the original function calling it. Somewhat inspired by arrow functions, this is limited to small block params composed of single expressions:
 
 ```javascript
-let result = foreach (numbers) {
-  let number = this.item;
+let result = foreach (numbers) do (number) {
   number * 2 // gets returned to foreach
 }
 ``` 
-
-Since this is a new syntatic structure (i.e. there is no backwards incompatible precedent), we should probably use these [completion reforms](https://web.archive.org/web/20170117211244/http://wiki.ecmascript.org/doku.php?id=harmony:completion_reform) too.
-
 
 # Forward Compatibility
 
@@ -515,14 +509,14 @@ foreach ([1, 2, 3]) {
 
 For example, we would want to enable something like the following:
 
-```foreach ({key, value} in map) { ... }``` to be given by the foreach function implementation.
+```foreach (map) do (key, value) { ... }``` to be given by the foreach function implementation.
 
 ```javascript
-foreach ({key, value} in map) {
+foreach (map) do (key, value) {
   // ...
 }
 // ... gets desugared to ...
-foreach (map, function({key, value}) {
+foreach (map, function(key, value) {
 })
 ```
 
@@ -536,7 +530,19 @@ foreach (map) { |key, value|
 }
 ```
 
+Or
+
+```javascript
+foreach (let {key, value} in map) {
+  // ...
+}
+```
+
 We probably need to do a better job at exploring the design space of use cases before debating syntax, hence leaving this as a future extension.
+
+# Areas of Exploration
+
+These are some areas that we are still exploring.
 
 ## return
 
