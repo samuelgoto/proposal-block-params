@@ -407,40 +407,6 @@ var box =
   </Box>;
 ```
 
-# Tennent's Correspondence Principle
-
-To preserve tennent's correspondence principle as much as possible, here are some considerations as we decide what can go into block params:
-
-* ```return``` statements inside the block should either throw ```SyntaxError```  (e.g. kotlin) or jump to a [non-local return](#return) (e.g. kotlin's inline functions [non-local returns](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns))
-* ```break```, ```continue```  should either throw ```SyntaxError``` or control the [lexical flow](#continue-break)
-* ```yield``` can't be used as top level statements (same strategy as ```() => { ... }```)
-* ```throw``` works (e.g. can be re-thrown from function that takes the block param)
-* the [completion values](#completion-value) are used to return values from the block param (strategy borrowed from [kotlin](#kotlin))
-* as opposed to arrow functions, ```this``` can be bound.
-
-## Completion Values
-
-Like Kotlin, it is possible to return values from the block params to the original function calling it. We aren't entirely sure yet what this looks like, but it will most probably borrow the same semantics we end up using in [do expressions](https://github.com/tc39/proposal-do-expressions) and other [statement-like expressions](https://github.com/rbuckton/proposal-statements-as-expressions#compound-statements).
-
-```javascript
-let result = foreach (numbers) do (number) {
-  number * 2 // gets returned to foreach
-}
-``` 
-
-# Forward Compatibility
-
-If we bake this in, do we corner ourselves from ever exposing new control structures (e.g. unless () {})?
-
-That's a good question, and we are still evaluating what the answer should be. Here are a few ideas that have been thrown around:
-
-* user defined form shadows built-in ones
-* sigils (e.g. for! {})
-
-In this formulation, we are leaning towards the former.
-
-It is important to note that the **current** built-in ones can't be shadowed because they are ```reserved keywords```. So, you can't override ```for``` or ```if``` or ```while``` (which I think is working as intended), but you could override ones that are not reserved keywords (e.g. ```until``` or ```match```).
-
 # Extensions
 
 This can open a stream of future extensions that would enable further constructs to be added. Here are some that occurred to us while developing this.
@@ -549,6 +515,40 @@ We probably need to do a better job at exploring the design space of use cases b
 # Areas of Exploration
 
 These are some areas that we are still exploring.
+
+## Tennent's Correspondence Principle
+
+To preserve tennent's correspondence principle as much as possible, here are some considerations as we decide what can go into block params:
+
+* ```return``` statements inside the block should either throw ```SyntaxError```  (e.g. kotlin) or jump to a [non-local return](#return) (e.g. kotlin's inline functions [non-local returns](https://kotlinlang.org/docs/reference/inline-functions.html#non-local-returns))
+* ```break```, ```continue```  should either throw ```SyntaxError``` or control the [lexical flow](#continue-break)
+* ```yield``` can't be used as top level statements (same strategy as ```() => { ... }```)
+* ```throw``` works (e.g. can be re-thrown from function that takes the block param)
+* the [completion values](#completion-value) are used to return values from the block param (strategy borrowed from [kotlin](#kotlin))
+* as opposed to arrow functions, ```this``` can be bound.
+
+## Forward Compatibility
+
+If we bake this in, do we corner ourselves from ever exposing new control structures (e.g. unless () {})?
+
+That's a good question, and we are still evaluating what the answer should be. Here are a few ideas that have been thrown around:
+
+* user defined form shadows built-in ones
+* sigils (e.g. for! {})
+
+In this formulation, we are leaning towards the former.
+
+It is important to note that the **current** built-in ones can't be shadowed because they are ```reserved keywords```. So, you can't override ```for``` or ```if``` or ```while``` (which I think is working as intended), but you could override ones that are not reserved keywords (e.g. ```until``` or ```match```).
+
+## Completion Values
+
+Like Kotlin, it is possible to return values from the block params to the original function calling it. We aren't entirely sure yet what this looks like, but it will most probably borrow the same semantics we end up using in [do expressions](https://github.com/tc39/proposal-do-expressions) and other [statement-like expressions](https://github.com/rbuckton/proposal-statements-as-expressions#compound-statements).
+
+```javascript
+let result = foreach (numbers) do (number) {
+  number * 2 // gets returned to foreach
+}
+``` 
 
 ## scoping
 
