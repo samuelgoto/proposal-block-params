@@ -18,67 +18,197 @@
 
 ```javascript
 // ... this is what you write ...
-foo {
+a() {
   // ...
 }
 
 // ... this is what you get ...
-foo(function() {
+a(function() {
   // ...
 });
+
+// ... this is how you use it ...
+function a(b) {
+  b();
+}
 ```
 
-@[1-4] (This is what you write ...)
-@[6-9] (... and this is what you get.)
-
+@[1-4] (Allowing passing a function block as a parameter ...)
+@[6-9] (... outside of parentheses.)
+@[11-14] (userland responsible for defining a)
 
 +++
 
-### Other parameters allowed ...
+### Parameters before the block allowed ...
 
 ```javascript
-// ... this is what you write ...
-foo(1, "hello") {
+// this is what you write ...
+a(1) {
   // ...
 }
 
 // ... this is what you get ...
-foo(1, "hello", function() {
+a(1, function() {
+  // ...
+})
+```
+
++++
+
+### For example
+
+```javascript
+// ... this is what you write ...
+unless(expr) {
+  // ...
+}
+
+// ... this is what you get ...
+unless(expr, function() {
   // ...
 });
+
+// ... this is what userland defines ...
+function unless(expr, block) {
+  if (!expr) {
+    block();
+  }
+}
 ```
 
 @[1-4] (This is what you write ...)
 @[6-9] (... and this is what you get.)
+@[8-13] (... userland control structure)
 
 +++
 
-### Inner block params get "this".
+### Binding arguments ...
+
+```javascript
+// NOTE(goto): syntax TBD.
+a(1) do (b) {
+  // ...
+}
+
+a(1, function(b) {
+  // ...
+})
+```
+
++++
+
+### For example ...
 
 ```javascript
 // ... this is what you write ...
-foo {
+foreach ([1, 2, 3]) do (item) {
+  console.log(item);
+}
+
+// ... this is what you get ...
+foreach ([1, 2, 3], function(item) {
+  console.log(item)
+});
+
+// ... this is what userland defines ...
+function foreach(iterable, block) {
+  for (let item of iterable) {
+    block(item);
+  }
+}
+```
+
+@[1-4] (This is what you write ...)
+@[6-9] (... and this is what you get.)
+@[11-16]
+
++++
+
+### Nesting block params ...
+
+```javascript
+// ... this is what you write ...
+a {
   // ...
-  bar {
+  b {
     // ...
   }
   // ...
 }
 
 // ... is equivalent to ...
-foo(function() {
-  bar.call(this, function () {
+a(function() {
+  b.call(this, function () {
     // ...
   })
 });
 ```
 
-@[1-8] (This is what you write ...)
-@[10-15] (... and this is what you get.)
+@[1-8] (If b wants to make it self connected to a ...)
+@[10-15] (... it can set a contextual "this" to communicate.)
+
++++
+
+### For example
+
+```javascript
+select (expr) {
+  when (cond1) {
+  }
+  when (cond2) {
+  }
+}
+
+// ... is equivalent to ...
+select (expr, function() {
+  when.call (this, cond1, function() {
+  })
+  when.call (this, cond2, function() {
+  })
+})
+```
+
+### Omitting parentheses altogether allowed ...
+
+```javascript
+// ... this is what you write ...
+foo {
+  // ...
+}
+
+// ... this is what you get ...
+foo(function() {
+  // ...
+});
+```
+
+@[1-4] (This is what you write ...)
+@[6-9] (... and this is what you get.)
+
++++
+
+### For example
+
+```javascript
+let dom = html {
+  head {
+    title("welcome!")
+  }
+  body {
+    div {
+      span {
+        a {
+          span("hello world")
+        }
+      }
+    }
+  }
+}
+```
 
 ---
 
-### Example
+### Examples
 
 +++
 
@@ -425,26 +555,21 @@ until (() => i == 10, function() {
 @[1-6]
 @[8-13]
 
-+++
-
-### bindings
-
-```javascript
-foreach (map) do (key, value) {
-  // ...
-}
-
-// ... is equivalent to ...
-foreach (map, function(key, value) {
-})
-```
-
-@[1-3](Syntax TBD)
-@[5-7](Gets passed as a parameter)
-
 ---
 
 ### Areas of Investigation
+
++++
+
+### Scoping
+
++++
+
+### Nesting
+
++++
+
+### Completion values
 
 +++
 
