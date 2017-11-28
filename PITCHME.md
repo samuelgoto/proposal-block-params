@@ -660,3 +660,89 @@ for (let i = 0; i < 10; i++) {
 ---
 
 ### Stage 1?
+
+---
+
+### Options for break/continue
+
+
++++
+
+### Kotlin: disallow
+
+```kotlin
+fun unless(condition: Boolean, block: () -> Unit) {
+  if (condition) {
+    block()
+  }
+}
+
+fun main(args: Array<String>) {
+  println("Hello, world!")
+  while (true) {
+    unless(true) {
+      println("hello")
+      // Error:(11, 12) 'break' or 'continue' jumps 
+      // across a function or a class boundary
+      break
+
+      // 'return' is not allowed here
+      return
+    }
+  }
+}
+```
+
++++
+
+### Ruby: pick a choice
+
+```ruby
+def iffy(condition) 
+  if (condition) then
+    yield()
+  end
+end 
+
+for i in 0..1 
+  puts "Running: #{i}"
+  iffy (i == 0) {
+    # This does not break from the outer loop!
+    # Nor does next.
+    break
+  }
+end
+```
+
++++
+
+### Standard exceptions
+
+```javascript
+foreach (array) {
+  continue;
+}
+// ... is sugar for ...
+foreach (array, function() {
+  throw new ContinueException();
+});
+```
+
++++
+
+### Modifiers
+
+```javascript
+inline function unless(expr, block) {
+  // ... breaks and continues bound lexically ...
+}
+function foreach (collection) {
+  // ... breaks and continues bound locally ...
+}
+```
+
+---
+
+### Nesting
+
+
