@@ -60,12 +60,12 @@ a(1, function() {
 
 ```javascript
 // ... this is what you write ...
-unless(expr) {
+unless (document.cookie) {
   // ...
 }
 
 // ... this is what you get ...
-unless(expr, function() {
+unless (document.cookie, function() {
   // ...
 });
 
@@ -209,7 +209,25 @@ let dom = html {
     }
   }
 }
+
+let dom = html(function() {
+  head.call(this, function() {
+    title("welcome!")
+  })
+  body.call(this, function() {
+    div.call(this, function() {
+      span.call(this, function() {
+        a.call(function() {
+          span("hello world")
+        })
+      })
+    })
+  })
+})
 ```
+
+@[1-14]
+@[16-29]
 
 ---
 
@@ -221,26 +239,12 @@ let dom = html {
 
 ```javascript
 // ... this is what you write ...
-import {lock} from "polyfill"
+import {lock} from "polyfill.js"
 
 lock (resource) {
   console.log(resource[0]);
 }
-
-// ... this is what you get ...
-function lock(resource, block) {
-  // sleeps until resource[0] != 0
-  Atomics.wait(resource, 0, 0);
-  block();
-}
-
-lock (resource, function() {
-  console.log(resource[0])
-})
 ```
-
-@[1-6]
-@[8-17]
 
 +++
 
@@ -251,24 +255,17 @@ lock (resource, function() {
 unless (expr) {
   // ... statements ...
 }
-
-// ... this is what you get ...
-unless (expr, function() {
-  // ... statements ...
-})
 ```
-
-@[1-4] (This is what you write ...)
-@[6-9] (... and this is what you get.)
 
 +++
 
-### defer
+### fork
 
 ```javascript
-defer (100) {
+fork () {
   // internally, calls setTimeout()
-  stuff.cleanUp();
+  // or maybe tasklet's new Worker() ?
+  expensiveWork();
 }
 ```
 
@@ -584,7 +581,7 @@ let evens = foreach ([1, 2, 3, 4]) do (number) {
 
 ```javascript
 // Are there better ways to make when aware of select?
-// Other than passing 'this' around?
+// Other than passing 'this' around? Maybe @@this?
 select (foo) {
   // How does 'when' get resolved? can select insist on
   // a specific implementation of when?
