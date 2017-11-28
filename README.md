@@ -610,8 +610,8 @@ Whereas:
 
 ```javascript
 for (let i = 0; i < 10; i++) {
-  foreach (array) {
-    if (::item == 5) {
+  foreach (array) do (item) {
+    if (item == 5) {
       // You'd expect the continue here to apply to
       // the foreach, not the lexical for.
       continue;
