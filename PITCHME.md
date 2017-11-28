@@ -61,12 +61,12 @@ a(1, function() {
 ```javascript
 // ... this is what you write ...
 unless (document.cookie) {
-  // ...
+  alert("blargh!")
 }
 
 // ... this is what you get ...
 unless (document.cookie, function() {
-  // ...
+  alert("blargh!")
 });
 
 // ... this is what userland defines ...
@@ -259,10 +259,10 @@ unless (expr) {
 
 +++
 
-### fork
+### run
 
 ```javascript
-fork () {
+run () {
   // internally, calls setTimeout()
   // or maybe tasklet's new Worker() ?
   expensiveWork();
@@ -479,7 +479,7 @@ let html = `
 
 @[1-6]
 @[8-14]
-@[16-22]
+@[16-23]
 
 ---
 
@@ -519,7 +519,7 @@ if (arg1, function() {
 ### functization
 
 ```javascript
-// ... this is what you write ...
+// What if we wanted to re-evaluate the arguments?
 let i = 0;
 until (i == 10) {
   ...
@@ -548,21 +548,23 @@ until (() => i == 10, function() {
 #### Do we corner ourselves?
 
 ```javascript
+// Do we corner ourselves syntactically?
+// If this lands, and someone defines this ...
 function match () {
 }
 
+// ... does it prevent us from shipping this?
 match (cond) {
   // ...
 }
 ```
-
-@[4-6](Should we reserve match? Should userland shadow built-ins?)
 
 +++
 
 ### Completion values
 
 ```javascript
+// What if we wanted to filter a list?
 let evens = foreach ([1, 2, 3, 4]) do (number) {
   if (number % 2 == 0) {
     // NOTE(goto): gets returned to foreach as a
@@ -597,7 +599,7 @@ select (foo) {
 ```javascript
 function even(number) {
   unless (number % 2 == 1) {
-    // non local return?
+    // Should this return to unless or to even?    
     return true;
   }
   return false;
@@ -630,14 +632,13 @@ function dostuff() {
 ```javascript
 for (let i = 0; i < 10; i++) {
   unless (i == 5) {
-    // You'd expect the continue to apply to the
-    // lexical for, not to the unless
+    // Should this continue the for? or be disallowed?
     continue;
   }
 }
 ```
 
-@[2-6](You'd expect continue to continue the for-loop)
+@[2-6](You'd expect continue to continue the for-loop?)
 
 +++
 
@@ -647,15 +648,14 @@ for (let i = 0; i < 10; i++) {
 for (let i = 0; i < 10; i++) {
   foreach (array) do (item) {
     if (item == 5) {
-      // You'd expect the continue here to apply to
-      // the foreach, not the lexical for.
+      // Should this continue the for? or the foreach?
       continue;
     }
   }
 }
 ```
 
-@[2-8](Whereas inside foreaches you'd expect continue to continue the foreach)
+@[2-7](Whereas inside foreaches you'd expect continue to continue the foreach)
 
 ---
 
