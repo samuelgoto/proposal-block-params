@@ -663,6 +663,10 @@ for (let i = 0; i < 10; i++) {
 
 ---
 
+### Annex
+
+---
+
 ### Options for break/continue
 
 
@@ -743,6 +747,53 @@ function foreach (collection) {
 
 ---
 
-### Nesting
+### Nesting and Scoping
 
++++
 
+### Problem statement
+
+```javascript
+select (foo) {
+  // Problem 1: how does "when" get resolved?
+  // Problem 2: how does "when" connect with "select"?
+  //   e.g. how does the argument to "when" gets
+  //        compared to the argument of "select"?
+  when (bar) {
+  }
+}
+```
+
++++
+
+### Option 1: explicit reference
+
+```javascript
+select (foo) {
+  // :: de-sugars to this.when (bar) { ... }
+  ::when (bar) {
+  } 
+}
+```
+
++++
+
+### Option 2: passing this around
+
+```javascript
+select (foo, function() {
+  (when in this ? this.when : when) (bar, function {
+    // ...
+  }
+})
+
+function select (expr, block) {
+  block.call({
+    when (cond, inner) {
+      if (expr == cond) {
+        inner();
+      }
+    }
+  });
+}
+```
