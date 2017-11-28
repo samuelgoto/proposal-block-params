@@ -10,12 +10,14 @@ It is a syntactic simplification that allows, on function calls, to omit paranth
 For example:
 
 ```javascript
-// this ...
 a("hello") {
   ...
 }
+```
 
-// ... is equivalent to ...
+Is equivalent to this:
+
+```javascript
 a("hello", function() {
   ...
 })
@@ -24,12 +26,14 @@ a("hello", function() {
 Functions that take just a single block parameter can also be called parentheses-less:
 
 ```javascript
-// this ...
 a {
   ...
 }
+```
 
-// ... is equivalent to ...
+Is equivalent to this:
+
+```javascript
 a(function() {
   ...
 })
@@ -38,7 +42,6 @@ a(function() {
 Block params that are lexically nested in block params get a reference to this:
 
 ```javascript
-// this ...
 a {
   ...
   b {
@@ -46,7 +49,11 @@ a {
   }
   ...
 }
+```
 
+Is equivalent to this:
+
+```javascript
 // ... is equivalent to ...
 a(function() {
   ...
