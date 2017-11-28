@@ -78,18 +78,19 @@ function unless(expr, block) {
 
 @[1-4] (This is what you write ...)
 @[6-9] (... and this is what you get.)
-@[8-13] (... userland control structure)
+@[11-16] (... userland control structure)
 
 +++
 
 ### Binding arguments ...
 
 ```javascript
-// NOTE(goto): syntax TBD.
-a(1) do (b) {
+// The following ...
+a(1) do (b) { // NOTE(goto): syntax TBD.
   // ...
 }
 
+// ... is equivalent to this ...
 a(1, function(b) {
   // ...
 })
@@ -152,6 +153,7 @@ a(function() {
 ### For example
 
 ```javascript
+// This ...
 select (expr) {
   when (cond1) {
   }
@@ -167,6 +169,8 @@ select (expr, function() {
   })
 })
 ```
+
++++
 
 ### Omitting parentheses altogether allowed ...
 
@@ -208,11 +212,11 @@ let dom = html {
 
 ---
 
-### Examples
+### Use Cases
 
 +++
 
-### assert
+### lock
 
 ```javascript
 // ... this is what you write ...
@@ -237,10 +241,6 @@ lock (resource, function() {
 @[1-6]
 @[8-17]
 
----
-
-### Use Cases
-
 +++
 
 ### unless
@@ -259,22 +259,6 @@ unless (expr, function() {
 
 @[1-4] (This is what you write ...)
 @[6-9] (... and this is what you get.)
-
-+++
-
-### lock
-
-```javascript
-// ... this is what you write ...
-lock (buffer) {
-  buffer.write();
-}
-
-// ... this is what you get ...
-lock (buffer, function() {
-  buffer.write();
-})
-```
 
 +++
 
