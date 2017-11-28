@@ -1,7 +1,7 @@
+Early feedback from @adamk, @domenic, @slightlyoff, @erights, @waldemarhowart, @bterlson and @rwaldron (click [here](https://github.com/samuelgoto/proposal-block-params/issues/new) to send feedback).
+
 Block Params
 =========
-
-Early feedback from @adamk, @domenic, @slightlyoff, @erights, @waldemarhowart, @bterlson and @rwaldron (click [here](https://github.com/samuelgoto/proposal-block-params/issues/new) to send feedback).
 
 This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html), [Ruby](#ruby) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
@@ -549,6 +549,24 @@ We probably need to do a better job at exploring the design space of use cases b
 # Areas of Exploration
 
 These are some areas that we are still exploring.
+
+## scoping
+
+There are certain block params that go together and they need to be somehow aware of each other. For example, ```select``` and ```when```:
+
+```javascript
+select (foo) {
+  when (bar) {
+    ...
+  }
+}
+```
+
+How does ```when``` get resolved?
+
+The global scope? If so, how does it connect with ```select``` to test ```bar``` with ```foo```?
+
+From ```select```? If so, [how does it avoid using the ```this``` reference](https://github.com/samuelgoto/proposal-block-params/issues/16) and have [```with```-like performance implications](https://github.com/samuelgoto/proposal-block-params/issues/13)? perhaps [@@this](https://github.com/samuelgoto/proposal-block-params/issues/20)?
 
 ## return
 
