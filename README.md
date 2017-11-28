@@ -3,9 +3,9 @@ Block Params
 
 Early feedback from @adamk, @domenic, @slightlyoff, @erights, @waldemarhowart, @bterlson and @rwaldron (click [here](https://github.com/samuelgoto/proposal-block-params/issues/new) to send feedback).
 
-This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
+This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html), [Ruby](#ruby) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
-It is syntactic sugar that allows on function calls, omitting parantheses around the ***last*** parameter when that's a lambda.
+It is a syntactic simplification that allows, on function calls, to omit parantheses around the ***last***  parameter when that's a lambda.
 
 For example:
 
@@ -15,13 +15,13 @@ a("hello") {
   ...
 }
 
-// ... is desugared to ...
+// ... is equivalent to ...
 a("hello", function() {
   ...
 })
 ```
 
-Functions that take just a single block parameter can also be called parenthesis-less:
+Functions that take just a single block parameter can also be called parentheses-less:
 
 ```javascript
 // this ...
@@ -29,7 +29,7 @@ a {
   ...
 }
 
-// ... is desugared to ...
+// ... is equivalent to ...
 a(function() {
   ...
 })
@@ -47,7 +47,7 @@ a {
   ...
 }
 
-// ... is desugared to ...
+// ... is equivalent to ...
 a(function() {
   ...
   b.call(this, function() {
@@ -78,6 +78,8 @@ And interesting applications in [DOM construction](https://medium.com/@daveford/
 This is early, so there are still a lot of [areas to explore](#areas-of-exploration) (e.g. [```continue``` and ```break```](#continue-break), [return](#return), [bindings](#bindings) and [```this```](https://github.com/samuelgoto/proposal-block-params/issues/9)) as well as strategic problems to overcome (e.g. [forward compatibility](#forward-compatibility)) and things to check feasibility (e.g. [completion values](#completion-values)).
 
 There is a [polyfill](#polyfill), but I wouldn't say it is a great one quite yet :)
+
+It is probably constructive to start reading from the [prior art](#prior-art) section.
 
 # Use cases
 
@@ -325,6 +327,40 @@ describe("a calculator") {
 
 One of the most interesting aspects of this proposal is that it opens the door to statement-like structures inside expressions, which are most notably useful in constructing the DOM.
 
+## Template Literals
+
+For example, instead of:
+
+```javascript
+let html = `<div>`;
+for (let product of ["apple", "oranges"]) {
+  html += `<span>${product}</span>`;
+}
+html += `</div>`;
+```
+
+or
+
+```javascript
+let html = `
+  <div>
+  ${["apple", "oranges"].forEach(product => `<span>${product}</span>`)}
+  </div>
+`;
+```
+
+One could write:
+
+```javascript
+let html = `
+  <div>
+  ${foreach (["apple", "orange"]) {
+    `<span>${item()}</span>`
+  }}
+  </div>
+`;
+```
+
 ## JSX
 
 For example, instead of:
@@ -364,40 +400,6 @@ var box =
   </Box>;
 ```
 
-## Template Literals
-
-For example, instead of:
-
-```javascript
-let html = `<div>`;
-for (let product of ["apple", "oranges"]) {
-  html += `<span>${product}</span>`;
-}
-html += `</div>`;
-```
-
-or
-
-```javascript
-let html = `
-  <div>
-  ${["apple", "oranges"].forEach(product => `<span>${product}</span>`)}
-  </div>
-`;
-```
-
-One could write:
-
-```javascript
-let html = `
-  <div>
-  ${foreach (["apple", "orange"]) {
-    `<span>${item()}</span>`
-  }}
-  </div>
-`;
-```
-
 # Tennent's Correspondence Principle
 
 To preserve tennent's correspondence principle as much as possible, here are some considerations as we decide what can go into block params:
@@ -411,7 +413,7 @@ To preserve tennent's correspondence principle as much as possible, here are som
 
 ## Completion Values
 
-Like Kotlin, it is possible to return values from the block params to the original function calling it. Somewhat inspired by arrow functions, this is limited to small block params composed of single expressions:
+Like Kotlin, it is possible to return values from the block params to the original function calling it. We aren't entirely sure yet what this looks like, but it will most probably borrow the same semantics we end up using in [do expressions](https://github.com/tc39/proposal-do-expressions) and other [statement-like expressions](https://github.com/rbuckton/proposal-statements-as-expressions#compound-statements).
 
 ```javascript
 let result = foreach (numbers) do (number) {
@@ -430,7 +432,7 @@ That's a good question, and we are still evaluating what the answer should be. H
 
 In this formulation, we are leaning towards the former.
 
-It is important to note that the **current** built-in ones can't be shadowed because they are ```reserved keywords```. So, you can't override ```for``` or ```if``` or ```while``` (which I think is working as intended), but you could override ones that are not reserved keywords (e.g. ```until```).
+It is important to note that the **current** built-in ones can't be shadowed because they are ```reserved keywords```. So, you can't override ```for``` or ```if``` or ```while``` (which I think is working as intended), but you could override ones that are not reserved keywords (e.g. ```until``` or ```match```).
 
 # Extensions
 
@@ -499,15 +501,7 @@ TODO(goto): should we do that by default with all parameters?
 
 From @bterlson:
 
-There are a variety of cases where binding helps. Currently, we pass parameters back to the block via ```this```. For example:
-
-```javascript
-foreach ([1, 2, 3]) {
-  console.log(this.item);
-}
-```
-
-For example, we would want to enable something like the following:
+There are a variety of cases where binding helps. For example, we would want to enable something like the following:
 
 ```foreach (map) do (key, value) { ... }``` to be given by the foreach function implementation.
 
@@ -515,7 +509,12 @@ For example, we would want to enable something like the following:
 foreach (map) do (key, value) {
   // ...
 }
-// ... gets desugared to ...
+```
+
+To be equivalent to:
+
+```javascript
+// ... is equivalent to ...
 foreach (map, function(key, value) {
 })
 ```
@@ -566,11 +565,11 @@ foobar() // returns 2
 // after 100 ms
 // block() returns 1. does that get ignored?
 ```
-Note that Java throws a [```TransferException```](http://tronicek.blogspot.com/2008/08/nonlocal-transfer.html) when that happens. SmallTalk allows that too, so the intuition is that this is fine.
+Note that Java throws a [```TransferException```](http://tronicek.blogspot.com/2008/08/nonlocal-transfer.html) when that happens. SmallTalk allows that too, so the intuition is that this is solvable.
 
 ## continue, break
 
-```continue``` and ```break``` are interesting because their interpretation is defined by the user. For example:
+```continue``` and ```break``` are interesting because their interpretation can be defined by the user. For example:
 
 ```javascript
 for (let i = 0; i < 10; i++) {
@@ -596,88 +595,90 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-It is still unclear if this can be left as an extension.
+It is still unclear if this can be left as an extension without cornering ourselves.
 
-We are exploring other alternatives [here](https://github.com/samuelgoto/proposal-block-params/issues/8), but here is how we are thinking:
+We are exploring other alternatives [here](https://github.com/samuelgoto/proposal-block-params/issues/8).
 
-By default, ```break``` and ```continue``` works lexically: they act on the closest enclosing loop block. For example:
 
-```javascript
-while (true) {
-  unless (false) {
-    // ...
-    break;
-    // ...
-    continue;
-  }
-}
-```
-Gets desugared to
+# Polyfill
 
-```javascript
-// ... inserts __loop__ lexically ...
-__loop__: while (true) {
-  unless (false) {
-    // ...
-    break __loop__;
-    // ...
-    continue __loop__;
-  }
-}
-```
+  This is currently polyfilled as a transpiler. You can find a lot of examples [here](test/runtime.js).
 
-To support looping control structures (e.g. ```foreach () {}```) we introduce a modifier (e.g. a contextual keyword like ```loop```) to the function declaration (or alternatively at the function call site, e.g. [```for each() {}```](http://www.javac.info/closures-v05.html)) that generates a different sugar:
+  `npm install -g @docscript/docscript`
 
-```javascript
-// ... modifier name, syntax, position TBD ...
-loop function foreach(iterable, block) {
-}
-foreach ([1, 2, 3]) {
-  // ...
-  break;
-  // ...
-  continue;
-}
-```
-It gets desugared into:
+# Tests
 
- 1. the head is wrapped into a ```__loop__``` label
- 3. the body is wrapped into a ```__block__: do { ... } while (false)``` bock and
- 2. all ```breaks``` and ```continues``` inside the body are re-written.
+  `npm test`
 
-For example:
+# Status
 
-```javascript
-__loop__: foreach ([1, 2, 3]) {
-  __block__: do {
-    // ...
-    break __loop__;
-    // ...
-    continue __block__;
-  } while (false);
-}
-```
-
-Alternatively, this transformation could be identified at the call site, but I think that would put the responsibility in the wrong hands:
-
-```javascript
-// ... the contextual keyword for triggers the local interpretation ...
-for each ([1, 2, 3]) {
-}
-```
-
-This is an [active area of exploration](https://github.com/samuelgoto/proposal-block-params/issues/8) and we would love to get more eyes on this design space].
+  You really don't want to use this right now. Very early prototype.
 
 # Prior Art
+
+The following is a list of previous discussions at TC39 and related support in other languages.
 
 ## TC39
 
 * [block lambdas](https://web.archive.org/web/20161123223104/http://wiki.ecmascript.org/doku.php?id=strawman:block_lambda_revival) and [discussion](https://esdiscuss.org/topic/block-lambdas-break-and-continue)
+* [Allen's considerations on break and continue](http://wirfs-brock.com/allen/files/jshistory/continue-break-lambda.pdf)
 * [javascript needs blocks](http://yehudakatz.com/2012/01/10/javascript-needs-blocks/) by @wycats
 
 ## SmallTalk
 
 ## Ruby
+
+```ruby
+def iffy(condition) 
+  if (condition) then
+    yield()
+  end
+end 
+
+iffy (true) {
+  puts "This gets executed!"
+}
+iffy (false) {
+  puts "This does not"
+}
+for i in 0..1 
+  puts "Running: #{i}"
+  iffy (i == 0) {
+    # This does not break from the outer loop!
+    # Prints
+    #
+    # Running: 0 
+    # Running: 1
+    break
+  }
+end
+
+
+for i in 0..1 
+  iffy (i == 0) {
+    # This does not continue from the outer loop!
+    # Prints
+    #
+    # Running: 0 
+    # Running: 1
+    next
+  }
+  puts "Running: #{i}"
+end
+
+def foo() 
+  iffy (false) {
+    return "never executed"
+  }
+  iffy (true) {
+    return "executed!"
+  }
+  return "blargh, never got here!"
+end
+
+# Prints "executed!"
+foo()
+```
 
 ## Groovy
 
@@ -750,40 +751,7 @@ class Select constructor (head: Any) {
  }
 ```
 
-# Polyfill
-
-  This is currently polyfilled as a transpiler. You can find a lot of examples [here](test/runtime.js).
-
-  `npm install -g @docscript/docscript`
-
-# Tests
-
-  `npm test`
-
-# Status
-
-  You really don't want to use this right now. Very early prototype.
-
-# Related work
-
-## DOM construction
-
-* JSX
-* Kotlin typed builders
-* Elm
-* Hyperscript
-* json-ish
-* Om
-* Flutter
-* Anko layouts
-* E4X
-* [Curl](https://en.wikipedia.org/wiki/Curl_(programming_language))
-* [JFX Script](https://en.wikipedia.org/wiki/JavaFX_Script)
-* [JXON](https://developer.mozilla.org/en-US/docs/Archive/JXON)
-* [Protocol Buffers](https://developers.google.com/protocol-buffers/docs/overview)
-* [JSON-ish](http://blog.sgo.to/2015/09/json-ish.html)
-
-### Languages
+## Related Work
 
 * [user defined loops](http://gafter.blogspot.com/2006/10/iterative-control-abstraction-user.html)
 * [non-local transfers](http://tronicek.blogspot.com/2008/08/nonlocal-transfer.html)
