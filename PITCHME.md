@@ -7,7 +7,8 @@
 ### Use Cases
 ### Extensions
 ### Areas of Investigation
-##### (return, break, continue, scoping)
+##### (return, break, continue, scoping, completion)
+
 ---
 
 ### Overview
@@ -545,18 +546,6 @@ until (() => i == 10, function() {
 
 +++
 
-### Scoping
-
-+++
-
-### Nesting
-
-+++
-
-### Completion values
-
-+++
-
 ### forward compatibility
 
 #### Do we corner ourselves?
@@ -571,6 +560,38 @@ match (cond) {
 ```
 
 @[4-6](Should we reserve match? Should userland shadow built-ins?)
+
++++
+
+### Completion values
+
+```javascript
+let evens = foreach ([1, 2, 3, 4]) do (number) {
+  if (number % 2 == 0) {
+    // NOTE(goto): gets returned to foreach as a
+    // completion value?
+    number
+  }
+  // returns undefined to foreach?
+
+  // isomorphic problem in do-expressions?
+}
+```
+
++++
+
+### Scoping and Nesting
+
+```javascript
+// Are there better ways to make when aware of select?
+// Other than passing 'this' around?
+select (foo) {
+  // How does 'when' get resolved? can select insist on
+  // a specific implementation of when?
+  when (bar) {
+  }
+}
+```
 
 +++
 
@@ -607,7 +628,7 @@ function dostuff() {
 
 +++
 
-### break and continues ...
+### break and continue ...
 
 ```javascript
 for (let i = 0; i < 10; i++) {
@@ -637,7 +658,7 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-@[2-8](Whereas inside foreaches you'd expect continue to continue the foreaech)
+@[2-8](Whereas inside foreaches you'd expect continue to continue the foreach)
 
 ---
 
