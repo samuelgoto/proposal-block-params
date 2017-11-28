@@ -7,23 +7,23 @@
 ### Use Cases
 ### Extensions
 ### Areas of Investigation
-
+#### (return, break, continue, scoping)
 ---
 
 ### Overview
 
 +++
 
-### Syntactic Sugar for function calls.
+### Syntactic simplification on calls.
 
 ```javascript
 // ... this is what you write ...
-a {
+foo {
   // ...
 }
 
 // ... this is what you get ...
-a(function() {
+foo(function() {
   // ...
 });
 ```
@@ -38,12 +38,12 @@ a(function() {
 
 ```javascript
 // ... this is what you write ...
-a(1, "hello") {
+foo(1, "hello") {
   // ...
 }
 
 // ... this is what you get ...
-a(1, "hello", function() {
+foo(1, "hello", function() {
   // ...
 });
 ```
@@ -57,17 +57,17 @@ a(1, "hello", function() {
 
 ```javascript
 // ... this is what you write ...
-a {
+foo {
   // ...
-  b {
+  bar {
     // ...
   }
   // ...
 }
 
 // ... is equivalent to ...
-a(function() {
-  this.b(function () {
+foo(function() {
+  bar.call(this, function () {
     // ...
   })
 });
@@ -86,21 +86,21 @@ a(function() {
 
 ```javascript
 // ... this is what you write ...
-import {assert} from "polyfill"
+import {lock} from "polyfill"
 
-assert (document.cookie) {
-  alert("Blargh, you are not signed in!");
+lock (resource) {
+  console.log(resource[0]);
 }
 
 // ... this is what you get ...
-function assert(expr, block) {
-  if (!expr) {
-    block();
-  }
+function lock(resource, block) {
+  // sleeps until resource[0] != 0
+  Atomics.wait(resource, 0, 0);
+  block();
 }
 
-assert (document.cookie, function() {
-  alert("Blargh, you are not signed in!");
+lock (resource, function() {
+  console.log(resource[0])
 })
 ```
 
@@ -162,8 +162,8 @@ defer (100) {
 ### foreach
 
 ```javascript
-foreach (array) {
-  console.log(this.item);
+foreach (array) do (item) {
+  console.log(item);
 }
 ```
 
@@ -430,22 +430,12 @@ until (() => i == 10, function() {
 ### bindings
 
 ```javascript
-foreach ([1, 2, 3]) {
-  // passing parameters to the block param is awkward ...
-  // ... right now, using 'this'.
-  console.log(this.item);
-}
-```
-
-+++
-
-```javascript
-foreach ({key, value} in map) {
+foreach (map) do (key, value) {
   // ...
 }
 
-// ... gets desugared to ...
-foreach (map, function({key, value}) {
+// ... is equivalent to ...
+foreach (map, function(key, value) {
 })
 ```
 
@@ -504,7 +494,7 @@ function dostuff() {
 }
 ```
 
-@[2-6](async returns?)
+@[2-6](escape continuations?)
 
 +++
 
@@ -528,8 +518,8 @@ for (let i = 0; i < 10; i++) {
 
 ```javascript
 for (let i = 0; i < 10; i++) {
-  foreach (array) {
-    if (this.item == 5) {
+  foreach (array) do (item) {
+    if (item == 5) {
       // You'd expect the continue here to apply to
       // the foreach, not the lexical for.
       continue;
