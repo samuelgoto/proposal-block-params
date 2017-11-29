@@ -8,7 +8,6 @@
 ### Extensions
 ### Areas of Investigation
 * return, break, continue, scoping, completion
-hello?
 
 ---
 
@@ -678,6 +677,18 @@ for (let i = 0; i < 10; i++) {
 ```
 
 @[2-7](Whereas inside foreaches you'd expect continue to continue the foreach)
+
+
+--
+
+### To recap
+
+* Does it carry its own weight?
+* Do we corner ourselves?
+* Does it fragment the ecosystem?
+* Does break/continue seem solveable?
+* Does nesting seem motivated?
+* Which pattern should we optimize for?
 
 ---
 
