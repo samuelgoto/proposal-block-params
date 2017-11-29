@@ -35,7 +35,7 @@ a(() => {
 })
 ```
 
-We want to enable the ability to nest block params, and we are currently exploring using a sygil (e.g. possibly consistent with the bind operator  ```::```) to refer to the parent block param:
+We want to enable the ability to nest block params (e.g. to enable paired block params like [select/when](#vbs-select), [builders](#builders) and [layout](#layout)), and we are currently exploring using a sygil (e.g. possibly consistent with the bind operator  ```::```) to refer to the parent block param:
 
 ```javascript
 // ... this is what you write ...
