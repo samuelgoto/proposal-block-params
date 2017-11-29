@@ -12,7 +12,7 @@ function element(Type, arg1, arg2) {
     block = arg2;
   }
 
-  block.call(result);
+  block(result);
 
   if (typeof arg1 == "string") {
     result.children = [arg1];
@@ -50,7 +50,12 @@ class Element {
     this.attributes[name] = value;
   };
   static export(Type) {
-    return function(arg1, arg2) {
+    Element.prototype[Type.name] = function(arg1, arg2) {
+      return element.call(this, Generic.bind(null, Type), arg1, arg2);
+    };
+  }
+  static register(Type) {
+    Element.prototype[Type] = function(arg1, arg2) {
       return element.call(this, Generic.bind(null, Type), arg1, arg2);
     }
   }
@@ -145,3 +150,10 @@ scope.a = function(arg1, arg2) { return element.call(this, A, arg1, arg2); };
 scope.button = function(arg1, arg2) { return element.call(this, Button, arg1, arg2); };
 scope.Element = Element;
 scope.component = component;
+
+Element.register("div");
+Element.register("span");
+Element.register("title");
+Element.register("html");
+Element.register("li");
+Element.register("a");

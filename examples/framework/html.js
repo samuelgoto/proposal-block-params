@@ -8,7 +8,7 @@ function element(Type, arg1, arg2) {
     block = arg2;
   }
 
-  block.call(result);
+  block(result)
 
   if (typeof arg1 == "string") {
     result.children = [arg1];
@@ -47,7 +47,7 @@ class Element {
     let type = this["@type"];
     let attributes = ``;
     for (let name in this) {
-      if (name == "@type" || name == "children") {
+      if (name == "@type" || name == "children" || this[name] instanceof Function) {
 	continue;
       }
 
@@ -124,17 +124,20 @@ module.exports.html = function(arg1, arg2) { return element.call(this, Html, arg
 module.exports.body = function(arg1, arg2) { return element.call(this, Body, arg1, arg2); };
 module.exports.head = function(arg1, arg2) { return element.call(this, Head, arg1, arg2); };
 
-// Elements
-
 function register(type) {
-  module.exports[type] = function(arg1, arg2) { return element.call(this, Element.bind(null, type), arg1, arg2); };
+    Element.prototype[type] = function(arg1, arg2) { return element.call(this, Element.bind(null, type), arg1, arg2); };
+  // console.log(type);
 }
 
-let elements = ["style", "svg", "g", "circle", "line", "a"];
+let elements = ["style", "svg", "g", "circle", "line", "a", "span", "div", "head", "body", "title"];
 
 for (let i in elements) {
   let el = elements[i];
   register(el);
 }
+
+// new Div()
+
+// console.log(Div.span);
 
 module.exports.component = component;

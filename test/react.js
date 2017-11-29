@@ -29,6 +29,7 @@ describe("React", function() {
   it("Nesting", function() {
     assertThat(`
       div {
+	  let span = __args__.span.bind(__args__);
 	  span {}
       }
     `).equalsTo(`<div><span></span></div>`);
@@ -37,6 +38,7 @@ describe("React", function() {
   it("Attributes", function() {
     assertThat(`
       div {
+	  let span = __args__.span.bind(__args__);
 	  span({width: 100}) {}
       }
     `).equalsTo(`<div><span width="100"></span></div>`);
@@ -45,7 +47,7 @@ describe("React", function() {
   it("Text nodes", function() {
     assertThat(`
       div {
-	  span("hello world")
+	  __args__.span("hello world")
       }
     `).equalsTo(`<div><span>hello world</span></div>`);
   });
@@ -56,15 +58,16 @@ describe("React", function() {
       class A extends React.Component {
 	  render() {
             return div {
-  	      span("hello world")
+  	      __args__.span("hello world")
             }
           }
       }
 
-      let a = Element.export(A);
+      Element.export(A);
 
       div {
-	  a({width: 100}) {}
+          let A = __args__.A.bind(__args__);
+	  A({width: 100}) {}
       }
     `).equalsTo(`<div><div><span>hello world</span></div></div>`);
   });
@@ -74,24 +77,26 @@ describe("React", function() {
       class A extends React.Component {
 	  render() {
             return div {
-  	      span("Hi, from A!")
+  	      __args__.span("Hi, from A!")
             }
           }
       }
       class B extends React.Component {
 	  render() {
             return div {
-  	      span("Hi, from B!")
-	      a {}
+  	      __args__.span("Hi, from B!")
+	      let A = __args__.A.bind(__args__);
+	      A {}
             } 
           }
       }
 
-      let a = Element.export(A);
-      let b = Element.export(B);
+      Element.export(A);
+      Element.export(B);
 
       div {
-        b {}
+	let B = __args__.B.bind(__args__);
+        B {}
       }
     `).equalsTo(`<div><div><span>Hi, from B!</span><div><span>Hi, from A!</span></div></div></div>`);
   });
@@ -102,15 +107,16 @@ describe("React", function() {
 	  render() {
             let props = this.props;
             return div {
-  	      span(props.content)
+  	      __args__.span(props.content)
             }
           }
       }
 
-      let a = Element.export(A);
+      Element.export(A);
 
       div {
-	  a({content: "hello world"}) {}
+          let A = __args__.A.bind(__args__);
+	  A({content: "hello world"}) {}
       }
     `).equalsTo(`<div><div><span>hello world</span></div></div>`);
   });
@@ -129,17 +135,17 @@ describe("React", function() {
 	    this.setState({foo: value});
           }
 	  render() {
-            let state = this.state;
             return div {
-  	      span(state.foo)
+  	      __args__.span(this.state.foo)
             }
           }
       }
 
-      let a = Element.export(A);
+      Element.export(A);
 
       div {
-	  a {}
+          let A = __args__.A.bind(__args__);
+	  A {}
       }
     `).equalsTo(`<div><div><span>hello</span></div></div>`);
   });

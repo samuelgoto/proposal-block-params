@@ -7,44 +7,48 @@ let content = div {
 
   // If-statements!
   if (true) {
-      span("Welcome back!")
+      __args__.span("Welcome back!")
   }
 
   // For-loops!
   for (let page of ["about", "contact"]) {
-    span(page)
+    __args__.span(page)
   }
 
+  let div = __args__.div.bind(__args__);
   div {
-    this.onclick = function() { return "Hi!"; };
-    span("click me!")
+    __args__.onclick = function() { return "Hi!"; };
+    __args__.span("click me!")
   }
 }
 
 // A function that returns a HTML node
 let extra = function() {
-  return div { this.node("extra info") };
+  return div { __args__.node("extra info") };
 }
 
 // Composing multiple nodes
 let result = html {
+  let head = __args__.head.bind(__args__);
   head {
-      title("Sam's Website")
+      __args__.title("Sam's Website")
   }
+  let body = __args__.body.bind(__args__);
   body {
       // CSS in JS!
-      this.style = {
+      __args__.style = {
 	  "background-color": "black",
       };
+      let div = __args__.div.bind(__args__);
       div {
 	  // Variables!
-	  div(welcome)
+	  __args__.div(welcome)
 
 	  // Functions!
-	  div(extra())
+	  __args__.div(extra())
 
 	  // Composition!
-	  div(content)
+	  __args__.div(content)
       }
   }
 }

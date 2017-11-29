@@ -10,51 +10,50 @@ const falafel = require('falafel');
 describe("Transpiler", function() {
   it("Visiting basic", function() {
     let result = DocScript.compile(`d {};`);
-    Assert.equal(result,
-        `d(function() {});`);
+    Assert.equal(result, `d((__args__) => { let {} = __args__; {} });`);
   });
 
   it("Visiting empty attributes", function() {
     let result = DocScript.compile(`d({}) {};`);
     // console.log(result);
-    Assert.equal(result, `d({}, function() {});`);
+    Assert.equal(result, `d({}, (__args__) => { let {} = __args__; {} });`);
   });
 
   it("Visiting single attribute", function() {
     let result = DocScript.compile(`d(1) {};`);
     // console.log(result);
     Assert.equal(result,
-        `d(1, function() {});`);
+      `d(1, (__args__) => { let {} = __args__; {} });`);
   });
 
   it("Visiting object attribute", function() {
     let result = DocScript.compile(`d({a: 1}) {};`);
     Assert.equal(result,
-        `d({a: 1}, function() {});`);
+      `d({a: 1}, (__args__) => { let {} = __args__; {} });`);
   });
 
   it("Keeps statements in expressions", function() {
     let result = DocScript.compile(`d { a = 1 };`);
     Assert.equal(result,
-        `d(function() { a = 1 });`);
+      `d((__args__) => { let {} = __args__; { a = 1 } });`);
   });
 
   it("Keeps statements in calls", function() {
     let result = DocScript.compile(`d(1) { a = 1 };`);
     Assert.equal(result,
-        `d(1, function() { a = 1 });`);
+      `d(1, (__args__) => { let {} = __args__; { a = 1 } });`);
   });
 
   it.skip("Wraps literals in __Literal__", function() {
     let result = DocScript.compile(`d { 1 };`);
     Assert.equal(result,
-        `d(function() { with (this) { scope.__Literal__(1); } });`);
+        `d(() => { with (this) { scope.__Literal__(1); } });`);
   });
 
   it.skip("Wraps variables in __Identifier__", function() {
     let result = DocScript.compile(`d { a };`);
     Assert.equal(result,
-        `d(function() { with (this) { scope.__Identifier__(a); } });`);
+        `d(() => { with (this) { scope.__Identifier__(a); } });`);
   });
 
   it.skip("Visiting function attributes binds this", function() {
@@ -69,39 +68,39 @@ describe("Transpiler", function() {
 
   it("Inner functions", function() {
     let result = DocScript.compile(`d { a() };`);
-    Assert.equal(result, `d(function() { a.call(this); });`);
+    Assert.equal(result, `d((__args__) => { let {} = __args__; { a(); } });`);
   });
 
   it("Inner functions with params", function() {
     let result = DocScript.compile(`d { a(c) };`);
-    Assert.equal(result, `d(function() { a.call(this, c); });`);
+    Assert.equal(result, `d((__args__) => { let {} = __args__; { a(c); } });`);
   });
 
   it("Inner nested functions", function() {
     let result = DocScript.compile(`d { a { } };`);
-    Assert.equal(result, `d(function() { a.call(this, function() { }); });`);
+    Assert.equal(result, `d((__args__) => { let {} = __args__; { a((__args__) => { let {} = __args__; { } }); } });`);
   });
 
   it("Property access remains the same for objects", function() {
     let result = DocScript.compile(`d { a.b };`);
-    Assert.equal(result, `d(function() { a.b });`);
+    Assert.equal(result, `d((__args__) => { let {} = __args__; { a.b } });`);
   });
 
   it("Property access remains the same for functions", function() {
     let result = DocScript.compile(`d { a.b() };`);
-    Assert.equal(result, `d(function() { a.b(); });`);
+    Assert.equal(result, `d((__args__) => { let {} = __args__; { a.b(); } });`);
   });
 
   it("Property access remains the same for assignments", function() {
     let result = DocScript.compile(`d { a.b = 1 };`);
     Assert.equal(result,
-        `d(function() { a.b = 1 });`);
+      `d((__args__) => { let {} = __args__; { a.b = 1 } });`);
   });
 
   it("Property access isn't done on lets", function() {
     let result = DocScript.compile(`d { let a = 1 };`);
     Assert.equal(result,
-        `d(function() { let a = 1 });`);
+      `d((__args__) => { let {} = __args__; { let a = 1 } });`);
   });
 
   it("Doesn't expand class extends expressions", function() {
@@ -109,7 +108,7 @@ describe("Transpiler", function() {
     Assert.equal(result, `class A extends b() {}`);
   });
 
-  it("Transpiles annotations", function() {
+  it.skip("Transpiles annotations", function() {
     // NOTE(goto): de-sugaring from
     // https://github.com/wycats/javascript-decorators
     // Example:
@@ -119,8 +118,8 @@ describe("Transpiler", function() {
     //
     // NOTE(goto): only delta is that we use "let" as opposed to "var".
     let result = DocScript.compile(`@foo class A { b() { return 1;} }`);
-    Assert.equal(result,`
-        let A = (function() {
+    Assert.equal(result.toString(),`
+	  let A = (function() {
           class A { b() { return 1;} }
 
           A = foo(A) || A;

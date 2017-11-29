@@ -23,7 +23,7 @@ describe("Semantics", function() {
   it("Lambda", function() {
    assertThat(`
      function a(arg, lambda) {
-       return lambda();
+       return lambda({});
      }
      a(1) { return 2; }
    `).equals(2);
@@ -32,47 +32,36 @@ describe("Semantics", function() {
   it("Nesting", function() {
    assertThat(`
      function a(lambda) {
-       let result = {};
-       lambda.call(result);
+       let result = undefined;
+       lambda({
+         b() {
+           result = "hello world";
+         }
+       });
        return result;
      }
-     function b(lambda) {
-       this["hello"] = "world";
-     }
      a { 
-       b {}
+      // TODO(goto): make the syntactical simplication
+      // where :: is equivalent to __args__[Symbol.this]
+      let b = __args__.b;
+      b {}
      }
-   `).deepEquals({hello: "world"});
+   `).deepEquals("hello world");
   });
 
   it("Nesting function declarations", function() {
    assertThat(`
      function a(lambda) {
-       return lambda.call(2);
+       return lambda({foo: "bar"});
      }
      a {
        function b() {
-	 return this;
+	 return __args__;
        }
        return b();
      }
-   `).equals(2);
+   `).deepEquals({foo: "bar"});
   });
-
-  it("Methods do not get this overriden", function() {
-   assertThat(`
-     function a(lambda) {
-       return lambda.call(2);
-     }
-     a {
-       function b() {
-	 return this;
-       }
-       return b();
-     }
-   `).equals(2);
-  });
-
 });
 
 class That {
@@ -82,10 +71,10 @@ class That {
 
   eval(opt_debug) {
     let code = DocScript.compile(this.code).toString();
-    let result = eval(code);
     if (opt_debug) {
       console.log(code);
     }
+    let result = eval(code);
     return result;
   }
 

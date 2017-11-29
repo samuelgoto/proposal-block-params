@@ -29,7 +29,7 @@ acorn.plugins.docscript = function(parser) {
 	  node.callee = expr;
 	  node.arguments = [
 	    this.finishNode(arg, "ObjectExpression"),
-	    this.finishNode(func, "FunctionExpression")
+	    this.finishNode(func, "ArrowFunctionExpression")
 	  ];
 	  this.semicolon();
 	  return this.finishNode(node, "CallExpression");
@@ -43,7 +43,7 @@ acorn.plugins.docscript = function(parser) {
 	  func.params = [];
 	  func.generator = false;
 	  func.expression = false;
-	  expr.arguments.push(this.finishNode(func, "FunctionExpression"));
+	  expr.arguments.push(this.finishNode(func, "ArrowFunctionExpression"));
 	  this.semicolon();
 	  return this.finishNode(expr, "CallExpression");
 	}
@@ -96,7 +96,7 @@ acorn.plugins.docscript = function(parser) {
 	node.callee = base;
 	node.arguments = [
 	  // this.finishNode(arg, "ObjectExpression"),
-	  this.finishNode(func, "FunctionExpression")
+	  this.finishNode(func, "ArrowFunctionExpression")
 	];
 	return this.finishNode(node, "CallExpression")
       }
@@ -126,7 +126,7 @@ acorn.plugins.docscript = function(parser) {
 	func.expression = false;
 	// func.parent = undefined;
 	// Adds the function body as an argument
-	expr.arguments.push(this.finishNode(func, "FunctionExpression"));
+	expr.arguments.push(this.finishNode(func, "ArrowFunctionExpression"));
 	// And fixes the start and end indexes to include the function
 	// block.
 	expr.end = func.end;
@@ -148,10 +148,10 @@ acorn.plugins.docscript = function(parser) {
 // let ast = acorn.parse("b { c {} };", {
 // TODO: let ast = acorn.parse(`b { c { d(); } };`, {
 // let ast = acorn.parse(`d("hi");`, {
-// let ast = acorn.parse(`d {};`, {
+//let ast = acorn.parse(`d {};`, {
 //    plugins: {docscript: true}
-// });
-// console.log(JSON.stringify(ast, undefined, " "));
+//});
+//console.log(JSON.stringify(ast, undefined, " "));
 
 // console.log(generate(ast));
 
@@ -184,6 +184,8 @@ function visitor(node) {
   } else if (node.type === "CallExpression") {
     // return;
 
+    // console.log("hi");
+
     let method = node.callee.type == "MemberExpression";
 
     if (method) {
@@ -201,18 +203,20 @@ function visitor(node) {
       if (!param.docscript) {
         params += `${param.source()}`;
       } else {
-        params += `function() ${param.source() }`;
+	// TODO(goto): fill {} in with the parameters from do ()
+	params += `(__args__) => { let {} = __args__; ${param.source() } }`;
       }
       if (i < (node.arguments.length - 1)) {
         params += ", ";
       }
     }
-    let expansion = expand ? (".call(this" + (node.arguments.length > 0 ? ", " : "")) : "(";
-    node.update(`${node.callee.source()}${expansion}${params})`);
+    // let expansion = expand ? (".call(this" + (node.arguments.length > 0 ? ", " : "")) : "(";
+    node.update(`${node.callee.source()}(${params})`);
   } else if (node.type == "ExpressionStatement") {
+    // console.log();
     if (inside(node, n => n.docscript) &&
 	node.expression.type == "CallExpression") {
-      // console.log(node);
+	// console.log(node);
       node.update(`${node.source()};`);
     }
   } else if (node.type == "ClassDeclaration" &&
@@ -286,14 +290,16 @@ class DocScript {
 
 // return;
 
-// let code = `d({}) {};`;
+// let code = `d {};`;
 
 // let ast = acorn.parse(code, {
-//  plugins: {docscript: true}
+//   plugins: {docscript: true}
 // });
 
+// console.log(JSON.stringify(ast, undefined, " "));
+
 // var result = falafel(code, {
-//  parser: acorn, plugins: { docscript: true }
+//   parser: acorn, plugins: { docscript: true }
 // }, visitor);
 
 // console.log(result);
