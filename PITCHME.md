@@ -29,8 +29,8 @@ a(1, () => {
 });
 
 // ... this is how you use it ...
-function a(arg, b) {
-  b();
+function a(arg, block) {
+  block();
 }
 ```
 
@@ -81,7 +81,7 @@ a(1, (b) => {
 })
 
 // ... so that a can pass parameters to the block ...
-function a(block) {
+function a(arg, block) {
   block("hello");
 }
 ```
@@ -679,7 +679,7 @@ for (let i = 0; i < 10; i++) {
 @[2-7](Whereas inside foreaches you'd expect continue to continue the foreach)
 
 
---
+---
 
 ### To recap
 
