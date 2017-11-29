@@ -681,18 +681,14 @@ for (let i = 0; i < 10; i++) {
 
 ---
 
-### To recap
+### Stage 1?
 
 * Does it carry its own weight?
 * Do we corner ourselves?
 * Does it fragment the ecosystem?
-* Does break/continue seem solveable?
+* Does break/continue/return seem solveable?
 * Does nesting seem motivated?
 * Which pattern should we optimize for?
-
----
-
-### Stage 1?
 
 ---
 
