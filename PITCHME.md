@@ -19,17 +19,17 @@
 
 ```javascript
 // ... this is what you write ...
-a() {
+a(1) {
   // ...
 }
 
 // ... this is what you get ...
-a(function() {
+a(1, () => {
   // ...
 });
 
 // ... this is how you use it ...
-function a(b) {
+function a(arg, b) {
   b();
 }
 ```
@@ -37,22 +37,6 @@ function a(b) {
 @[1-4] (Allowing passing a function block as a parameter ...)
 @[6-9] (... outside of parentheses.)
 @[11-14] (userland responsible for defining a)
-
-+++
-
-### Parameters before the block allowed ...
-
-```javascript
-// this is what you write ...
-a(1) {
-  // ...
-}
-
-// ... this is what you get ...
-a(1, function() {
-  // ...
-})
-```
 
 +++
 
@@ -65,7 +49,7 @@ unless (document.cookie) {
 }
 
 // ... this is what you get ...
-unless (document.cookie, function() {
+unless (document.cookie, () => {
   alert("blargh!")
 });
 
@@ -92,7 +76,7 @@ a(1) do (b) { // NOTE(goto): syntax TBD.
 }
 
 // ... is equivalent to this ...
-a(1, function(b) {
+a(1, (b) => {
   // ...
 })
 ```
@@ -108,7 +92,7 @@ foreach ([1, 2, 3]) do (item) {
 }
 
 // ... this is what you get ...
-foreach ([1, 2, 3], function(item) {
+foreach ([1, 2, 3], (item) => {
   console.log(item)
 });
 
@@ -132,15 +116,15 @@ function foreach(iterable, block) {
 // ... this is what you write ...
 a {
   // ...
-  b {
+  ::b {
     // ...
   }
   // ...
 }
 
-// ... is equivalent to ...
-a(function() {
-  b.call(this, function () {
+// ... is "somewhat" equivalent to ...
+a((__parent__) => {
+  __parent__.b(() => {
     // ...
   })
 });
@@ -156,17 +140,17 @@ a(function() {
 ```javascript
 // This ...
 select (expr) {
-  when (cond1) {
+  ::when (cond1) {
   }
-  when (cond2) {
+  ::when (cond2) {
   }
 }
 
 // ... is equivalent to ...
-select (expr, function() {
-  when.call (this, cond1, function() {
+select (expr, (__parent__) => {
+  __parent__.when(cond1, () => {
   })
-  when.call (this, cond2, function() {
+  __parent__.when(this, cond2, () => {
   })
 })
 ```
@@ -182,7 +166,7 @@ foo {
 }
 
 // ... this is what you get ...
-foo(function() {
+foo(() => {
   // ...
 });
 ```
@@ -196,29 +180,29 @@ foo(function() {
 
 ```javascript
 let dom = html {
-  head {
-    title("welcome!")
+  ::head {
+    ::title("welcome!")
   }
-  body {
-    div {
-      span {
-        a {
-          span("hello world")
+  ::body {
+    ::div {
+      ::span {
+        ::a {
+          ::span("hello world")
         }
       }
     }
   }
 }
 
-let dom = html(function() {
-  head.call(this, function() {
-    title("welcome!")
+let dom = html((__parent__) => {
+  __parent__.head((__parent__) => {
+    __parent__.title("welcome!")
   })
-  body.call(this, function() {
-    div.call(this, function() {
-      span.call(this, function() {
-        a.call(function() {
-          span("hello world")
+  __parent__.body((__parent__) => {
+    __parent__.div((__parent__) => {
+      __parent__.span((__parent__) => {
+        __parent__.a((__parent__) => {
+          __parent__.span("hello world")
         })
       })
     })
@@ -241,8 +225,8 @@ let dom = html(function() {
 // ... this is what you write ...
 import {lock} from "polyfill.js"
 
-lock (resource) {
-  console.log(resource[0]);
+lock (resource) do (value) {
+  console.log(value);
 }
 ```
 
@@ -285,10 +269,10 @@ foreach (array) do (item) {
 
 ```javascript
 select (expr) {
-  when (foo) { 1 }
-  when (bar) { 2 }
-  when (hello) { 3 }
-  when (world) { 3 }
+  ::when (foo) { 1 }
+  ::when (bar) { 2 }
+  ::when (hello) { 3 }
+  ::when (world) { 3 }
 }
 ```
 
@@ -308,8 +292,8 @@ using (stream) {
 
 ```javascript
 let a = map {
-  put("hello", "world") {}
-  put("foo", "bar") {}
+  ::put("hello", "world")
+  ::put("foo", "bar")
 }
 ```
 
@@ -319,15 +303,17 @@ let a = map {
 
 ```javascript
 let dom = html {
-  head {
-    title("Hello World!") {}
+  ::head {
+    ::title("Hello World!")
   }
-  body {
-    div {
-      span("Welcome to my Blog!") {}
+  ::body {
+    ::div {
+      ::span("Welcome to my Blog!")
     }
     for (page of ["contact", "guestbook"]) {
-      a({href: `${page}.html`}) { span(`${page}`) } {}
+      ::a({href: `${page}.html`}) {
+        ::span(`${page}`)
+      }
     }
   }
 }
@@ -342,12 +328,12 @@ const express = require("express");
 const app = express();
 
 server (app) {
-  get("/") {
-     this.response.send(
-       "hello world" + this.request.get("param1"));
+  ::get("/") do (request, response) {
+     response.send(
+       "hello world" + request.get("param1"));
   }
 
-  listen(3000) {
+  ::listen(3000) {
     console.log("hello world");
   }
 }
@@ -359,14 +345,14 @@ server (app) {
 
 ```javascript
 job('PROJ-unit-tests') {
-  scm {
-      git(gitUrl) {}
+  ::scm {
+      ::git(gitUrl)
   }
-  triggers {
-      scm('*/15 * * * *') {}
+  ::triggers {
+      scm('*/15 * * * *')
   }
-  steps {
-      maven('-e clean test') {}
+  ::steps {
+      ::maven('-e clean test')
   }
 }
 ```
@@ -397,11 +383,11 @@ describe("a calculator") {
 
   val calculator = Calculator()
 
-  on("calling sum with two numbers") {
+  ::on("calling sum with two numbers") {
 
     val sum = calculator.sum(2, 3)
 
-    it("should return the sum of the two numbers") {
+    ::it("should return the sum of the two numbers") {
 
       shouldEqual(5, sum)
     }
@@ -431,10 +417,10 @@ var box =
   <Box>
     {
       select (shouldShowAnswer(user)) {
-        when (true) {
+        ::when (true) {
           <Answer value={false}>no</Answer>
         }
-        when (false) {
+        ::when (false) {
           <Box.Comment>
              Text Content
           </Box.Comment>
@@ -583,7 +569,7 @@ let evens = foreach ([1, 2, 3, 4]) do (number) {
 
 ```javascript
 // Are there better ways to make when aware of select?
-// Other than passing 'this' around? Maybe @@this?
+// Other than using ::?
 select (foo) {
   // How does 'when' get resolved? can select insist on
   // a specific implementation of when?
@@ -770,7 +756,7 @@ select (foo) {
 
 ```javascript
 select (foo) {
-  // :: de-sugars to this.when (bar) { ... }
+  // :: de-sugars to __parent__.when (bar) { ... }
   ::when (bar) {
   } 
 }
@@ -778,17 +764,17 @@ select (foo) {
 
 +++
 
-### Option 2: passing this around
+### Option 2: with-like scoping
 
 ```javascript
 select (foo, function() {
-  (when in this ? this.when : when) (bar, function {
+  (when in __parent__ ? __parent__.when : when) (bar, function {
     // ...
   }
 })
 
 function select (expr, block) {
-  block.call({
+  block({
     when (cond, inner) {
       if (expr == cond) {
         inner();
