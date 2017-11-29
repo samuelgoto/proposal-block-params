@@ -70,16 +70,25 @@ function unless(expr, block) {
 ### Binding arguments ...
 
 ```javascript
-// The following ...
+// ... this is what you write ...
 a(1) do (b) { // NOTE(goto): syntax TBD.
-  // ...
+  console.log(b)
 }
 
-// ... is equivalent to this ...
+// ... this is what you get ...
 a(1, (b) => {
-  // ...
+  console.log(b)
 })
+
+// ... so that a can pass parameters to the block ...
+function a(block) {
+  block("hello");
+}
 ```
+
+@[1-4]
+@[6-9]
+@[11-14]
 
 +++
 
@@ -122,16 +131,27 @@ a {
   // ...
 }
 
-// ... is "somewhat" equivalent to ...
+// ... is "somewhat" what you get (TBD) ...
 a((__parent__) => {
   __parent__.b(() => {
     // ...
   })
 });
+
+// ... so that "a" can offer the implementation of "b" ...
+function a(block) {
+  block({
+    // use ::b {} to access this
+    b() {
+      // aha!
+    }
+  });
+}
 ```
 
 @[1-8] (If b wants to make it self connected to a ...)
-@[10-15] (... it can set a contextual "this" to communicate.)
+@[10-15] (... it can set a contextual special variable __parent__ to communicate.)
+@[12-10]
 
 +++
 
@@ -150,14 +170,29 @@ select (expr) {
 select (expr, (__parent__) => {
   __parent__.when(cond1, () => {
   })
-  __parent__.when(this, cond2, () => {
+  __parent__.when(cond2, () => {
   })
 })
+
+// ... which gets used like ...
+function select(expr, block) {
+  block({
+    when(cond, inner) {
+      if (expr == cond) {
+        inner();
+      }
+    }
+  });
+}
 ```
+
+@[1-7] This is what you'd write
+@[9-15] This is what you'd get
+@[17-26] This is how a polyfill would be built
 
 +++
 
-### Omitting parentheses altogether allowed ...
+### Omitting parentheses altogether allowed for functions with a single parameter ...
 
 ```javascript
 // ... this is what you write ...
@@ -349,7 +384,7 @@ job('PROJ-unit-tests') {
       ::git(gitUrl)
   }
   ::triggers {
-      scm('*/15 * * * *')
+      ::scm('*/15 * * * *')
   }
   ::steps {
       ::maven('-e clean test')
@@ -565,7 +600,7 @@ let evens = foreach ([1, 2, 3, 4]) do (number) {
 
 +++
 
-### Scoping and Nesting
+### Nesting
 
 ```javascript
 // Are there better ways to make when aware of select?
@@ -733,7 +768,7 @@ function foreach (collection) {
 
 ---
 
-### Nesting and Scoping
+### Nesting
 
 +++
 
