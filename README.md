@@ -10,16 +10,16 @@ It is a syntactic simplification that allows, on function calls, to omit paranth
 For example:
 
 ```javascript
-a("hello") {
-  ...
+a(1) {
+  // ...
 }
 ```
 
 Is equivalent to this:
 
 ```javascript
-a("hello", function() {
-  ...
+a(1, () => {
+  // ...
 })
 ```
 
@@ -27,44 +27,53 @@ Functions that take just a single block parameter can also be called parentheses
 
 ```javascript
 a {
-  ...
+  // ...
 }
 ```
 
 Is equivalent to this:
 
 ```javascript
-a(function() {
+a(() => {
+  // ...
+})
+```
+
+We want to enable the ability to nest block params, and we are currently exploring using a sygil (e.g. possibly consistent with the bind operator  ```::```) to refer to the parent block param:
+
+```javascript
+a(1) {
+  ::b(2) {
+  }
+}
+```
+
+Which is "somewhat" equivalent to the following (with some TBD Symbol magic):
+
+```javascript
+a (1, (__parent__) => {
+  __parent__.b(2, (__parent__) => {
+  })
+})
+```
+
+Arguments can be passed to the block param:
+
+```javascript
+a(1) do (foo) {
+  // ...
+}
+```
+
+Is equivalent to:
+
+```javascript
+a(1, (foo) => {
   ...
 })
 ```
 
-Block params that are lexically nested in block params get a reference to this:
-
-```javascript
-a {
-  ...
-  b {
-    ...
-  }
-  ...
-}
-```
-
-Is equivalent to this:
-
-```javascript
-// ... is equivalent to ...
-a(function() {
-  ...
-  b.call(this, function() {
-    ...
-  })
-  ...
-});
-```
-
-To preserve Tennent's Corresponde Principle, we are exploring which  [restrictions apply](#tennents-correspondence-principle) inside the block param.
+To preserve Tennent's Corresponde Principle, we are exploring which  [restrictions apply](#tennents-correspondence-principle) inside the block param (e.g. because these are based on arrow functions, ```break``` and ```continue``` aren't available as top level constructs and ```return``` may behave differently).
 
 While a simple syntactical simplification, it enables an interesting set of userland frameworks to be built, taking off presure from TC39 to design them (and an extensible [shadowing mechanism](#forward-compatibility) that enables to bake them natively when/if time comes):
 
@@ -140,8 +149,8 @@ defer (100) {
 
 ```javascript
 // works on arrays, maps and streams
-foreach (array) {
-  console.log(this.item);
+foreach (array) do (item) {
+  console.log(item);
 }
 ```
 
@@ -149,9 +158,9 @@ foreach (array) {
 
 ```javascript
 let a = select (foo) {
-  when (bar) { 1 }
-  when (hello) { 2 }
-  otherwise { 3 }
+  ::when (bar) { 1 }
+  ::when (hello) { 2 }
+  ::otherwise { 3 }
 }
 ```
 
@@ -170,8 +179,8 @@ using (stream) {
 ```javascript
 // ... and sets ...
 let a = map {
-  put("hello", "world") {}
-  put("foo", "bar") {}
+  ::put("hello", "world") {}
+  ::put("foo", "bar") {}
 }
 ```
 
@@ -179,8 +188,8 @@ let a = map {
 
 ```javascript
 let a = graph("architecture") {
-  edge("a", "b") {}
-  edge("b", "c") {}
+  ::edge("a", "b") {}
+  ::edge("b", "c") {}
   // ...
 }
 ```
@@ -189,10 +198,10 @@ let a = graph("architecture") {
 
 ```javascript
 let data = survey("TC39 Meeting Schedule") {
-  question("Where should we host the European meeting?") {
-    option("Paris") {}
-    option("Barcelona") {}
-    option("London") {}
+  ::question("Where should we host the European meeting?") {
+    ::option("Paris")
+    ::option("Barcelona")
+    ::option("London")
   }
 }
 ```
@@ -203,15 +212,15 @@ let data = survey("TC39 Meeting Schedule") {
 
 ```javascript
 let body = html {
-  head {
-    title("Hello World!") {}
+  ::head {
+    ::title("Hello World!") {}
   }
-  body {
-    div {
-      span("Welcome to my Blog!") {}
+  ::body {
+    ::div {
+      ::span("Welcome to my Blog!") {}
     }
     for (page of ["contact", "guestbook"]) {
-      a({href: `${page}.html`}) { span(`${page}`) } {}
+      ::a({href: `${page}.html`}) { span(`${page}`) } {}
     }
   }
 }
@@ -222,11 +231,11 @@ let body = html {
 ```javascript
 let layout =
   VerticalLayout {
-    ImageView ({width: matchParent}) {
+      ::ImageView ({width: matchParent}) {
         ::padding = dip(20)
         ::margin = dip(15)
       }
-      Button("Tap to Like") {
+      ::Button("Tap to Like") {
         ::onclick { toast("Thanks for the love!") }
       }
     }
@@ -244,11 +253,11 @@ const express = require("express");
 const app = express();
 
 server (app) {
-  get("/") {
-     this.response.send("hello world" + request().get("param1"));
+  ::get("/") do (response) {
+    response.send("hello world" + request().get("param1"));
   }
 
-  listen(3000) {
+  ::listen(3000) {
     console.log("hello world");
   }
 }
@@ -258,14 +267,14 @@ server (app) {
 
 ```javascript
 job('PROJ-unit-tests') {
-  scm {
-      git(gitUrl) {}
+  ::scm {
+      ::git(gitUrl) {}
   }
-  triggers {
-      scm('*/15 * * * *') {}
+  ::triggers {
+      ::scm('*/15 * * * *') {}
   }
-  steps {
-      maven('-e clean test') {}
+  ::steps {
+      ::maven('-e clean test') {}
   }
 }
 ```
@@ -295,14 +304,14 @@ let re = regex {
 // are requested. depending on the semantics of this proposal
 // this may not be possible to cover.
 let heroes = hero {
-  name
-  height
-  mass
-  friends {
-    name
-    home {
-      name
-      climate
+  ::name
+  ::height
+  ::mass
+  ::friends {
+    ::name
+    ::home {
+      ::name
+      ::climate
     }
   }
 }
@@ -318,11 +327,11 @@ describe("a calculator") {
 
   val calculator = Calculator()
 
-  on("calling sum with two numbers") {
+  ::on("calling sum with two numbers") {
 
     val sum = calculator.sum(2, 3)
 
-    it("should return the sum of the two numbers") {
+    ::it("should return the sum of the two numbers") {
 
       shouldEqual(5, sum)
     }
@@ -394,10 +403,10 @@ var box =
   <Box>
     {
       select (shouldShowAnswer(user)) {
-        when (true) {
+        ::when (true) {
           <Answer value={false}>no</Answer>
         }
-        when (false) {
+        ::when (false) {
           <Box.Comment>
              Text Content
           </Box.Comment>
@@ -470,48 +479,6 @@ until (() => i == 10, function() {
 
 TODO(goto): should we do that by default with all parameters?
 
-## bindings
-
-From @bterlson:
-
-There are a variety of cases where binding helps. For example, we would want to enable something like the following:
-
-```foreach (map) do (key, value) { ... }``` to be given by the foreach function implementation.
-
-```javascript
-foreach (map) do (key, value) {
-  // ...
-}
-```
-
-To be equivalent to:
-
-```javascript
-// ... is equivalent to ...
-foreach (map, function(key, value) {
-})
-```
-
-Exactly which keyword we pick (e.g. ```in``` or ```with``` or ```:``` etc) and its position (e.g. ```foreach (item in array)``` or ```foreach (array with item)```) TBD.
-
-Another alternative syntax could be something along the lines of:
-
-```javascript
-foreach (map) { |key, value|
-  // ...
-}
-```
-
-Or
-
-```javascript
-foreach (let {key, value} in map) {
-  // ...
-}
-```
-
-We probably need to do a better job at exploring the design space of use cases before debating syntax, hence leaving this as a future extension.
-
 # Areas of Exploration
 
 These are some areas that we are still exploring.
@@ -542,7 +509,7 @@ It is important to note that the **current** built-in ones can't be shadowed bec
 
 ## Completion Values
 
-Like Kotlin, it is possible to return values from the block params to the original function calling it. We aren't entirely sure yet what this looks like, but it will most probably borrow the same semantics we end up using in [do expressions](https://github.com/tc39/proposal-do-expressions) and other [statement-like expressions](https://github.com/rbuckton/proposal-statements-as-expressions#compound-statements).
+Like Kotlin, it is desirable to make the block params return values to the original function calling them. We aren't entirely sure yet what this looks like, but it will most probably borrow the same semantics we end up using in [do expressions](https://github.com/tc39/proposal-do-expressions) and other [statement-like expressions](https://github.com/rbuckton/proposal-statements-as-expressions#compound-statements).
 
 ```javascript
 let result = foreach (numbers) do (number) {
@@ -552,7 +519,7 @@ let result = foreach (numbers) do (number) {
 
 ## scoping
 
-There are certain block params that go together and they need to be somehow aware of each other. For example, ```select``` and ```when```:
+There are certain block params that go together and they need to be somehow aware of each other. For example, ```select``` and ```when``` would ideally be described like this:
 
 ```javascript
 select (foo) {
@@ -580,7 +547,7 @@ One challenge with ```return``` is for block params that outlive the outer scope
 
 ```javascript
 function foobar() {
-  start (100) {
+  run (100) {
     // calls setTimeout(1, block) internally
     return 1;
   }
@@ -623,6 +590,48 @@ for (let i = 0; i < 10; i++) {
 It is still unclear if this can be left as an extension without cornering ourselves.
 
 We are exploring other alternatives [here](https://github.com/samuelgoto/proposal-block-params/issues/8).
+
+## bindings
+
+From @bterlson:
+
+There are a variety of cases where binding helps. For example, we would want to enable something like the following:
+
+```foreach (map) do (key, value) { ... }``` to be given by the foreach function implementation.
+
+```javascript
+foreach (map) do (key, value) {
+  // ...
+}
+```
+
+To be equivalent to:
+
+```javascript
+// ... is equivalent to ...
+foreach (map, function(key, value) {
+})
+```
+
+Exactly which keyword we pick (e.g. ```in``` or ```with``` or ```:``` etc) and its position (e.g. ```foreach (item in array)``` or ```foreach (array with item)```) TBD.
+
+Another alternative syntax could be something along the lines of:
+
+```javascript
+foreach (map) { |key, value|
+  // ...
+}
+```
+
+Or
+
+```javascript
+foreach (let {key, value} in map) {
+  // ...
+}
+```
+
+We probably need to do a better job at exploring the design space of use cases before debating syntax, hence leaving this as a future extension.
 
 
 # Polyfill
