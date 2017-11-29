@@ -10,14 +10,12 @@ It is a syntactic simplification that allows, on function calls, to omit paranth
 For example:
 
 ```javascript
+// ... this is what you write ...
 a(1) {
   // ...
 }
-```
 
-Is equivalent to this:
-
-```javascript
+// ... this is what you get ...
 a(1, () => {
   // ...
 })
@@ -26,14 +24,12 @@ a(1, () => {
 Functions that take just a single block parameter can also be called parentheses-less:
 
 ```javascript
+// ... this is what you write ...
 a {
   // ...
 }
-```
 
-Is equivalent to this:
-
-```javascript
+// ... this is what you get ...
 a(() => {
   // ...
 })
@@ -42,15 +38,13 @@ a(() => {
 We want to enable the ability to nest block params, and we are currently exploring using a sygil (e.g. possibly consistent with the bind operator  ```::```) to refer to the parent block param:
 
 ```javascript
+// ... this is what you write ...
 a(1) {
   ::b(2) {
   }
 }
-```
 
-Which is "somewhat" equivalent to the following (with some TBD Symbol magic):
-
-```javascript
+// ... this is somewhat (with some TBD symbol magic) you get ...
 a (1, (__parent__) => {
   __parent__.b(2, (__parent__) => {
   })
@@ -60,14 +54,12 @@ a (1, (__parent__) => {
 Arguments can be passed to the block param:
 
 ```javascript
-a(1) do (foo) {
+// ... this is what you write ...
+a(1) do (foo) { // syntax TBD
   // ...
 }
-```
 
-Is equivalent to:
-
-```javascript
+// ... this is what you get ...
 a(1, (foo) => {
   ...
 })
