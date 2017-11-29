@@ -149,9 +149,9 @@ function a(block) {
 }
 ```
 
-@[1-8] (If b wants to make it self connected to a ...)
-@[10-15] (... it can set a contextual special variable __parent__ to communicate.)
-@[12-10]
+@[1-8] If b wants to make it self connected to a ...
+@[10-15] ... it can set a contextual special variable __parent__ to communicate.
+@[17-25] This is how a could pass __parent__ to the block
 
 +++
 
