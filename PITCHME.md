@@ -15,7 +15,7 @@
 
 +++
 
-### Syntactic simplification on calls.
+### Inspired by Kotlin, Ruby and Groovy ...
 
 ```javascript
 // ... this is what you write ...
