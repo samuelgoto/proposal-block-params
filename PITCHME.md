@@ -542,41 +542,31 @@ describe("a calculator") {
 
 ---
 
-### JSX
+### React
 
 ```javascript
-// ... instead of this ...
-var box =
-  <Box>
-    {
-      shouldShowAnswer(user) ?
-      <Answer value={false}>no</Answer> :
-      <Box.Comment>
-         Text Content
-      </Box.Comment>
-    }
-  </Box>;
+import {html} from "polyfill.js";
 
-// ... you could write this ...
-var box =
-  <Box>
-    {
-      select (shouldShowAnswer(user)) {
-        ::when (true) {
-          <Answer value={false}>no</Answer>
-        }
-        ::when (false) {
-          <Box.Comment>
-             Text Content
-          </Box.Comment>
+class HelloWorld extends React.Component {
+  render() {
+    return html {
+      ::div {
+        ::Box {
+          if (shouldShowAnswer(user)) {
+            ::Answer("no") 
+          } else {
+            ::Box.Comment("Text content")
+          }
         }
       }
     }
-  </Box>;
+  }
+}
 ```
 
-@[1-11] (Instead of a ternary operator ...)
-@[12-28] (... a select 'statement'.)
+@[4-16] (native JSX-like syntax ...)
+@[7-13] (... with custom components ...)
+@[8-12] (... and statements)
 
 ---
 
