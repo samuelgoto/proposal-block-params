@@ -12,7 +12,7 @@
 
 ### Overview
 
-+++
+---
 
 ### Inspired by Kotlin, Ruby and Groovy
 
@@ -37,7 +37,7 @@ function a(arg, block) {
 @[6-9] (... outside of parentheses.)
 @[11-14] (userland responsible for defining a)
 
-+++
+---
 
 ### For example
 
@@ -64,7 +64,7 @@ function unless(expr, block) {
 @[6-9] (... and this is what you get.)
 @[11-16] (... userland control structure)
 
-+++
+---
 
 ### Binding arguments ...
 
@@ -89,7 +89,7 @@ function a(arg, block) {
 @[6-9]
 @[11-14]
 
-+++
+---
 
 ### For example ...
 
@@ -116,7 +116,7 @@ function foreach(iterable, block) {
 @[6-9] (... and this is what you get.)
 @[11-16]
 
-+++
+---
 
 ### Nesting block params ...
 
@@ -152,7 +152,7 @@ function a(block) {
 @[10-15] ... it can set a contextual special variable __parent__ to communicate.
 @[17-25] This is how a could pass __parent__ to the block
 
-+++
+---
 
 ### For example
 
@@ -189,7 +189,7 @@ function select(expr, block) {
 @[9-15] This is what you'd get
 @[17-26] This is how a polyfill would be built
 
-+++
+---
 
 ### Omitting parentheses altogether allowed for functions with a single parameter ...
 
@@ -208,7 +208,7 @@ foo(() => {
 @[1-4] (This is what you write ...)
 @[6-9] (... and this is what you get.)
 
-+++
+---
 
 ### For example
 
@@ -251,7 +251,7 @@ let dom = html((__parent__) => {
 
 ### Use Cases
 
-+++
+---
 
 ### lock
 
@@ -264,7 +264,7 @@ lock (resource) do (value) {
 }
 ```
 
-+++
+---
 
 ### unless
 
@@ -275,7 +275,7 @@ unless (expr) {
 }
 ```
 
-+++
+---
 
 ### run
 
@@ -287,7 +287,7 @@ run () {
 }
 ```
 
-+++
+---
 
 ### foreach
 
@@ -298,7 +298,7 @@ let result = foreach (array) do (item) {
 }
 ```
 
-+++
+---
 
 ### select
 
@@ -311,7 +311,7 @@ let result = select (expr) {
 }
 ```
 
-+++
+---
 
 ### using
 
@@ -321,7 +321,7 @@ using (stream) {
 }
 ```
 
-+++
+---
 
 ### maps
 
@@ -332,7 +332,7 @@ let a = map {
 }
 ```
 
-+++
+---
 
 ### layout
 
@@ -354,7 +354,7 @@ let dom = html {
 }
 ```
 
-+++
+---
 
 ### node
 
@@ -374,7 +374,7 @@ server (app) {
 }
 ```
 
-+++
+---
 
 ### makefiles
 
@@ -392,7 +392,7 @@ job('PROJ-unit-tests') {
 }
 ```
 
-+++
+---
 
 ### regexes
 
@@ -409,7 +409,7 @@ let re = regex {
 }
 ```
 
-+++
+---
 
 ### testing
 
@@ -430,7 +430,7 @@ describe("a calculator") {
 }
 ```
 
-+++
+---
 
 ### JSX
 
@@ -468,19 +468,12 @@ var box =
 @[1-11] (Instead of a ternary operator ...)
 @[12-28] (... a select 'statement'.)
 
-+++
+---
 
 ### templates
 
 ```javascript
 // ... instead of this ...
-let html = `<div>`;
-for (let product of ["apple", "oranges"]) {
-  html += `<span>${product}</span>`;
-}
-html += `</div>`;
-
-// ... or this ...
 let html = `
   <div>
   ${["apple", "oranges"].forEach(
@@ -498,15 +491,14 @@ let html = `
 `;
 ```
 
-@[1-6]
-@[8-14]
-@[16-23]
+@[1-8]
+@[9-17]
 
 ---
 
 ### Extensions
 
-+++
+---
 
 ### Chaining
 
@@ -535,7 +527,7 @@ iffy (arg1, () => {
 @[1-8]
 @[10-19]
 
-+++
+---
 
 ### functization
 
@@ -658,19 +650,7 @@ let evens = foreach ([1, 2, 3, 4]) do (number) {
 
 +++
 
-### Option 1: Labelled return
-
-```javascript
-let evens = foreach ([1, 2, 3, 4]) do (number) {
-  if (number % 2 == 0) {
-    return@foreach number; // Syntax largely TBD
-  }
-}
-```
-
-+++
-
-### Option 2: Last expression
+### Option 1: Last expression
 
 ```javascript
 let evens = foreach ([1, 2, 3, 4]) do (number) {
@@ -684,6 +664,18 @@ let evens = foreach ([1, 2, 3, 4]) do (number) {
 
 @[3-4]
 @[6]
+
++++
+
+### Option 2: Labelled return
+
+```javascript
+let evens = foreach ([1, 2, 3, 4]) do (number) {
+  if (number % 2 == 0) {
+    return@foreach number; // Syntax largely TBD
+  }
+}
+```
 
 ---
 
@@ -929,3 +921,8 @@ function foreach (iterable, block) {
 ---
 
 ### Stage 1?
+
+* problem outline
+* examples
+* high-leve API
+* identified challenges
