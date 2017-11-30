@@ -571,34 +571,65 @@ until (() => i == 10, function() {
 ```javascript
 // Do we corner ourselves syntactically?
 // If this lands, and someone defines this ...
-function match () {
+function match (block) {
 }
 
-// ... does it prevent us from shipping this?
+// ... should this override a future built-in match?
 match (cond) {
   // ...
 }
 ```
 
-+++
+---
 
 ### Completion values
 
+#### Labelled return? Last expression?
+
 ```javascript
-// What if we wanted to filter a list?
+// Problem statement: what if we wanted to return
+// values to the caller?
 let evens = foreach ([1, 2, 3, 4]) do (number) {
   if (number % 2 == 0) {
-    // NOTE(goto): gets returned to foreach as a
-    // completion value?
-    number
+    // how do we return conditionally?
   }
-  // returns undefined to foreach?
-
-  // isomorphic problem in do-expressions?
 }
 ```
 
 +++
+
+### Options for return
+
++++
+
+### Option 1: Labelled return
+
+```javascript
+let evens = foreach ([1, 2, 3, 4]) do (number) {
+  if (number % 2 == 0) {
+    return@foreach number; // Syntax largely TBD
+  }
+}
+```
+
++++
+
+### Option 2: Last expression
+
+```javascript
+let evens = foreach ([1, 2, 3, 4]) do (number) {
+  if (number % 2 == 0) {
+    // Last expression
+    number
+  }
+  // returns undefined
+}
+```
+
+@[3-4]
+@[6]
+
+---
 
 ### Nesting
 
@@ -606,8 +637,10 @@ let evens = foreach ([1, 2, 3, 4]) do (number) {
 // Are there better ways to make when aware of select?
 // Other than using ::?
 select (foo) {
-  // How does 'when' get resolved? can select insist on
-  // a specific implementation of when?
+  // Problem 1: how does "when" get resolved?
+  // Problem 2: how does "when" connect with "select"?
+  //   e.g. how does the argument to "when" gets
+  //        compared to the argument of "select"?
   when (bar) {
   }
 }
@@ -615,12 +648,50 @@ select (foo) {
 
 +++
 
-### return
+### Options for Nesting
+
++++
+
+### Option 1: explicit reference
+
+```javascript
+select (foo) {
+  // :: de-sugars to __parent__.when (bar) { ... }
+  ::when (bar) {
+  } 
+}
+```
+
++++
+
+### Option 2: with-like scoping
+
+```javascript
+select (foo, function() {
+  (when in __parent__ ? __parent__.when : when) (bar, function {
+    // ...
+  }
+})
+
+function select (expr, block) {
+  block({
+    when (cond, inner) {
+      if (expr == cond) {
+        inner();
+      }
+    }
+  });
+}
+```
+
+---
+
+### non-local return
 
 ```javascript
 function even(number) {
   unless (number % 2 == 1) {
-    // Should this return to unless or to even?    
+    // What are the consequences of non-local returns?
     return true;
   }
   return false;
@@ -631,7 +702,29 @@ function even(number) {
 
 +++
 
-### return
+### Options for non-local return
+
++++
+
+### Option 1: disallow
+
+```kotlin
+fun main(args: Array<String>) {
+  println("Hello, world!")
+  while (true) {
+    unless(true) {
+      // 'return' is not allowed here
+      return
+    }
+  }
+}
+```
+
+@[10-11]
+
+---
+
+### non-local return
 
 ```javascript
 function dostuff() {
@@ -646,9 +739,10 @@ function dostuff() {
 
 @[2-6](escape continuations?)
 
-+++
+---
 
 ### break and continue ...
+#### ... are weird ...
 
 ```javascript
 for (let i = 0; i < 10; i++) {
@@ -678,26 +772,9 @@ for (let i = 0; i < 10; i++) {
 
 @[2-7](Whereas inside foreaches you'd expect continue to continue the foreach)
 
-
----
-
-### Stage 1?
-
-* Does it carry its own weight?
-* Do we corner ourselves?
-* Does it fragment the ecosystem?
-* Does break/continue/return seem solveable?
-* Does nesting seem motivated?
-* Which pattern should we optimize for?
-
----
-
-### Annex
-
----
++++
 
 ### Options for break/continue
-
 
 +++
 
@@ -712,16 +789,12 @@ fun main(args: Array<String>) {
       // Error:(11, 12) 'break' or 'continue' jumps 
       // across a function or a class boundary
       break
-
-      // 'return' is not allowed here
-      return
     }
   }
 }
 ```
 
 @[6-8]
-@[10-11]
 
 +++
 
@@ -798,8 +871,6 @@ while (true) {
 @[4-7]
 @[12-14]
 
-
-
 +++
 
 ### loop contextual keyword
@@ -871,53 +942,4 @@ function foreach (iterable, block) {
 
 ---
 
-### Nesting
-
-+++
-
-### Problem statement
-
-```javascript
-select (foo) {
-  // Problem 1: how does "when" get resolved?
-  // Problem 2: how does "when" connect with "select"?
-  //   e.g. how does the argument to "when" gets
-  //        compared to the argument of "select"?
-  when (bar) {
-  }
-}
-```
-
-+++
-
-### Option 1: explicit reference
-
-```javascript
-select (foo) {
-  // :: de-sugars to __parent__.when (bar) { ... }
-  ::when (bar) {
-  } 
-}
-```
-
-+++
-
-### Option 2: with-like scoping
-
-```javascript
-select (foo, function() {
-  (when in __parent__ ? __parent__.when : when) (bar, function {
-    // ...
-  }
-})
-
-function select (expr, block) {
-  block({
-    when (cond, inner) {
-      if (expr == cond) {
-        inner();
-      }
-    }
-  });
-}
-```
+### Stage 1?
