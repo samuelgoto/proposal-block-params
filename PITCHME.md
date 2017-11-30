@@ -754,18 +754,22 @@ end
 outer: while (true) { 
   inner: foreach ([1, 2, 3]) do (item) {
     if (item == 1) {
+      // Mandatory label in break/continue telling
+      // explicitly where to go.
       break inner;
     }
   }
 
   unless (false) {
+    // Allows users to make the decision on the
+    // the different cases.
     break outer;
   }
 }
 ```
 
-@[2-6]
-@[8-10]
+@[4-6] 
+@[11-13]
 
 
 +++
@@ -776,19 +780,23 @@ outer: while (true) {
 while (true) { 
   inner: foreach ([1, 2, 3]) do (item) {
     if (item == 1) {
+      // by default, break/continue works lexically.
+      // so, if you want to break locally, you'd have
+      // the ability to do so with a label.
       break inner;
     }
   }
 
   unless (false) {
-    // by default, break works lexically.
+    // phew, great, glad that by default i don't have
+    // to type more.
     break;
   }
 }
 ```
 
-@[2-6]
-@[8-11]
+@[4-7]
+@[12-14]
 
 
 
@@ -797,28 +805,25 @@ while (true) {
 ### loop contextual keyword
 
 ```javascript
-// break works lexically by default.
-// if you want to "capture" the break
-// use the "loop" keyword to call your block param.
 foreach ([1, 2, 3]) do (item) {
   if (item == 1) {
+     // break still works lexically by default ...
      break;
   }
 }
 
 function foreach(iterable, block) {
   for (let item of iterable) {
-    // "loop" is a contextual keyword (e.g. await)
-    // which "captures" breaks/continue in the call
-    // to block(item) and propagate to the most
-    // lexically relevant loop (in this case, for).
+    // if you want to "capture" the break
+    // use the "loop" keyword to call your block param
+    // and apply it to the local lexical scope, i.e. for.
     loop block(item);
   }
 }
 ```
 
-@[1-8]
-@[10-18]
+@[3-4]
+@[10-13]
 
 +++
 
