@@ -704,12 +704,6 @@ for (let i = 0; i < 10; i++) {
 ### Kotlin: disallow
 
 ```kotlin
-fun unless(condition: Boolean, block: () -> Unit) {
-  if (condition) {
-    block()
-  }
-}
-
 fun main(args: Array<String>) {
   println("Hello, world!")
   while (true) {
@@ -726,9 +720,12 @@ fun main(args: Array<String>) {
 }
 ```
 
+@[6-8]
+@[10-11]
+
 +++
 
-### Ruby: pick a choice
+### Ruby: make a choice
 
 ```ruby
 def iffy(condition) 
@@ -747,19 +744,81 @@ for i in 0..1
 end
 ```
 
+@[10-12]
+
 +++
 
-### Standard exceptions
+### Labels
 
 ```javascript
-foreach (array) {
-  continue;
+outer: while (true) { 
+  inner: foreach ([1, 2, 3]) do (item) {
+    if (item == 1) {
+      break inner;
+    }
+  }
+
+  unless (false) {
+    break outer;
+  }
 }
-// ... is sugar for ...
-foreach (array, function() {
-  throw new ContinueException();
-});
 ```
+
+@[2-6]
+@[8-10]
+
+
++++
+
+### Labels variant 1
+
+```javascript
+while (true) { 
+  inner: foreach ([1, 2, 3]) do (item) {
+    if (item == 1) {
+      break inner;
+    }
+  }
+
+  unless (false) {
+    // by default, break works lexically.
+    break;
+  }
+}
+```
+
+@[2-6]
+@[8-11]
+
+
+
++++
+
+### loop contextual keyword
+
+```javascript
+// break works lexically by default.
+// if you want to "capture" the break
+// use the "loop" keyword to call your block param.
+foreach ([1, 2, 3]) do (item) {
+  if (item == 1) {
+     break;
+  }
+}
+
+function foreach(iterable, block) {
+  for (let item of iterable) {
+    // "loop" is a contextual keyword (e.g. await)
+    // which "captures" breaks/continue in the call
+    // to block(item) and propagate to the most
+    // lexically relevant loop (in this case, for).
+    loop block(item);
+  }
+}
+```
+
+@[1-8]
+@[10-18]
 
 +++
 
@@ -773,6 +832,37 @@ function foreach (collection) {
   // ... breaks and continues bound locally ...
 }
 ```
+
++++
+
+### Standard exceptions
+
+```javascript
+foreach (array) {
+  continue;
+}
+
+// ... is sugar for ...
+foreach (array, function() {
+  throw new ContinueException();
+});
+
+function foreach (iterable, block) {
+  for (let item of iterable) {
+    try {
+      block(item);
+    } catch break {
+      break;
+    } catch continue {
+      continue;
+    }
+  }
+}
+```
+
+@[1-3]
+@[5-8]
+@[10-20]
 
 ---
 
