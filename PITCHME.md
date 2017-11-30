@@ -3,11 +3,9 @@
 ---
 
 ### Overview
-### Example
 ### Use Cases
 ### Extensions
 ### Areas of Investigation
-* return, break, continue, scoping, completion
 
 ---
 
@@ -293,7 +291,8 @@ run () {
 ### foreach
 
 ```javascript
-foreach (array) do (item) {
+// foreach is an expression!
+let result = foreach (array) do (item) {
   console.log(item);
 }
 ```
@@ -303,7 +302,7 @@ foreach (array) do (item) {
 ### select
 
 ```javascript
-select (expr) {
+let result = select (expr) {
   ::when (foo) { 1 }
   ::when (bar) { 2 }
   ::when (hello) { 3 }
@@ -512,7 +511,7 @@ let html = `
 
 ```javascript
 // ... this is what you write ...
-if (arg1) {
+iffy (arg1) {
   ...
 } else if (arg2) {
   ...
@@ -521,13 +520,13 @@ if (arg1) {
 }
 
 // ... this is what you get ...
-if (arg1, function() {
+iffy (arg1, () => {
   ...
 },
-"else if", arg2, function {
+"else if", arg2, () => {
   ...
 },
-"else", function () {
+"else", () => {
   ...
 })
 ```
@@ -639,14 +638,13 @@ fun main(args: Array<String>) {
 
 ### Completion values
 
-#### Labelled return? Last expression?
-
 ```javascript
 // Problem statement: what if we wanted to return
 // values to the caller?
 let evens = foreach ([1, 2, 3, 4]) do (number) {
   if (number % 2 == 0) {
     // how do we return conditionally?
+    // labelled returns? last expression?
   }
 }
 ```
@@ -778,7 +776,7 @@ for (let i = 0; i < 10; i++) {
 
 +++
 
-### Kotlin: disallow
+### Option 1: disallow (Kotlin)
 
 ```kotlin
 fun main(args: Array<String>) {
@@ -798,7 +796,7 @@ fun main(args: Array<String>) {
 
 +++
 
-### Ruby: make a choice
+### Option 2: make a choice (Ruby)
 
 ```ruby
 def iffy(condition) 
@@ -821,7 +819,7 @@ end
 
 +++
 
-### Labels
+### Option 3: Mandatory labels
 
 ```javascript
 outer: while (true) { 
@@ -847,7 +845,7 @@ outer: while (true) {
 
 +++
 
-### Labels variant 1
+### Option 4: Label with default lexical
 
 ```javascript
 while (true) { 
@@ -873,14 +871,12 @@ while (true) {
 
 +++
 
-### inline contextual keyword
+### Option 5: contextual keywords
 
 ```javascript
-foreach ([1, 2, 3]) do (item) {
-  if (item == 1) {
-     // break still works lexically by default ...
-     break;
-  }
+foreach (array) {
+  // break still works lexically by default ...
+  break;
 }
 
 function foreach(iterable, block) {
@@ -893,12 +889,12 @@ function foreach(iterable, block) {
 }
 ```
 
-@[3-4]
-@[10-13]
+@[2-3]
+@[8-1]
 
 +++
 
-### Standard exceptions
+### Option 6: Standard exceptions
 
 ```javascript
 foreach (array) {
