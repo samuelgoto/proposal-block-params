@@ -6,6 +6,7 @@
 ### Use Cases
 ### Extensions
 ### Areas of Investigation
+### Stage 1?
 
 ---
 
@@ -13,7 +14,7 @@
 
 +++
 
-### Inspired by Kotlin, Ruby and Groovy ...
+### Inspired by Kotlin, Ruby and Groovy
 
 ```javascript
 // ... this is what you write ...
@@ -561,6 +562,8 @@ until (() => i == 10, function() {
 
 ### Areas of Investigation
 
+#### Spoiler alert: there are many :)
+
 ---
 
 ### forward compatibility
@@ -614,7 +617,7 @@ function dostuff() {
 
 +++
 
-### Options for non-local return
+### Other options for non-local return
 
 +++
 
