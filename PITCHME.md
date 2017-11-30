@@ -562,7 +562,7 @@ until (() => i == 10, function() {
 
 ### Areas of Investigation
 
-+++
+---
 
 ### forward compatibility
 
@@ -579,6 +579,61 @@ match (cond) {
   // ...
 }
 ```
+
+---
+
+### non-local return
+
+```javascript
+function even(number) {
+  unless (number % 2 == 1) {
+    // What are the consequences of non-local returns?
+    return true;
+  }
+  return false;
+}
+```
+
+@[2-5](non local return?)
+
++++
+
+### non-local return
+
+```javascript
+function dostuff() {
+  run (100) {
+    // What happens if this completes after the
+    // function completed? 
+    return "hello world";
+  }
+  return false;
+}
+```
+
+@[2-6](escape continuations?)
+
++++
+
+### Options for non-local return
+
++++
+
+### Option 1: disallow
+
+```kotlin
+fun main(args: Array<String>) {
+  println("Hello, world!")
+  while (true) {
+    unless(true) {
+      // 'return' is not allowed here
+      return
+    }
+  }
+}
+```
+
+@[10-11]
 
 ---
 
@@ -683,61 +738,6 @@ function select (expr, block) {
   });
 }
 ```
-
----
-
-### non-local return
-
-```javascript
-function even(number) {
-  unless (number % 2 == 1) {
-    // What are the consequences of non-local returns?
-    return true;
-  }
-  return false;
-}
-```
-
-@[2-5](non local return?)
-
-+++
-
-### Options for non-local return
-
-+++
-
-### Option 1: disallow
-
-```kotlin
-fun main(args: Array<String>) {
-  println("Hello, world!")
-  while (true) {
-    unless(true) {
-      // 'return' is not allowed here
-      return
-    }
-  }
-}
-```
-
-@[10-11]
-
----
-
-### non-local return
-
-```javascript
-function dostuff() {
-  run (100) {
-    // What happens if this completes after the
-    // function completed? 
-    return "hello world";
-  }
-  return false;
-}
-```
-
-@[2-6](escape continuations?)
 
 ---
 
@@ -873,7 +873,7 @@ while (true) {
 
 +++
 
-### loop contextual keyword
+### inline contextual keyword
 
 ```javascript
 foreach ([1, 2, 3]) do (item) {
@@ -886,28 +886,15 @@ foreach ([1, 2, 3]) do (item) {
 function foreach(iterable, block) {
   for (let item of iterable) {
     // if you want to "capture" the break
-    // use the "loop" keyword to call your block param
+    // use the "inline" keyword to call your block param
     // and apply it to the local lexical scope, i.e. for.
-    loop block(item);
+    inline block(item);
   }
 }
 ```
 
 @[3-4]
 @[10-13]
-
-+++
-
-### Modifiers
-
-```javascript
-inline function unless(expr, block) {
-  // ... breaks and continues bound lexically ...
-}
-function foreach (collection) {
-  // ... breaks and continues bound locally ...
-}
-```
 
 +++
 
