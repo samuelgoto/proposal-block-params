@@ -264,6 +264,19 @@ lock (resource) do (value) {
 }
 ```
 
++++
+
+```javascript
+lock (resource, (value) => {
+  console.log(value);
+})
+
+function lock(resource, block) {
+  Atomics.wait(resource, 0, 0);
+  block(resource[0]);
+}
+```
+
 ---
 
 ### unless
@@ -272,6 +285,20 @@ lock (resource) do (value) {
 // ... this is what you write ...
 unless (expr) {
   // ... statements ...
+}
+```
+
++++
+
+```javascript
+unless (expr, () => {
+  // ...
+})
+
+function unless(expr, block) {
+  if (!expr) {
+    block();
+  }
 }
 ```
 
@@ -287,6 +314,18 @@ run () {
 }
 ```
 
++++
+
+```javascript
+run (() => {
+  expensiveWork();
+}
+
+function run(block) {
+  setTimeout(0, block);
+}
+```
+
 ---
 
 ### foreach
@@ -295,6 +334,20 @@ run () {
 // foreach is an expression!
 let result = foreach (array) do (item) {
   console.log(item);
+}
+```
+
++++
+
+```javascript
+let result = foreach (array, (item) => {
+  console.log(item);
+})
+
+function foreach(array, block) {
+  for (let item of array) {
+    block(item);
+  }
 }
 ```
 
@@ -308,6 +361,26 @@ let result = select (expr) {
   ::when (bar) { 2 }
   ::when (hello) { 3 }
   ::when (world) { 3 }
+}
+```
+
++++
+
+```javascript
+let result = select (expr, (__parent__) => {
+  __parent__.when (foo, (__parent__) => {
+    1
+  })
+})
+
+function select (expr, block) {
+  block({
+    when (cond, inner) {
+      if (expr == cond) {
+        inner();
+      }
+    }
+  });
 }
 ```
 
@@ -332,6 +405,24 @@ let a = map {
 }
 ```
 
++++
+
+```javascript
+let a = map ((__parent__) => {
+  __parent__.put("hello", "world")
+})
+
+function map (block) {
+  let result = new Map();
+  block({
+    put(key, value) {
+      result.put(key, value);
+    }
+  });
+  return result;
+}
+```
+
 ---
 
 ### layout
@@ -352,6 +443,25 @@ let dom = html {
     }
   }
 }
+```
+
++++
+
+```javascript
+let dom = html((__parent__) => {
+  __parent__.head((__parent__) => {
+    __parent__.title("welcome!")
+  })
+  __parent__.body((__parent__) => {
+    __parent__.div((__parent__) => {
+      __parent__.span((__parent__) => {
+        __parent__.a((__parent__) => {
+          __parent__.span("hello world")
+        })
+      })
+    })
+  })
+})
 ```
 
 ---
