@@ -545,8 +545,6 @@ describe("a calculator") {
 ### React
 
 ```javascript
-import {html} from "polyfill.js";
-
 class HelloWorld extends React.Component {
   render() {
     return html {
