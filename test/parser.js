@@ -53,6 +53,10 @@ describe("Parser", function() {
      d(1) {}
    `).parses();
   });
+
+  it.skip("Parsing ::", function() {
+    assertThat(`d { ::a };`).parses();
+  });
 });
 
 class That {

@@ -8,6 +8,13 @@ const es7 = require('acorn-es7')(acorn);
 
 
 acorn.plugins.docscript = function(parser) {
+  parser.extend("readToken", function(nextMethod) {
+    return function(code) {
+	// console.log(`Reading a token! ${code}`)
+      return nextMethod.call(this, code)
+    }
+  })
+
   parser.extend("parseExpressionStatement", function(nextMethod) {
     return function(node, expr) {
 
