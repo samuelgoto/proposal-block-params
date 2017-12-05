@@ -3,7 +3,7 @@ Early feedback from @adamk, @domenic, @slightlyoff, @erights, @waldemarhowart, @
 Block Params
 =========
 
-This is a very early [stage 0](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html), [Ruby](#ruby) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
+This is a very early [stage 1](https://tc39.github.io/process-document/) exploration of a syntactical simplication (heavily inspired by [Kotlin](https://kotlinlang.org/docs/reference/type-safe-builders.html), [Ruby](#ruby) and [Groovy](http://docs.groovy-lang.org/docs/latest/html/documentation/core-domain-specific-languages.html)) that enables domain specific languages to be developed in userland.
 
 It is a syntactic simplification that allows, on function calls, to omit parantheses around the ***last***  parameter when that's a lambda.
 
