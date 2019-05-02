@@ -362,8 +362,8 @@ One could write:
 ```javascript
 let html = `
   <div>
-  ${foreach (["apple", "orange"]) {
-    `<span>${item()}</span>`
+  ${foreach (["apple", "orange"]) do (item) {
+    `<span>${item}</span>`
   }}
   </div>
 `;
