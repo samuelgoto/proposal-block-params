@@ -73,7 +73,7 @@ Here are some interesting scenarios:
 
 * [flow control](#flow-control) (e.g. [lock](#lock), [unless](#perls-unless), [guard](#swifts-guard), [defer](#swifts-defer), [foreach](#cs-foreach), [select](#vbs-select))
 * [builders](#builders) (e.g. [map](#map), [dot](#dot), [data](#custom-data))
-* [layout](#layout) (e.g. [html](#kotlins-template), [android](#android))
+* [layout](#layout) (e.g. [html](#kotlins-templates), [android](#android))
 * [configuration](#configuration) (e.g. [node](#node), [makefiles](#makefiles))
 * [others](#misc) (e.g. [regexes](#regexes), [graphql](#graphql), [testing](#testing))
 
