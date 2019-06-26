@@ -352,7 +352,7 @@ or
 ```javascript
 let html = `
   <div>
-  ${["apple", "oranges"].forEach(product => `<span>${product}</span>`)}
+  ${["apple", "oranges"].map(product => `<span>${product}</span>`).join("\n")}
   </div>
 `;
 ```
@@ -362,8 +362,8 @@ One could write:
 ```javascript
 let html = `
   <div>
-  ${foreach (["apple", "orange"]) {
-    `<span>${item()}</span>`
+  ${foreach (["apple", "orange"]) do (item) {
+    `<span>${item}</span>`
   }}
   </div>
 `;
