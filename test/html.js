@@ -157,105 +157,53 @@ describe("HTML", function() {
     });
   });
 
-  it.skip('Methods', function() {
+  it('If statements', function() {
     assertThat(`
-      div({width: 200}) {
-      }`
-    ).equalsTo({"@type": "div", width : 200});
-  });
-
-  it.skip('Nesting', function() {
-    assertThat(`
-      div {
-	let span = __args__.span.bind(__args__);
-        span {
-        }
-      }`
-    ).equalsTo({
-      "@type": "div",
-      children: [{
-	"@type": "span"
-      }]
-    });
-  });
-
-  it.skip('Text nodes', function() {
-    assertThat(`
-      div {
-        let span = __args__.span.bind(__args__);
-        span("hello world")
-      }`
-    ).equalsTo({
-      "@type": "div",
-      children: [{
-	"@type": "span",
-	children: [ "hello world" ]
-      }]
-    });
-  });
-
-  it.skip('If statements', function() {
-    assertThat(`
-      div {
-        let span = __args__.span.bind(__args__);
+      new html {
         if (true) {
-          span("hello world")
+          head("hello world") {}
         }
       }`
     ).equalsTo({
-      "@type": "div",
+      "@type": "html",
       children: [{
-	"@type": "span",
+	"@type": "head",
 	children: [ "hello world" ]
       }]
     });
   });
 
-  it.skip('For-loops', function() {
+  it('For-loops', function() {
     assertThat(`
-      div {
-        let span = __args__.span.bind(__args__);
+      new html {
         for (let i = 0; i < 2; i++) {
-          span("" + i + "")
+          head("" + i + "") {}
         }
       }`
     ).equalsTo({
-      "@type": "div",
+      "@type": "html",
       "children": [{
-	"@type": "span",
+	"@type": "head",
 	"children": ["0"]
       }, {
-	"@type": "span",
+	"@type": "head",
 	"children": ["1"]
       }]
     });
   });
 
-  it.skip('Functions', function() {
+  it('Variables', function() {
     assertThat(`
-      function bar(parent) {
-        parent.node("hello world");
-      }
-
-      div {
-        bar(__args__)
+      let foo = "hello world";
+      new html {
+        head(foo) {}
       }`
     ).equalsTo({
-      "@type": "div",
-      "children": ["hello world"]
-    });
-  });
-
-  it.skip('Variables', function() {
-    assertThat(`
-      // TODO(goto): figure out why using "let foo" here breaks.
-      var foo = "hello world";
-      div {
-        __args__.node(foo)
-      }`
-    ).equalsTo({
-      "@type": "div",
-      children: ["hello world"]
+      "@type": "html",
+      "children": [{
+        "@type": "head",
+        "children": ["hello world"]
+      }]
     });
   });
 
@@ -293,7 +241,7 @@ describe("HTML", function() {
 
   it.skip('Scripting internal variables', function() {
     assertThat(`
-      div {
+      new html {
 	var c = 1;
         var b = 2;
 	__args__.node(b)
@@ -333,7 +281,7 @@ describe("HTML", function() {
     });
   });
 
-  it.skip("[]-member expressions", function() {
+  it("[]-member expressions", function() {
     assertThat(`
       div {
         "1"
@@ -344,7 +292,7 @@ describe("HTML", function() {
        equivalent to div { "1"["2"] } == div { undefined }.`);
   });
 
-  it.skip(".-member expressions", function() {
+  it(".-member expressions", function() {
     assertThat(`
       div {
         "1"
@@ -354,14 +302,14 @@ describe("HTML", function() {
       `This evaluates to "1".b which is undefined, so Error is thrown`);
   });
 
-  it.skip("div { '1'; }", function() {
+  it("div { '1'; }", function() {
     assertThat(`
-      div {
+      new html {
         "1";
       }`
     ).equalsTo({
-      name: "div",
-      children: ["1"]
+      "@type": "html",
+      children: []
     });
   });
 
@@ -375,17 +323,18 @@ describe("HTML", function() {
     });
   });
 
-  it.skip("div {} expressions become statements", function() {
+  it("div {} expressions become statements", function() {
     assertThat(`
-      div {
-        span {}
+      new html {
+        head {};
         ["1"]
       }`
     ).equalsTo({
-      name: "div",
+      "@type": "html",
       children: [{
-	name: "span"
-      }, "1"]
+	"@type": "head",
+        children: []
+      }]
     });
   });
 
@@ -434,44 +383,46 @@ describe("HTML", function() {
     });
   });
 
-  it.skip("Simplest usage in Classes", function() {
+  it("Simplest usage in Classes", function() {
     assertThat(`
       class Foo {
-        bar() {
-          return div {
-            __args__.span("bar")
+        render() {
+          return new html {
+            head {
+            }
           };
         }
       }
-      new Foo().bar();
+      new Foo().render();
     `
     ).equalsTo({
-      "@type": "div",
-      children: [{
-	"@type": "span",
-	children: [ "bar" ]
+      "@type": "html",
+      "children": [{
+	"@type": "head",
+	"children": [ ]
       }]
     });
   });
 
-  it.skip("this reference on Classes", function() {
+  it("this reference on Classes", function() {
     assertThat(`
       class Foo {
         constructor() {
           this.foo = "bar";
         }
         bar() {
-          return div {
-            __args__.span(this.foo);
+          let that = this;
+          return new html {
+            head(that.foo) {}
           };
         }
       }
       new Foo().bar();
     `
     ).equalsTo({
-      "@type": "div",
+      "@type": "html",
       children: [{
-	"@type": "span",
+	"@type": "head",
 	children: [ "bar" ]
       }]
     });
@@ -502,24 +453,25 @@ describe("HTML", function() {
     })
   });
 
-  it.skip("this.method() reference on Classes", function() {
+  it("this.method() reference on Classes", function() {
     assertThat(`
       class Foo {
         foo() {
           return "bar";
         }
         bar() {
-          return div {
-            __args__.span(this.foo());
+          let that = this;
+          return new html {
+            head(that.foo()) {}
           };
         }
       }
       new Foo().bar();
     `
     ).equalsTo({
-      "@type": "div",
+      "@type": "html",
       children: [{
-	"@type": "span",
+	"@type": "head",
 	children: [ "bar" ]
       }]
     });
