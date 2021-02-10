@@ -45,6 +45,11 @@ describe("Transpiler", function() {
     Assert.equal(result, `this.d({}, function() {});`);
   });
 
+  it("Visiting non-empty attributes", function() {
+    let result = DocScript.compile(`d({a: 2}) {};`);
+    Assert.equal(result, `this.d({a: 2}, function() {});`);
+  });
+
   it("Visiting single attribute", function() {
     let result = DocScript.compile(`d(1) {};`);
     // console.log(result);

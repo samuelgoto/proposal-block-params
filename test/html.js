@@ -2,6 +2,42 @@ const Assert = require('assert');
 const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
+class Element {
+  constructor(arg1, arg2) {
+    this["@type"] = this.constructor.name;
+    this.children = [];
+    if (typeof arg1 == "string") {
+      this.children.push(arg1);
+    } else if (typeof arg1 == "object") {
+      Object.assign(this, arg1);
+    } else {
+      arg1.call(this);
+    }
+
+    if (arg2) {
+      arg2.call(this);
+    }
+  }
+  push(child) {
+    this.children.push(child);
+  }
+}
+
+class html extends Element {
+  head(arg1, arg2) {
+    this.push(new head(arg1, arg2));
+  }
+}
+
+class head extends Element {
+  title(arg1, arg2) {
+    this.push(new title(arg1, arg2));
+  }
+}
+
+class title extends Element {
+}
+
 describe("HTML", function() {
   it("Basic", () => {
     const script = `let a = 1;`;
@@ -30,37 +66,6 @@ describe("HTML", function() {
       }) 
     })`);
   });
-
-  class Element {
-    constructor(block) {
-      this["@type"] = this.constructor.name;
-      this.children = [];
-      if (typeof block == "string") {
-        this.children.push(block);
-        return;
-      } else {
-        block.call(this);
-      }
-    }
-    push(child) {
-      this.children.push(child);
-    }
-  }
-
-  class html extends Element {
-    head(block) {
-      this.push(new head(block));
-    }
-  }
-
-  class head extends Element {
-    title(block) {
-      this.push(new title(block));
-    }
-  }
-
-  class title extends Element {
-  }
   
   it("Basic", () => {
     const script = `
@@ -119,14 +124,37 @@ describe("HTML", function() {
     assertThat(`function foo(param) { return param; } foo(1) {}`).equalsTo(1);
   });
 
-  it.skip('Attributes', function() {
+  it('Attributes', function() {
     assertThat(`
-      div({width: 100}) {
+      new html {
+        head({onload: 1}) {
+        }
       }
     `).equalsTo({
-      "@type": "div",
-      width: 100
-    }, true);
+      "@type": "html",
+      "children": [{
+        "@type": "head",
+        "children": [],
+        "onload": 1
+      }]
+    });
+  });
+
+  it('Attributes', function() {
+    assertThat(`
+      new html {
+        head {
+          this.onload = 1;
+        }
+      }
+    `).equalsTo({
+      "@type": "html",
+      "children": [{
+        "@type": "head",
+        "children": [],
+        "onload": 1
+      }]
+    });
   });
 
   it.skip('Methods', function() {
@@ -770,16 +798,16 @@ class That {
 
 function assertThat(code) {
   // return new That(code);
-  function evals(opt_debug) {
-    let script = `
-      const {html, div} = require("../examples/framework/html.js");
-
-      ${code}
-    `;
-    let compiled = DocScript.compile(script).toString();
-    if (opt_debug) {
-      console.log(compiled);
-    }
+  function evals() {
+    //let script = `
+    //  const {html, div} = require("../examples/framework/html.js");
+    //  ${code}
+    //`;
+    let compiled = DocScript.compile(code).toString();
+    // console.log(compiled);
+    //if (opt_debug) {
+    //  console.log(compiled);
+    //}
     return eval(compiled);
   }
 
@@ -803,17 +831,17 @@ function assertThat(code) {
     evals: function(opt_debug) {
       return evals(opt_debug);
     },
-    equalsTo: function(expected, opt_debug, opt_xml) {
-      let result = evals(opt_debug);
+    equalsTo: function(expected) {
+      let result = evals();
       // console.log(result.toXml());
-      if (opt_xml) {
+      //if (opt_xml) {
           // NOTE(goto): poor man version of comparing XML :)
-	  Assert.equal(
-            result.toXml().replace(/ /g, "").replace(/\n/g, ""),
-            expected.replace(/ /g, "").replace(/\n/g, ''));
-      } else {
-        Assert.deepEqual(clean(result), expected);
-      }
+      //	  Assert.equal(
+      //    result.toXml().replace(/ /g, "").replace(/\n/g, ""),
+      //    expected.replace(/ /g, "").replace(/\n/g, ''));
+      //} else {
+      Assert.deepEqual(result, expected);
+      //}
     },
     contains: function(expected, opt_debug) {
       let result = evals(opt_debug);
