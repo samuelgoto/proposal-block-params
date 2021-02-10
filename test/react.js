@@ -5,7 +5,7 @@ var acorn = require("acorn");
 var React = require("react");
 var ReactDOMServer = require('react-dom/server');
 
-describe("React", function() {
+describe.skip("React", function() {
   it("React hello world HTML", function() {
     let result = ReactDOMServer.renderToStaticMarkup(
       React.createElement("div", null, "hello world"));

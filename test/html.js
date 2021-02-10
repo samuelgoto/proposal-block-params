@@ -3,6 +3,90 @@ const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
 describe("HTML", function() {
+  it("Basic", () => {
+    const script = `let a = 1;`;
+    let compiled = DocScript.compile(script).toString();
+    Assert.deepEqual(compiled, `let a = 1;`);
+  });
+
+  it("DocScript", () => {
+    const script = `
+    new html { 
+      head {
+        title("welcome") {}
+      } 
+      body {
+        p("hello world") {}
+      } 
+    }`;
+    let compiled = DocScript.compile(script).toString();
+    Assert.deepEqual(compiled, `
+    new html(function() { 
+      this.head(function() {
+        this.title("welcome", function() {})
+      }) 
+      this.body(function() {
+        this.p("hello world", function() {})
+      }) 
+    })`);
+  });
+
+  class Element {
+    constructor(block) {
+      this["@type"] = this.constructor.name;
+      this.children = [];
+      if (typeof block == "string") {
+        this.children.push(block);
+        return;
+      } else {
+        block.call(this);
+      }
+    }
+    push(child) {
+      this.children.push(child);
+    }
+  }
+
+  class html extends Element {
+    head(block) {
+      this.push(new head(block));
+    }
+  }
+
+  class head extends Element {
+    title(block) {
+      this.push(new title(block));
+    }
+  }
+
+  class title extends Element {
+  }
+  
+  it("Basic", () => {
+    const script = `
+      new html {
+        head {
+          title("welcome") {}
+        }
+      }
+    `;
+    let compiled = DocScript.compile(script).toString();
+    let result = eval(compiled);
+
+    Assert.deepEqual(result, {
+      "@type": "html",
+      "children": [{
+        "@type": "head",
+        "children": [{
+          "@type": "title",
+          "children": [
+            "welcome"
+          ]
+        }]
+      }]
+    });
+  });
+  
   it('Backwards compatible', function() {
     // Basic fundamental programs are not broken
     assertThat("").equalsTo(undefined);
@@ -17,7 +101,7 @@ describe("HTML", function() {
     assertThat("let b = 1; b").contains({});
   });
 
-  it('Simplest', function() {
+  it.skip('Simplest', function() {
     assertThat(`function foo() { return 1; } foo {}`).equalsTo(1);
   });
 
@@ -27,7 +111,7 @@ describe("HTML", function() {
     ).equalsTo({children: [ 1 ]});
   });
 
-  it('Attributes: non-object attribute gets ignored', function() {
+  it.skip('Attributes: non-object attribute gets ignored', function() {
     // The literal 1 gets ignored as a parameter because it is not a
     // named key/value object.
     // TODO(goto): possibly allow things like "enabled" that are just
@@ -35,7 +119,7 @@ describe("HTML", function() {
     assertThat(`function foo(param) { return param; } foo(1) {}`).equalsTo(1);
   });
 
-  it('Attributes', function() {
+  it.skip('Attributes', function() {
     assertThat(`
       div({width: 100}) {
       }
@@ -45,14 +129,14 @@ describe("HTML", function() {
     }, true);
   });
 
-  it('Methods', function() {
+  it.skip('Methods', function() {
     assertThat(`
       div({width: 200}) {
       }`
     ).equalsTo({"@type": "div", width : 200});
   });
 
-  it('Nesting', function() {
+  it.skip('Nesting', function() {
     assertThat(`
       div {
 	let span = __args__.span.bind(__args__);
@@ -67,7 +151,7 @@ describe("HTML", function() {
     });
   });
 
-  it('Text nodes', function() {
+  it.skip('Text nodes', function() {
     assertThat(`
       div {
         let span = __args__.span.bind(__args__);
@@ -82,7 +166,7 @@ describe("HTML", function() {
     });
   });
 
-  it('If statements', function() {
+  it.skip('If statements', function() {
     assertThat(`
       div {
         let span = __args__.span.bind(__args__);
@@ -99,7 +183,7 @@ describe("HTML", function() {
     });
   });
 
-  it('For-loops', function() {
+  it.skip('For-loops', function() {
     assertThat(`
       div {
         let span = __args__.span.bind(__args__);
@@ -119,7 +203,7 @@ describe("HTML", function() {
     });
   });
 
-  it('Functions', function() {
+  it.skip('Functions', function() {
     assertThat(`
       function bar(parent) {
         parent.node("hello world");
@@ -134,7 +218,7 @@ describe("HTML", function() {
     });
   });
 
-  it('Variables', function() {
+  it.skip('Variables', function() {
     assertThat(`
       // TODO(goto): figure out why using "let foo" here breaks.
       var foo = "hello world";
@@ -147,7 +231,7 @@ describe("HTML", function() {
     });
   });
 
-  it('Children', function() {
+  it.skip('Children', function() {
     assertThat(`
       div {
         let div = __args__.div.bind(__args__);
@@ -179,7 +263,7 @@ describe("HTML", function() {
     }, true);
   });
 
-  it('Scripting internal variables', function() {
+  it.skip('Scripting internal variables', function() {
     assertThat(`
       div {
 	var c = 1;
@@ -197,7 +281,7 @@ describe("HTML", function() {
     });
   });
 
-  it("Arrays can be embedded", function() {
+  it.skip("Arrays can be embedded", function() {
     assertThat(`
       div {
         ["hello", "world"].forEach(function(x) { this.node(x) }, __args__);
@@ -208,7 +292,7 @@ describe("HTML", function() {
     });
   });
 
-  it("Two variables", function() {
+  it.skip("Two variables", function() {
     assertThat(`
       var b = "1";
       div {
@@ -292,7 +376,7 @@ describe("HTML", function() {
     });
   });
 
-  it("scope reference works on parameters", function() {
+  it.skip("scope reference works on parameters", function() {
     assertThat(`
       function foo(props) {
 	return div {
@@ -307,7 +391,7 @@ describe("HTML", function() {
     });
   });
 
-  it("method() reference works", function() {
+  it.skip("method() reference works", function() {
     assertThat(`
       function foo(context) {
         return div {
@@ -322,7 +406,7 @@ describe("HTML", function() {
     });
   });
 
-  it("Simplest usage in Classes", function() {
+  it.skip("Simplest usage in Classes", function() {
     assertThat(`
       class Foo {
         bar() {
@@ -342,7 +426,7 @@ describe("HTML", function() {
     });
   });
 
-  it("this reference on Classes", function() {
+  it.skip("this reference on Classes", function() {
     assertThat(`
       class Foo {
         constructor() {
@@ -365,7 +449,7 @@ describe("HTML", function() {
     });
   });
 
-  it('Functions and Classes', function() {
+  it.skip('Functions and Classes', function() {
     assertThat(`
       function bar(parent) {
         parent.node("hello world");
@@ -390,7 +474,7 @@ describe("HTML", function() {
     })
   });
 
-  it("this.method() reference on Classes", function() {
+  it.skip("this.method() reference on Classes", function() {
     assertThat(`
       class Foo {
         foo() {
@@ -475,7 +559,7 @@ describe("HTML", function() {
     ).equalsTo("bar");
   });
 
-  it('Attributes: functions', function() {
+  it.skip('Attributes: functions', function() {
     let result = assertThat(`
       div {
 	  __args__.onclick = function() {
@@ -487,7 +571,7 @@ describe("HTML", function() {
     Assert.equal("hello world", callback);
   });
 
-  it('Attributes: functions, classes', function() {
+  it.skip('Attributes: functions, classes', function() {
     let result = assertThat(`
       class Foo {
         render() {
@@ -504,7 +588,7 @@ describe("HTML", function() {
     Assert.equal("hello world", callback);
   });
 
-  it('Attributes: classes, attributes and this', function() {
+  it.skip('Attributes: classes, attributes and this', function() {
     let result = assertThat(`
       class Foo {
         constructor() {
@@ -529,7 +613,7 @@ describe("HTML", function() {
     Assert.equal("changed!", result.state);
   });
 
-  it('Attributes: classes, attributes and this from references', function() {
+  it.skip('Attributes: classes, attributes and this from references', function() {
     let result = assertThat(`
       class Foo {
         constructor() {
@@ -648,7 +732,7 @@ describe("HTML", function() {
     });
   });
 
-  it('XML', function() {
+  it.skip('XML', function() {
     assertThat(`
       html {
         let head = __args__.head.bind(__args__);

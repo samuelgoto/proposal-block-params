@@ -166,66 +166,88 @@ acorn.plugins.docscript = function(parser) {
 
 function visitor(node) {
 
-  function inside(node, pred) {
+  //function inside(node, pred) {
     // let inside = false;
-    let parent = node.parent;
-    while (parent) {
-      if (pred(parent)) {
+  //  let parent = node.parent;
+  //  while (parent) {
+  //    if (pred(parent)) {
 	// inside = true;
 	// break;
-	return true;
-      }
-      parent = parent.parent;
-    };
-    return false;
-  }
+	//return true;
+      //}
+     // parent = parent.parent;
+    //};
+    //return false;
+  //}
 
-  if (node.type == "Identifier") {
-    if (inside(node, n => n.docscript) &&
-	node.parent.type == "CallExpression" &&
-        node.parent.callee == node) {
-      // console.log(node);
-      // node.update(`("${node.name}" in this ? this.${node.name}.bind(this) : ${node.name}.bind(this))`);
-      // node.update(`${node.name}.call(this)`);
-    }
-  } else if (node.type === "CallExpression") {
+  //if (node.type == "Identifier") {
+  //  if (inside(node, n => n.docscript) &&
+  // 	node.parent.type == "CallExpression" &&
+  //     node.parent.callee == node) {
+  //console.log(node);
+  // node.update(`("${node.name}" in this ? this.${node.name}.bind(this) : ${node.name}.bind(this))`);
+  // node.update(`${node.name}.call(this)`);
+  //   }
+  //} else
+  if (node.type === "CallExpression") {
     // return;
 
     // console.log("hi");
 
-    let method = node.callee.type == "MemberExpression";
+    // let method = node.callee.type == "MemberExpression";
 
-    if (method) {
-	// do not interfere with method calls.
-	return;
+    // console.log(node.callee);
+    
+    if (node.callee.type == "MemberExpression") {
+      //    node.callee.type == "NewExpression") {
+      // do not interfere with method calls or new.
+      // console.log("hi");
+      // throw new Error("hi");
+      return;
     }
 
-    let expand = inside(node, n => n.docscript);
+    // let expand = inside(node, n => n.docscript);
     // if (node.arguments.length > 0 &&
     //	node.arguments[node.arguments.length - 1].docscript) {
     let params = ``;
+    let docscript = false;
     for (let i = 0; i < node.arguments.length; i++) {
       // console.log(i);
       let param = node.arguments[i];
       if (!param.docscript) {
         params += `${param.source()}`;
       } else {
+        docscript = true;
 	// TODO(goto): fill {} in with the parameters from do ()
-	params += `(__args__) => { let {} = __args__; ${param.source() } }`;
+        // console.log("hi");
+        //console.log(param.source());
+	// params += `(__args__) => { let {} = __args__; ${param.source() } }`;
+        params += `function() ${param.source() }`;
       }
       if (i < (node.arguments.length - 1)) {
         params += ", ";
       }
     }
     // let expansion = expand ? (".call(this" + (node.arguments.length > 0 ? ", " : "")) : "(";
-    node.update(`${node.callee.source()}(${params})`);
+    //console.log(node.callee.source());
+    // console.log("hi");
+    if (docscript) {
+      if (node.callee.type == "NewExpression") {
+        node.update(`${node.callee.source()}(${params})`);
+      } else if (node.callee.type == "MemberExpression") {
+      } else {
+        node.update(`this.${node.callee.source()}(${params})`);
+      }
+    } else {
+      node.update(`${node.callee.source()}(${params})`);
+    }
   } else if (node.type == "ExpressionStatement") {
     // console.log();
-    if (inside(node, n => n.docscript) &&
-	node.expression.type == "CallExpression") {
-	// console.log(node);
-      node.update(`${node.source()};`);
-    }
+    //if (inside(node, n => n.docscript) &&
+    //	node.expression.type == "CallExpression") {
+    //	// console.log(node);
+    //    node.update(`${node.source()};`);
+    //}
   } else if (node.type == "ClassDeclaration" &&
 	     node.decorators &&
              // TODO(goto): deal with multiple decorators.

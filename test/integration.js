@@ -2,7 +2,7 @@ var {DocScript} = require('./../docscript.js');
 const fs = require('fs');
 const Assert = require('assert');
 
-describe("Integration Tests", function(done) {
+describe.skip("Integration Tests", function(done) {
   fs.readdirSync("./examples")
       .filter(file => {
 	// Only keep the .js files

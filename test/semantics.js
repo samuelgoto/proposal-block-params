@@ -2,7 +2,7 @@ const Assert = require('assert');
 const {DocScript} = require('./../docscript');
 var expect = require('chai').expect;
 
-describe("Semantics", function() {
+describe.skip("Semantics", function() {
   it("Legacy", function() {
     assertThat(`function a() { return 1; } a()`).equals(1);
   });
